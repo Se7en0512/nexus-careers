@@ -1,0 +1,288 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-navy-950: #080d18;
+  --color-navy-900: #0b1220;
+  --color-navy-800: #121b30;
+  --color-navy-700: #1c2a47;
+  --color-navy-600: #2a3b5e;
+  --color-gold-400: #d9a94e;
+  --color-gold-300: #efcb80;
+  --color-ink-50: #eef0f5;
+  --color-ink-300: #b7becd;
+  --color-ink-500: #8891a6;
+  --color-red-400: #d97e6b;
+  --font-serif: var(--font-newsreader), "Newsreader", Georgia, serif;
+  --font-sans: var(--font-public-sans), "Public Sans", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+
+:root {
+  --gold-dim: rgba(217, 169, 78, 0.16);
+  --red-dim: rgba(217, 126, 107, 0.14);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-navy-950);
+  color: var(--color-ink-50);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-gold-400);
+  color: var(--color-navy-950);
+}
+
+@layer components {
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gold-400);
+  }
+
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    font-weight: 500;
+    background: var(--color-gold-400);
+    color: var(--color-navy-950);
+    padding: 14px 24px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    transition:
+      transform 0.15s,
+      background 0.2s;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+  }
+  .btn-primary:hover {
+    background: var(--color-gold-300);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    font-weight: 500;
+    border: 1px solid var(--color-navy-600);
+    color: var(--color-ink-50);
+    padding: 13px 24px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+    cursor: pointer;
+    background: transparent;
+    text-align: center;
+  }
+  .btn-secondary:hover {
+    border-color: var(--color-gold-400);
+    background: var(--color-navy-800);
+  }
+
+  .btn-danger {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    border: 1px solid rgba(217, 126, 107, 0.4);
+    color: var(--color-red-400);
+    padding: 10px 18px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    cursor: pointer;
+    background: transparent;
+  }
+  .btn-danger:hover {
+    background: var(--red-dim);
+  }
+
+  .section {
+    padding: 88px 0;
+  }
+
+  .section-head {
+    max-width: 600px;
+    margin-bottom: 56px;
+  }
+  .section-head h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(26px, 3vw, 36px);
+    margin-top: 14px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .section-head p {
+    color: var(--color-ink-300);
+    margin-top: 14px;
+    font-size: 16px;
+  }
+
+  .page-hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--color-navy-700);
+  }
+  .page-hero h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.15;
+    margin: 16px 0 18px;
+    max-width: 680px;
+    letter-spacing: -0.01em;
+  }
+  .page-hero p {
+    font-size: 17px;
+    color: var(--color-ink-300);
+    max-width: 600px;
+  }
+
+  .panel {
+    background: var(--color-navy-900);
+    border: 1px solid var(--color-navy-700);
+  }
+
+  .grid-panel {
+    display: grid;
+    gap: 1px;
+    background: var(--color-navy-700);
+    border: 1px solid var(--color-navy-700);
+  }
+
+  .field {
+    width: 100%;
+    background: var(--color-navy-900);
+    border: 1px solid var(--color-navy-600);
+    color: var(--color-ink-50);
+    padding: 12px 14px;
+    border-radius: 3px;
+    font-size: 14.5px;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field:focus {
+    border-color: var(--color-gold-400);
+  }
+  .field::placeholder {
+    color: var(--color-ink-500);
+  }
+
+  label.form-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-500);
+    margin-bottom: 8px;
+  }
+
+  .form-error {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--color-red-400);
+    margin-top: 8px;
+  }
+
+  .form-note {
+    font-size: 13px;
+    color: var(--color-ink-500);
+  }
+
+  .accent-link {
+    color: var(--color-gold-300);
+    border-bottom: 1px solid rgba(239, 203, 128, 0.4);
+    transition: border-color 0.2s;
+  }
+  .accent-link:hover {
+    border-color: var(--color-gold-300);
+  }
+
+  .nav-link {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-500);
+    padding: 8px 0;
+    transition: color 0.2s;
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-gold-400);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .nav-link:hover {
+    color: var(--color-ink-50);
+  }
+  .nav-link:hover::after,
+  .nav-link--active::after {
+    transform: scaleX(1);
+  }
+  .nav-link--active {
+    color: var(--color-ink-50);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--color-navy-700);
+  }
+}
+
+/* ===== FORM AUTH CARD ===== */
+.auth-card {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--color-navy-900);
+  border: 1px solid var(--color-navy-700);
+  padding: 40px 36px;
+}
+
+/* ===== RESUME PRINT ===== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #resume-print,
+  #resume-print * {
+    visibility: visible;
+  }
+  #resume-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
