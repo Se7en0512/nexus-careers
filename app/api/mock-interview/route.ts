@@ -95,8 +95,14 @@ Respond ONLY with JSON: {"score": <1-10>, "strengths": "...", "improvements": ".
     return NextResponse.json({ error: "Unknown action." }, { status: 400 });
   }
 
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is not set");
+    return NextResponse.json({ error: "AI service not configured" }, { status: 500 });
+  }
+
   try {
-    const res = await fetch(`${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`, {
+    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

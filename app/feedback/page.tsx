@@ -3,7 +3,7 @@ import FeedbackSection from "@/components/FeedbackSection";
 
 export const metadata: Metadata = {
   title: "Feedback",
-  description: "Leave feedback about Nexus Careers — your notes stay on the site for everyone to see.",
+  description: "Leave feedback about Thrive — your notes stay on the site for everyone to see.",
 };
 
 export default function FeedbackPage() {

@@ -9,7 +9,8 @@ export async function saveProgressAction(stageKey: string, checked: number[]) {
   const existing = (await db
     .prepare("SELECT checks FROM progress WHERE user_id = ?")
     .get(user.id)) as { checks: string } | undefined;
-  const checks = existing ? (JSON.parse(existing.checks) as Record<string, number[]>) : {};
+  let checks: Record<string, number[]> = {};
+  try { checks = existing ? JSON.parse(existing.checks) : {}; } catch { checks = {}; }
   checks[stageKey] = checked;
   await db.prepare(
     `INSERT INTO progress (user_id, stage, checks, updated_at)

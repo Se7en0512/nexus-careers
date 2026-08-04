@@ -18,6 +18,45 @@ const client: Client = isRemote
 
 type SQLValue = string | number | bigint | boolean | Uint8Array | null;
 
+// The free-tier Turso endpoint (and serverless networks in general) can drop
+// connections under load or while the DB is cold/waking up. Retry transient
+// failures a couple of times before giving up, and treat a malformed result
+// as an empty result instead of crashing the page.
+const MAX_ATTEMPTS = 3;
+
+function isTransientError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false;
+  const msg = e.message;
+  return (
+    msg.includes("fetch failed") ||
+    msg.includes("ETIMEDOUT") ||
+    msg.includes("ECONNRESET") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("socket hang up") ||
+    msg.includes("HRANA_") ||
+    msg.includes("SERVER_ERROR") ||
+    msg.includes("database is closed") ||
+    msg.includes("Connection reset")
+  );
+}
+
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let attempt = 0;
+  for (;;) {
+    try {
+      return await fn();
+    } catch (e) {
+      attempt++;
+      if (attempt >= MAX_ATTEMPTS || !isTransientError(e)) throw e;
+      await new Promise((r) => setTimeout(r, attempt * 250));
+    }
+  }
+}
+
+function toRows<T>(rows: unknown): Array<T> {
+  return Array.isArray(rows) ? (rows as Array<T>) : [];
+}
+
 export interface Statement {
   run(...args: SQLValue[]): Promise<{ changes: number; lastInsertRowid: number | bigint }>;
   get<T = Record<string, unknown>>(...args: SQLValue[]): Promise<T | null>;
@@ -27,24 +66,24 @@ export interface Statement {
 export const db = {
   async exec(sql: string) {
     await ensureInit();
-    await client.executeMultiple(sql);
+    await withRetry(() => client.executeMultiple(sql));
   },
   prepare(sql: string): Statement {
     return {
       async run(...args) {
         await ensureInit();
-        const r = await client.execute({ sql, args });
+        const r = await withRetry(() => client.execute({ sql, args }));
         return { changes: r.rowsAffected, lastInsertRowid: r.lastInsertRowid ?? 0 };
       },
       async get<T>(...args: SQLValue[]) {
         await ensureInit();
-        const r = await client.execute({ sql, args });
-        return (r.rows[0] as T) ?? null;
+        const r = await withRetry(() => client.execute({ sql, args }));
+        return (toRows<T>(r.rows)[0]) ?? null;
       },
       async all<T>(...args: SQLValue[]) {
         await ensureInit();
-        const r = await client.execute({ sql, args });
-        return r.rows as unknown as Array<T>;
+        const r = await withRetry(() => client.execute({ sql, args }));
+        return toRows<T>(r.rows);
       },
     };
   },
@@ -505,8 +544,9 @@ async function seedApplySites() {
 }
 
 async function seedNiches() {
-  const count = ((await rawPrepare("SELECT COUNT(*) AS n FROM niches").get()) as { n: number }).n;
-  if (count > 0) return;
+  const nicheCount = ((await rawPrepare("SELECT COUNT(*) AS n FROM niches").get()) as { n: number }).n;
+  const resCount = ((await rawPrepare("SELECT COUNT(*) AS n FROM niche_resources").get()) as { n: number }).n;
+  if (nicheCount > 0 && resCount > 0) return;
 
   const insertNiche = rawPrepare(
     "INSERT INTO niches (key, title, overview, rate_range, job_titles) VALUES (?, ?, ?, ?, ?)"
@@ -515,10 +555,16 @@ async function seedNiches() {
     "INSERT INTO niche_resources (niche_key, title, url, type, description) VALUES (?, ?, ?, ?, ?)"
   );
 
-  for (const n of NICHE_LEARNING) {
-    await insertNiche.run(n.key, n.title, n.overview, n.rate_range, JSON.stringify(n.job_titles));
-    for (const r of n.resources) {
-      await insertResource.run(n.key, r.title, r.url, r.type, r.description);
+  if (nicheCount === 0) {
+    for (const n of NICHE_LEARNING) {
+      await insertNiche.run(n.key, n.title, n.overview, n.rate_range, JSON.stringify(n.job_titles));
+    }
+  }
+  if (resCount === 0) {
+    for (const n of NICHE_LEARNING) {
+      for (const r of n.resources) {
+        await insertResource.run(n.key, r.title, r.url, r.type, r.description);
+      }
     }
   }
 }

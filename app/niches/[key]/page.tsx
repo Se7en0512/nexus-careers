@@ -42,7 +42,8 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ke
     .prepare("SELECT title, url, type, description FROM niche_resources WHERE niche_key = ?")
     .all(key)) as unknown as ResourceRow[];
 
-  const jobTitles = JSON.parse(row.job_titles) as string[];
+  let jobTitles: string[] = [];
+  try { jobTitles = JSON.parse(row.job_titles); } catch { jobTitles = []; }
   const details = NICHE_DETAILS[key as keyof typeof NICHE_DETAILS];
 
   return (

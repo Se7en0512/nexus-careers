@@ -97,7 +97,8 @@ export async function roadmapCompletion(userId: number): Promise<{ complete: boo
   const progress = (await db.prepare("SELECT checks FROM progress WHERE user_id = ?").get(userId)) as
     | { checks: string }
     | undefined;
-  const checks = progress ? (JSON.parse(progress.checks) as Record<string, number[]>) : {};
+  let checks: Record<string, number[]> = {};
+  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
   const totalItems = ROADMAP.reduce((a, s) => a + s.items.length, 0);
   const totalDone = ROADMAP.reduce((a, s) => a + (checks[s.key]?.length || 0), 0);
   return { complete: totalItems > 0 && totalDone >= totalItems, pct: totalItems ? Math.round((totalDone / totalItems) * 100) : 0 };
@@ -105,10 +106,10 @@ export async function roadmapCompletion(userId: number): Promise<{ complete: boo
 
 export async function isHireReady(userId: number): Promise<boolean> {
   if (!(await roadmapCompletion(userId)).complete) return false;
-  const vaScore = ((await db.prepare("SELECT va_score FROM users WHERE id = ?").get(userId)) as { va_score: number }).va_score;
-  if (vaScore < 80) return false;
-  const certs = ((await db.prepare("SELECT COUNT(*) AS n FROM certificates WHERE user_id = ?").get(userId)) as { n: number }).n;
-  if (certs < 1) return false;
+  const vaRow = (await db.prepare("SELECT va_score FROM users WHERE id = ?").get(userId)) as { va_score: number } | undefined;
+  if ((vaRow?.va_score ?? 0) < 80) return false;
+  const certRow = (await db.prepare("SELECT COUNT(*) AS n FROM certificates WHERE user_id = ?").get(userId)) as { n: number } | undefined;
+  if ((certRow?.n ?? 0) < 1) return false;
   return !!(await db.prepare("SELECT 1 FROM portfolios WHERE user_id = ?").get(userId));
 }
 

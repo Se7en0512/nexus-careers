@@ -38,7 +38,8 @@ export async function POST(req: Request) {
   const progress = (await db.prepare("SELECT checks FROM progress WHERE user_id = ?").get(user.id)) as
     | { checks: string }
     | undefined;
-  const checks = progress ? (JSON.parse(progress.checks) as Record<string, number[]>) : {};
+  let checks: Record<string, number[]> = {};
+  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
   const done = checks[stageKey]?.length || 0;
   if (done < stage.items.length) {
     return NextResponse.json(

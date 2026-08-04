@@ -13,8 +13,10 @@ export async function GET() {
   const row = (await db.prepare("SELECT stage, checks, updated_at FROM progress WHERE user_id = ?").get(user.id)) as
     | { stage: string; checks: string; updated_at: string }
     | undefined;
+  let checks: Record<string, number[]> = {};
+  try { checks = row ? JSON.parse(row.checks) : {}; } catch { checks = {}; }
   return NextResponse.json(
-    row ? { stage: row.stage, checks: JSON.parse(row.checks), updated_at: row.updated_at } : { stage: "umpisa", checks: {} }
+    row ? { stage: row.stage, checks, updated_at: row.updated_at } : { stage: "umpisa", checks: {} }
   );
 }
 
@@ -35,17 +37,18 @@ export async function POST(req: Request) {
   const existing = (await db.prepare("SELECT checks FROM progress WHERE user_id = ?").get(user.id)) as
     | { checks: string }
     | undefined;
-  const checks = existing ? (JSON.parse(existing.checks) as Record<string, number[]>) : {};
-  checks[stageKey] = checked;
+  let existingChecks: Record<string, number[]> = {};
+  try { existingChecks = existing ? JSON.parse(existing.checks) : {}; } catch { existingChecks = {}; }
+  existingChecks[stageKey] = checked;
 
   await db.prepare(
     `INSERT INTO progress (user_id, stage, checks, updated_at)
      VALUES (?, ?, ?, datetime('now'))
      ON CONFLICT(user_id) DO UPDATE SET checks = excluded.checks, updated_at = excluded.updated_at`
-  ).run(user.id, stageKey, JSON.stringify(checks));
+  ).run(user.id, stageKey, JSON.stringify(existingChecks));
 
   await recordDailyActivity(user.id);
   await refreshHireReadyBadge(user.id);
 
-  return NextResponse.json({ ok: true, checks });
+  return NextResponse.json({ ok: true, checks: existingChecks });
 }

@@ -14,13 +14,15 @@ interface CertRow {
 }
 
 async function getCertificate(id: string) {
+  const numericId = Number(id);
+  if (!Number.isFinite(numericId)) return null;
   const row = (await db
     .prepare(
       `SELECT c.*, u.name AS user_name, u.email AS user_email
        FROM certificates c JOIN users u ON u.id = c.user_id
        WHERE c.id = ?`
     )
-    .get(Number(id))) as unknown as (CertRow & { user_name: string; user_email: string }) | undefined;
+    .get(numericId)) as unknown as (CertRow & { user_name: string; user_email: string }) | undefined;
   return row;
 }
 
@@ -79,7 +81,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                 textTransform: "uppercase",
               }}
             >
-              Nexus Careers — Official Certificate
+              Thrive — Official Certificate
             </p>
             <h1
               style={{
@@ -116,7 +118,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
               }}
             >
               has fully completed the <strong style={{ color: "#F4F2EC" }}>{row.stage_title} Stage</strong> of{" "}
-              <strong style={{ color: "#F4F2EC" }}>Nexus Careers Roadmap</strong> — 30 days of foundation, skills,
+              <strong style={{ color: "#F4F2EC" }}>Thrive Roadmap</strong> — 30 days of foundation, skills,
               and job applications for remote work as a Virtual Assistant.
             </p>
             <p

@@ -18,7 +18,14 @@ export default async function GetStartedPage() {
         .prepare("SELECT checks FROM progress WHERE user_id = ?")
         .get(user.id)) as { checks: string } | undefined)
     : undefined;
-  const checks = progress ? (JSON.parse(progress.checks) as Record<string, number[]>) : {};
+  let checks: Record<string, number[]> = {};
+  if (progress) {
+    try {
+      checks = JSON.parse(progress.checks) as Record<string, number[]>;
+    } catch {
+      console.error("Failed to parse progress.checks in get-started");
+    }
+  }
 
   return (
     <>

@@ -1,4 +1,4 @@
-# Nexus Careers
+# Thrive
 
 Platform for Filipino VAs — structured roadmap, practical tools, and scam protection. 100% free — no plans, no payments.
 

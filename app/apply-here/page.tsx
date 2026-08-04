@@ -22,9 +22,9 @@ export default async function ApplyHerePage() {
   const user = await getSessionUser();
   if (!user) redirect("/signup?next=/apply-here");
 
-  const rows = db
+  const rows = (await db
     .prepare("SELECT id, name, url, category, description, platform_type, niche_tags FROM apply_sites ORDER BY category, name")
-    .all() as unknown as Site[];
+    .all()) as unknown as Site[];
 
   // node:sqlite rows have no plain prototype — must map to plain objects
   // before passing to a Client Component (Next.js serialization).

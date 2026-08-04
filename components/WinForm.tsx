@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function WinForm() {
@@ -9,6 +9,14 @@ export default function WinForm() {
   const [role, setRole] = useState("");
   const [quote, setQuote] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +30,7 @@ export default function WinForm() {
       });
       if (!res.ok) throw new Error();
       setStatus("done");
-      setTimeout(() => router.refresh(), 1200);
+      timerRef.current = setTimeout(() => router.refresh(), 1200);
     } catch {
       setStatus("error");
     }

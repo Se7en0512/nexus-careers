@@ -34,7 +34,7 @@ export default function AboutPage() {
           <div className="eyebrow">About Us</div>
           <h1 className="italic">Why we built this — and why it's not all promises.</h1>
           <p>
-            There's no face or name behind Nexus Careers because it isn't about
+            There's no face or name behind Thrive because it isn't about
             one person. It's about a system that wants to make clear something
             that's usually made confusing.
           </p>

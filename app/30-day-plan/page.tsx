@@ -14,7 +14,7 @@ export default async function Plan30Page() {
   const user = await getSessionUser();
   if (!user) redirect("/signup?next=/30-day-plan");
 
-  const rows = db
+  const rows = await db
     .prepare("SELECT day, done FROM daily_plan_progress WHERE user_id = ? AND done = 1")
     .all(user.id) as unknown as Array<{ day: number }>;
   const saved = rows.map((r) => r.day);

@@ -86,7 +86,13 @@ ${f.name}`;
   };
 
   const copy = async () => {
-    if (displayedLetter) await navigator.clipboard.writeText(displayedLetter);
+    if (displayedLetter) {
+      try {
+        await navigator.clipboard.writeText(displayedLetter);
+      } catch {
+        console.error("Failed to copy to clipboard");
+      }
+    }
   };
 
   const download = () => {

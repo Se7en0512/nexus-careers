@@ -24,8 +24,12 @@ const NICHE_FILTERS = [{ key: "all", label: "All niches" }, ...NICHE_LEARNING.ma
 
 function matchesNiche(tags: string, niche: string): boolean {
   if (niche === "all") return true;
-  const parsed = JSON.parse(tags) as string[];
-  return parsed.includes("all") || parsed.includes(niche);
+  try {
+    const parsed = JSON.parse(tags) as string[];
+    return parsed.includes("all") || parsed.includes(niche);
+  } catch {
+    return false;
+  }
 }
 
 export default function ApplyDirectory({ sites }: { sites: Site[] }) {

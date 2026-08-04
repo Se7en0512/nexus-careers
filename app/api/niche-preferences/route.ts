@@ -15,7 +15,9 @@ export async function GET() {
   const row = (await db.prepare("SELECT niche_preferences FROM users WHERE id = ?").get(user.id)) as
     | { niche_preferences: string }
     | undefined;
-  return NextResponse.json({ niches: row ? JSON.parse(row.niche_preferences) : [] });
+  let niches: string[] = [];
+  try { niches = row ? JSON.parse(row.niche_preferences) : []; } catch { niches = []; }
+  return NextResponse.json({ niches });
 }
 
 export async function POST(req: Request) {

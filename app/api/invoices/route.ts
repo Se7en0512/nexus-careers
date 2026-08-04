@@ -35,14 +35,13 @@ export async function POST(req: Request) {
     // Server-side total computation
     const total = lineItems.reduce((acc: number, li: { hours: number; rate: number }) => acc + li.hours * li.rate, 0);
 
-    // Generate sequential invoice number: INV-{userId}-{count+1}
-    const count = ((await db.prepare("SELECT COUNT(*) AS n FROM invoices WHERE user_id = ?").get(user.id)) as { n: number }).n;
-    const invoiceNumber = `INV-${user.id}-${count + 1}`;
-
     const result = await db.prepare(
         `INSERT INTO invoices (user_id, invoice_number, client_name, client_email, line_items, currency, due_date)
      VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).run(user.id, invoiceNumber, clientName, clientEmail, JSON.stringify(lineItems), currency, dueDate);
+    ).run(user.id, "", clientName, clientEmail, JSON.stringify(lineItems), currency, dueDate);
+
+    const invoiceNumber = `INV-${user.id}-${Number(result.lastInsertRowid)}`;
+    await db.prepare("UPDATE invoices SET invoice_number = ? WHERE id = ?").run(invoiceNumber, result.lastInsertRowid);
 
     await recordDailyActivity(user.id);
 

@@ -44,8 +44,9 @@ export default async function JobsPage() {
 
   const prefsRow = (await db
     .prepare("SELECT niche_preferences FROM users WHERE id = ?")
-    .get(user.id)) as { niche_preferences: string };
-  const savedNiches = JSON.parse(prefsRow.niche_preferences) as string[];
+    .get(user.id)) as { niche_preferences: string } | undefined;
+  let savedNiches: string[] = [];
+  try { savedNiches = prefsRow ? JSON.parse(prefsRow.niche_preferences) : []; } catch { savedNiches = []; }
 
   return (
     <>

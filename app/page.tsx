@@ -76,7 +76,7 @@ const SHOWCASE: Array<{ group: string; blurb: string; items: Array<{ label: stri
     items: [
       { label: "VA Readiness Check", href: "/tools/readiness" },
       { label: "Niche Finder", href: "/tools/niche-finder" },
-      { label: "Site Walkthrough", href: "/walkthrough" },
+      { label: "VA Learning Path", href: "/walkthrough" },
       { label: "Get Started Roadmap", href: "/get-started" },
     ],
   },
@@ -135,7 +135,7 @@ export default async function HomePage() {
         <div className="wrap relative z-[2]">
           <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
             <div>
-              <div className="eyebrow">// One Nexus for every aspiring VA</div>
+              <div className="eyebrow">// One platform for every aspiring VA</div>
               <h1 className="font-serif font-medium text-[clamp(34px,4.6vw,58px)] leading-[1.1] tracking-[-0.01em] my-[18px]">
                 Wherever you are in your VA journey,
                 <br /> there's a place for you here.
@@ -256,6 +256,78 @@ export default async function HomePage() {
                 <p className="text-sm text-ink-500 leading-[1.55] max-w-[240px]">{s.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHAT IS A VIRTUAL ASSISTANT */}
+      <section className="border-b border-navy-700">
+        <div className="wrap py-[88px]">
+          <div className="section-head">
+            <div className="eyebrow">New here?</div>
+            <h2>What is a Virtual Assistant?</h2>
+            <p>
+              A Virtual Assistant (VA) is someone who works remotely for a business or entrepreneur —
+              handling tasks like email, scheduling, research, social media, customer support, and
+              more. All you need is a laptop, Wi-Fi, and the right skills.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {[
+              {
+                stat: "₱15K–₱60K+",
+                label: "Monthly earning potential",
+                detail: "Starts at ₱15K for beginners. Experienced VAs and specialists earn ₱40K–₱60K+.",
+              },
+              {
+                stat: "4M+",
+                label: "Filipino VAs registered",
+                detail: "Filipinos are the #1 source of remote talent worldwide — English skills, reliability, and strong work ethic.",
+              },
+              {
+                stat: "100%",
+                label: "Free to start",
+                detail: "No degree, no certificate, no equipment purchases needed. A laptop and internet are enough to begin.",
+              },
+            ].map((s) => (
+              <div key={s.label} className="panel p-7">
+                <p className="font-mono text-[28px] text-gold-400 font-semibold leading-none mb-2">{s.stat}</p>
+                <p className="text-[14.5px] font-semibold mb-1.5">{s.label}</p>
+                <p className="text-[13px] text-ink-500 leading-relaxed">{s.detail}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="section-head !mb-6">
+            <div className="eyebrow">Explore Niches</div>
+            <h2 className="!text-[22px]">6 specializations — pick one to start.</h2>
+            <p>Each niche has its own learning path, tools, and earning potential.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-navy-700 border border-navy-700">
+            {[
+              { key: "admin", icon: "📋", title: "Admin Support", desc: "Email, calendar, data entry — the most accessible entry point for new VAs." },
+              { key: "social", icon: "📱", title: "Social Media", desc: "Content calendars, posts, captions, and engagement for Instagram, TikTok, and more." },
+              { key: "ecommerce", icon: "🛒", title: "E-commerce", desc: "Product listings, orders, customer chats for Shopify, Amazon, and Etsy stores." },
+              { key: "bookkeeping", icon: "📊", title: "Bookkeeping", desc: "Bank reconciliation, invoicing, and financial tracking using Xero or QuickBooks." },
+              { key: "content", icon: "✍️", title: "Content Writing", desc: "Blog posts, SEO articles, newsletters, and copywriting for businesses." },
+              { key: "customer", icon: "💬", title: "Customer Support", desc: "Inbound support via email, chat, and phone — often with training provided." },
+            ].map((n) => (
+              <Link
+                key={n.key}
+                href={`/niches/${n.key}`}
+                className="bg-navy-900 p-7 hover:bg-navy-800 transition-colors group"
+              >
+                <span className="text-2xl mb-4 block">{n.icon}</span>
+                <h3 className="text-[15.5px] font-semibold mb-1.5 group-hover:text-gold-300 transition-colors">{n.title}</h3>
+                <p className="text-[13px] text-ink-500 leading-relaxed">{n.desc}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link href="/niches" className="font-mono text-[12px] text-gold-400 hover:text-gold-300">
+              VIEW ALL NICHES & RESOURCES →
+            </Link>
           </div>
         </div>
       </section>

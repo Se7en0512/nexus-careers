@@ -150,7 +150,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
           {busy ? "Saving..." : savedSlug ? "Update Portfolio" : "Publish Portfolio"}
         </button>
         {savedSlug && (
-          <a href={`/portfolio/${savedSlug}`} target="_blank" className="btn-secondary">
+          <a href={`/portfolio/${savedSlug}`} target="_blank" rel="noopener noreferrer" className="btn-secondary">
             View the Public Page ↗
           </a>
         )}

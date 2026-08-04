@@ -39,7 +39,13 @@ export async function POST(req: Request) {
     expiresAt
   );
 
-  const resetLink = `${process.env.APP_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+  const appUrl = process.env.APP_URL || (process.env.NODE_ENV === "production" ? null : "http://localhost:3000");
+  if (!appUrl) {
+    console.error("[password-reset] APP_URL env var is not set");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+
+  const resetLink = `${appUrl}/reset-password?token=${token}`;
 
   // TODO: once an SMTP/mail service exists, send the link here and delete the block below.
   //

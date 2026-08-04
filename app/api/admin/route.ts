@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Login required" }, { status: 401 });
   }
-  if (!(await isAdmin(user))) {
+  if (!isAdmin(user)) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
   const ip = getClientIp(req);
@@ -103,7 +103,7 @@ export async function DELETE(req: Request) {
   } catch {
     return NextResponse.json({ error: "Login required" }, { status: 401 });
   }
-  if (!(await isAdmin(user))) {
+  if (!isAdmin(user)) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
   const ip = getClientIp(req);

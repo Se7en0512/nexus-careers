@@ -47,7 +47,10 @@ export async function POST(req: Request) {
     if (!/[0-9]/.test(next) || !/[a-zA-Z]/.test(next)) {
       return NextResponse.json({ error: "Password must contain a mix of letters and numbers" }, { status: 400 });
     }
-    const row = (await db.prepare("SELECT password_hash FROM users WHERE id = ?").get(user.id)) as { password_hash: string };
+    const row = (await db.prepare("SELECT password_hash FROM users WHERE id = ?").get(user.id)) as { password_hash: string } | undefined;
+    if (!row) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
     if (!verifyPassword(current, row.password_hash)) {
       return NextResponse.json({ error: "Current password is wrong" }, { status: 400 });
     }

@@ -36,7 +36,8 @@ export default async function DashboardPage() {
     | { stage: string; checks: string; updated_at: string }
     | undefined;
 
-  const checks = progress ? (JSON.parse(progress.checks) as Record<string, number[]>) : {};
+  let checks: Record<string, number[]> = {};
+  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
   const currentStageKey = progress?.stage || "umpisa";
   const currentStage = stageFromKey(currentStageKey);
 
@@ -49,8 +50,8 @@ export default async function DashboardPage() {
   const readiness = quizzes.find((q) => q.quiz === "readiness");
   const niche = quizzes.find((q) => q.quiz === "niche");
 
-  const vaScore = (await db.prepare("SELECT va_score FROM users WHERE id = ?").get(user.id)) as { va_score: number };
-  const userRow = (await db.prepare("SELECT updates_opt_in FROM users WHERE id = ?").get(user.id)) as { updates_opt_in: number };
+  const vaScore = (await db.prepare("SELECT va_score FROM users WHERE id = ?").get(user.id)) as { va_score: number } | undefined;
+  const userRow = (await db.prepare("SELECT updates_opt_in FROM users WHERE id = ?").get(user.id)) as { updates_opt_in: number } | undefined;
   const planDone = (await db
     .prepare("SELECT day FROM daily_plan_progress WHERE user_id = ? AND done = 1")
     .all(user.id)) as unknown as Array<{ day: number }>;
@@ -63,7 +64,7 @@ export default async function DashboardPage() {
     .prepare("SELECT id, stage_key, stage_title, date_issued FROM certificates WHERE user_id = ? ORDER BY date_issued")
     .all(user.id)) as unknown as Array<{ id: number; stage_key: string; stage_title: string; date_issued: string }>;
 
-  const appsCount = ((await db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id)) as { n: number }).n;
+  const appsCount = ((await db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id)) as { n: number } | undefined)?.n ?? 0;
   const checkinStreak = await getCheckinStreak(user.id);
   const weeklyCheckedIn = await hasCheckedInThisWeek(user.id);
 
@@ -142,7 +143,7 @@ export default async function DashboardPage() {
                 <p className="text-[12.5px] text-ink-500 mt-2">Roadmap ({totalDone}/{totalItems})</p>
               </div>
               <div className="bg-navy-900 p-6">
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{vaScore.va_score}</p>
+                <p className="font-mono text-[22px] text-gold-400 leading-none">{vaScore?.va_score ?? 0}</p>
                 <p className="text-[12.5px] text-ink-500 mt-2">VA Score</p>
               </div>
               <div className="bg-navy-900 p-6">
@@ -244,7 +245,7 @@ export default async function DashboardPage() {
                     <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Readiness Check</p>
                     {readiness && <p className="text-[13px] text-ink-500">taken on {readiness.created_at}</p>}
                   </div>
-                  <ScoreRing score={vaScore.va_score} size={64} />
+                  <ScoreRing score={vaScore?.va_score ?? 0} size={64} />
                 </div>
                 <p className="text-[15px] font-semibold mb-4">{readiness ? readiness.result : "No result saved yet."}</p>
                 <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
@@ -400,7 +401,7 @@ export default async function DashboardPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
               <div className="panel p-7">
-                <AccountSettings name={user.name || user.email} email={user.email} updatesOptIn={userRow.updates_opt_in === 1} />
+                <AccountSettings name={user.name || user.email} email={user.email} updatesOptIn={userRow?.updates_opt_in === 1} />
               </div>
               <div className="flex flex-col gap-6">
                 <div className="panel p-7">

@@ -118,7 +118,7 @@ export default function InvoiceGenerator() {
                             <p className="font-mono text-xl text-ink-50 font-bold">{invoice.invoice_number}</p>
                         </div>
                         <div className="text-right text-sm text-ink-300">
-                            <p className="font-semibold text-ink-50">Nexus VA</p>
+                            <p className="font-semibold text-ink-50">Thrive VA</p>
                             <p>Date issued: {new Date().toISOString().slice(0, 10)}</p>
                             {invoice.due_date && <p>Due: {invoice.due_date}</p>}
                         </div>

@@ -16,7 +16,7 @@ export default async function AssistantPage() {
       <section className="page-hero">
         <div className="wrap">
           <div className="eyebrow">Free Tool · AI Powered</div>
-          <h1>Ask the Nexus Assistant.</h1>
+          <h1>Ask the Thrive Assistant.</h1>
           <p>
             Rates, negotiations, interview answers, tool recommendations, scam spotting —
             ask anything about getting hired as a VA and get a direct, practical answer.

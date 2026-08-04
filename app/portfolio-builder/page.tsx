@@ -27,9 +27,9 @@ export default async function PortfolioBuilderPage() {
     ? {
         name: row.name,
         bio: row.bio,
-        skills: JSON.parse(row.skills) as string[],
+        skills: (() => { try { return JSON.parse(row.skills); } catch { return []; } })(),
         experience: row.experience,
-        links: JSON.parse(row.links) as { label: string; url: string }[],
+        links: (() => { try { return JSON.parse(row.links); } catch { return []; } })(),
       }
     : null;
 

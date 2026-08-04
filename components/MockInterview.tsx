@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const NICHES = [
   { key: "general VA", label: "General VA" },
@@ -31,6 +31,12 @@ export default function MockInterview() {
   const [error, setError] = useState("");
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      recRef.current?.stop();
+    };
+  }, []);
 
   const TOTAL = 5;
 

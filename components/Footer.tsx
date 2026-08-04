@@ -14,7 +14,7 @@ export default async function Footer() {
             <Link href="/" className="flex items-center gap-3">
               <Logo size={28} />
               <span className="font-mono font-semibold text-[14px] tracking-[0.06em] uppercase">
-                Nexus<span className="text-gold-400"> Careers</span>
+                Thrive
               </span>
             </Link>
             <p className="text-ink-500 text-sm mt-3.5">Where the next wave of Filipino VAs gets ready.</p>
@@ -84,7 +84,7 @@ export default async function Footer() {
         </div>
 
         <div className="border-t border-navy-700 pt-6 flex justify-between flex-wrap gap-3 font-mono text-xs text-ink-500">
-          <span>© 2026 NEXUS CAREERS</span>
+          <span>© 2026 THRIVE</span>
           <span>MADE FOR FILIPINO VAs</span>
         </div>
       </div>

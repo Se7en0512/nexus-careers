@@ -15,7 +15,7 @@ export default async function Nav() {
             <Logo size={22} />
           </span>
           <span className="font-serif text-[21px] font-medium tracking-[-0.02em]">
-            Nexus<span className="text-gold-400"> Careers</span>
+            Thrive
           </span>
         </Link>
 

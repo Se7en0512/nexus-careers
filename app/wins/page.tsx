@@ -18,11 +18,11 @@ interface Testimonial {
 
 export default async function WinsPage() {
   const user = await getSessionUser();
-  const wins = db
+  const wins = (await db
     .prepare(
       "SELECT id, name, role, quote, badge, created_at FROM testimonials WHERE status = 'approved' ORDER BY created_at DESC"
     )
-    .all() as unknown as Testimonial[];
+    .all()) as unknown as Testimonial[];
 
   return (
     <>

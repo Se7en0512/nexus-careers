@@ -25,8 +25,8 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Nexus Careers — Foundation for Filipino VAs",
-    template: "%s — Nexus Careers",
+    default: "Thrive — Foundation for Filipino VAs",
+    template: "%s — Thrive",
   },
   description:
     "A structured roadmap, practical tools, and scam protection for aspiring and current Filipino Virtual Assistants.",

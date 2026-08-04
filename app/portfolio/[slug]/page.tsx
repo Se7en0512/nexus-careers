@@ -28,8 +28,10 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
   const row = (await db.prepare("SELECT * FROM portfolios WHERE slug = ?").get(slug)) as PortfolioRow | undefined;
   if (!row) notFound();
 
-  const skills = JSON.parse(row.skills) as string[];
-  const links = JSON.parse(row.links) as { label: string; url: string }[];
+  let skills: string[] = [];
+  let links: { label: string; url: string }[] = [];
+  try { skills = JSON.parse(row.skills); } catch { skills = []; }
+  try { links = JSON.parse(row.links); } catch { links = []; }
   const hireReady = !!(await db
     .prepare("SELECT 1 FROM user_badges WHERE user_id = ? AND badge_type = 'hire_ready'")
     .get(row.user_id));
@@ -45,7 +47,7 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
         <div className="flex items-center gap-3 mb-14">
           <Logo size={26} />
           <span className="font-mono font-semibold text-[13px] tracking-[0.06em] uppercase">
-            Nexus<span className="text-gold-400"> Careers</span> · Portfolio
+            Thrive · Portfolio
           </span>
         </div>
 

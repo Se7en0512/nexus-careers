@@ -51,7 +51,12 @@ export default function QuizNiche({ userId }: { userId: number }) {
   };
 
   if (result) {
-    const d = NICHE_DETAILS[result.niche as keyof typeof NICHE_DETAILS];
+    const d = NICHE_DETAILS[result.niche as keyof typeof NICHE_DETAILS] ?? {
+      desc: "Explore this niche to find the right tools and skills.",
+      skills: [],
+      tools: [],
+      rate: "",
+    };
     return (
       <div className="panel p-8">
         <div className="eyebrow">Niche Finder Result</div>

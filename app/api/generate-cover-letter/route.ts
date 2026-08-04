@@ -43,7 +43,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const skills = JSON.parse(portfolio.skills) as string[];
+  let skills: string[] = [];
+  try { skills = JSON.parse(portfolio.skills) as string[]; } catch { skills = []; }
 
   const systemPrompt = `You are a professional cover letter writer for Filipino virtual assistants applying to remote/international clients.
 
@@ -65,9 +66,15 @@ ${jobDescription}
 
 Write the cover letter now.`;
 
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is not set");
+    return NextResponse.json({ error: "AI service not configured" }, { status: 500 });
+  }
+
   try {
     const res = await fetch(
-      `${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`,
+      `${GEMINI_URL}?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -60,7 +60,7 @@ export type AdminFeedback = FeedbackRow;
 export default async function AdminPage() {
   const user = await getSessionUser();
   if (!user) redirect("/signup?next=/admin");
-  if (!(await isAdmin(user))) redirect("/login?next=/admin");
+  if (!isAdmin(user)) redirect("/login?next=/admin");
 
   const siteRows = (await db.prepare("SELECT * FROM apply_sites ORDER BY name").all()) as unknown as SiteRow[];
   const jobRows = (await db.prepare("SELECT * FROM jobs ORDER BY created_at DESC").all()) as unknown as JobRow[];

@@ -6,7 +6,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const SYSTEM_PROMPT = `You are the Nexus Careers assistant — a career advisor for Filipino virtual assistants who are starting out or trying to get hired by international/remote clients.
+const SYSTEM_PROMPT = `You are the Thrive assistant — a career advisor for Filipino virtual assistants who are starting out or trying to get hired by international/remote clients.
 
 You help with practical things: setting rates (PHP to USD), negotiating with clients, writing application messages, preparing for interviews, choosing tools, avoiding job scams (never pay to get hired), and staying productive.
 
@@ -55,8 +55,14 @@ export async function POST(req: Request) {
     { role: "user", parts: [{ text: content }] },
   ];
 
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is not set");
+    return NextResponse.json({ error: "AI service not configured" }, { status: 500 });
+  }
+
   try {
-    const res = await fetch(`${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`, {
+    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

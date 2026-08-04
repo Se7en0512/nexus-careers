@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NICHE_LEARNING } from "@/data/niche-learning";
 
@@ -52,6 +52,14 @@ export default function JobsFeed({ jobs, savedNiches }: { jobs: Job[]; savedNich
   const togglePref = (key: string) =>
     setPrefs((p) => (p.includes(key) ? p.filter((k) => k !== key) : [...p, key]));
 
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
   const savePrefs = async () => {
     setSaving(true);
     try {
@@ -62,7 +70,7 @@ export default function JobsFeed({ jobs, savedNiches }: { jobs: Job[]; savedNich
       });
       if (res.ok) {
         setSavedMsg(true);
-        setTimeout(() => setSavedMsg(false), 2000);
+        timerRef.current = setTimeout(() => setSavedMsg(false), 2000);
         router.refresh();
       }
     } finally {

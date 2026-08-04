@@ -17,7 +17,11 @@ export default function DownloadTemplate({ filename, content }: DownloadTemplate
   };
 
   const copy = async () => {
-    await navigator.clipboard.writeText(content);
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      window.prompt("Copy the template (Ctrl+C):", content);
+    }
   };
 
   return (

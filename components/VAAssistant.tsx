@@ -60,7 +60,7 @@ export default function VAAssistant() {
         <div className="flex items-center gap-3">
           <span className="w-2 h-2 rounded-full bg-gold-400 animate-pulse" />
           <p className="font-mono text-[12px] uppercase tracking-[0.1em] text-gold-400">
-            Nexus Assistant
+            Thrive Assistant
           </p>
         </div>
         <p className="font-mono text-[11px] text-ink-500">40 messages / day · free</p>

@@ -13,7 +13,7 @@ export default async function JobTrackerPage() {
   const isGuest = !user;
 
   if (user) {
-    initialApplications = db
+    initialApplications = await db
       .prepare("SELECT * FROM job_applications WHERE user_id = ? ORDER BY applied_date DESC, id DESC")
       .all(user.id) as unknown as JobApplication[];
   }
