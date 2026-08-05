@@ -13,35 +13,35 @@ const GPT_BOTS = [
     key: "resume",
     label: "Resume Bot",
     desc: "Tailors your resume to any job post. Paste the job description and your raw facts — it writes a one-page resume optimized for that role.",
-    href: "https://chatgpt.com/g/g-resume-nexus",
+    href: "#apps",
     stage: "Stage 1",
   },
   {
     key: "cover",
     label: "Cover Letter Bot",
     desc: "Writes a cover letter using the hook/fit/proof/ask method. Paste the job post and your details — it produces two versions: formal and friendly.",
-    href: "https://chatgpt.com/g/g-cover-nexus",
+    href: "#apps",
     stage: "Stage 1",
   },
   {
     key: "interview",
     label: "Interview Bot",
     desc: "Acts as the hiring manager. Runs a mock interview, scores your answers, and gives specific feedback on clarity, relevance, and confidence.",
-    href: "https://chatgpt.com/g/g-interview-nexus",
+    href: "#interview",
     stage: "Stage 2",
   },
   {
     key: "outreach",
     label: "Outreach Bot",
     desc: "Writes cold outreach emails, discovery call scripts, and handles client objections — all with natural, human-sounding language.",
-    href: "https://chatgpt.com/g/g-outreach-nexus",
+    href: "#outreach",
     stage: "Stage 3",
   },
   {
     key: "daily",
     label: "Daily Summary Bot",
     desc: "Turns your raw work notes into a clean, client-friendly daily summary. Three sections: Done, Next, One question.",
-    href: "https://chatgpt.com/g/g-daily-nexus",
+    href: "#daily",
     stage: "Stage 4",
   },
 ];
@@ -74,20 +74,17 @@ export default async function PromptsPage() {
               <a
                 key={bot.key}
                 href={bot.href}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="panel p-6 block group hover:border-gold-400/50 transition-colors"
               >
                 <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-2">{bot.stage}</p>
                 <h3 className="font-serif font-medium text-[17px] mb-2 group-hover:text-gold-300 transition-colors">{bot.label}</h3>
                 <p className="text-[13.5px] text-ink-400 leading-relaxed">{bot.desc}</p>
-                <span className="font-mono text-xs text-gold-400 mt-4 inline-block">Open in ChatGPT →</span>
+                <span className="font-mono text-xs text-gold-400 mt-4 inline-block">Copy prompt →</span>
               </a>
             ))}
           </div>
           <p className="text-[12.5px] text-ink-500 mt-6">
-            GPT links are placeholder URLs — create your own custom GPTs on ChatGPT and update the links.
-            Each bot uses the prompts from the library below as its system instructions.
+            Each bot uses the prompts from the library below. Click any bot to jump to its prompt — copy it into ChatGPT and you&apos;re set.
           </p>
         </section>
 
