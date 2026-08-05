@@ -40,20 +40,16 @@ export default function DonateModal({
             </div>
           )}
 
-          <div className="flex-1 panel p-4 flex flex-col items-center gap-3 justify-center">
+          <div className="flex-1 panel p-4 flex flex-col items-center gap-3">
             <p className="font-mono text-[11px] uppercase tracking-wider text-gold-400">PayPal</p>
-            <div className="w-[160px] h-[160px] bg-white rounded-lg flex items-center justify-center">
-              <span className="text-[#253B80] font-bold text-[22px]">Pay</span>
-              <span className="text-[#179BD7] font-bold text-[22px]">Pal</span>
-            </div>
-            <a
-              href={paypalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary !px-5 !py-1.5 !text-[12px]"
-            >
-              Donate
-            </a>
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paypalLink)}&bgcolor=ffffff&color=000000`}
+              alt="PayPal QR Code"
+              width={160}
+              height={160}
+              className="rounded-lg bg-white p-2"
+            />
+            <p className="text-ink-500 text-[11px] text-center">Scan with PayPal app</p>
           </div>
         </div>
 

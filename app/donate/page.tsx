@@ -42,20 +42,16 @@ export default function DonatePage() {
           </div>
         )}
 
-        <div className="flex-1 panel p-6 flex flex-col items-center gap-3 justify-center">
+        <div className="flex-1 panel p-6 flex flex-col items-center gap-3">
           <p className="font-mono text-[11.5px] uppercase tracking-[0.1em] text-gold-400">PayPal</p>
-          <div className="w-[180px] h-[180px] bg-white rounded-lg flex items-center justify-center">
-            <span className="text-[#253B80] font-bold text-[26px]">Pay</span>
-            <span className="text-[#179BD7] font-bold text-[26px]">Pal</span>
-          </div>
-          <a
-            href={paypalLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary !px-6 !py-2 !text-[13px]"
-          >
-            Donate via PayPal
-          </a>
+          <img
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paypalLink)}&bgcolor=ffffff&color=000000`}
+            alt="PayPal QR Code"
+            width={180}
+            height={180}
+            className="rounded-lg bg-white p-2"
+          />
+          <p className="text-ink-500 text-[12px]">Scan with PayPal app</p>
         </div>
       </div>
 
