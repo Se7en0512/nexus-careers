@@ -54,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${newsreader.variable} ${publicSans.variable} ${plexMono.variable}`}>
       <head>
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
       </head>
       <body className="min-h-screen flex flex-col">
         <Nav />

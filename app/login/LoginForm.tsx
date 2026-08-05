@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
-    turnstile: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
+    hcaptcha: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
   }
 }
 
@@ -16,20 +16,20 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const captchaRef = useRef<HTMLDivElement>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   useEffect(() => {
-    if (!turnstileRef.current || turnstileRef.current.dataset.rendered) return;
-    const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
-    if (!sitekey || !window.turnstile) return;
-    const id = window.turnstile.render(turnstileRef.current, {
+    if (!captchaRef.current || captchaRef.current.dataset.rendered) return;
+    const sitekey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
+    if (!sitekey || !window.hcaptcha) return;
+    const id = window.hcaptcha.render(captchaRef.current, {
       sitekey,
-      callback: (token: string) => setTurnstileToken(token),
-      "expired-callback": () => setTurnstileToken(""),
+      callback: (token: string) => setCaptchaToken(token),
+      "expired-callback": () => setCaptchaToken(""),
       theme: "light",
     });
-    turnstileRef.current.dataset.rendered = id;
+    captchaRef.current.dataset.rendered = id;
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -40,7 +40,7 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, turnstile_token: turnstileToken }),
+        body: JSON.stringify({ email, password, captcha_token: captchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -83,7 +83,7 @@ export default function LoginForm() {
           Forgot your password?
         </Link>
       </div>
-      <div ref={turnstileRef} className="flex justify-center"></div>
+      <div ref={captchaRef} className="flex justify-center"></div>
       {error && <p className="form-error">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? "Signing in..." : "Sign In"}

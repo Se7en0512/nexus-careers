@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
-    turnstile: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
+    hcaptcha: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
   }
 }
 
@@ -19,20 +19,20 @@ export default function SignupForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [pwHint, setPwHint] = useState("");
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const captchaRef = useRef<HTMLDivElement>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   useEffect(() => {
-    if (!turnstileRef.current || turnstileRef.current.dataset.rendered) return;
-    const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
-    if (!sitekey || !window.turnstile) return;
-    const id = window.turnstile.render(turnstileRef.current, {
+    if (!captchaRef.current || captchaRef.current.dataset.rendered) return;
+    const sitekey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
+    if (!sitekey || !window.hcaptcha) return;
+    const id = window.hcaptcha.render(captchaRef.current, {
       sitekey,
-      callback: (token: string) => setTurnstileToken(token),
-      "expired-callback": () => setTurnstileToken(""),
+      callback: (token: string) => setCaptchaToken(token),
+      "expired-callback": () => setCaptchaToken(""),
       theme: "light",
     });
-    turnstileRef.current.dataset.rendered = id;
+    captchaRef.current.dataset.rendered = id;
   }, []);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function SignupForm() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, updates_opt_in: updatesOptIn, turnstile_token: turnstileToken }),
+        body: JSON.stringify({ name, email, password, updates_opt_in: updatesOptIn, captcha_token: captchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -119,7 +119,7 @@ export default function SignupForm() {
            anytime. (<em>Not required to sign up.</em>)
          </span>
       </label>
-      <div ref={turnstileRef} className="flex justify-center"></div>
+      <div ref={captchaRef} className="flex justify-center"></div>
       {error && <p className="form-error">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? "Working..." : "Create Account"}

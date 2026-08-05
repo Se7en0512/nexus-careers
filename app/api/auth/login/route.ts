@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPassword, createSession } from "@/lib/auth";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyCaptcha } from "@/lib/captcha";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
@@ -16,8 +16,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const turnstileToken = String(data.turnstile_token || "");
-  if (!(await verifyTurnstile(turnstileToken, ip))) {
+  const captchaToken = String(data.captcha_token || "");
+  if (!(await verifyCaptcha(captchaToken, ip))) {
     return NextResponse.json({ error: "Security check failed. Please try again." }, { status: 403 });
   }
 
