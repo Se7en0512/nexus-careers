@@ -1,11 +1,23 @@
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isAdmin } from "@/lib/auth";
+import { db } from "@/lib/db";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
 
 export default async function Nav() {
   const user = await getSessionUser();
+  const admin = user ? isAdmin(user) : false;
+
+  let unreadCount = 0;
+  if (admin) {
+    try {
+      const row = (await db.prepare("SELECT COUNT(*) AS n FROM notifications WHERE read = 0").get()) as { n: number } | null;
+      unreadCount = row?.n ?? 0;
+    } catch {
+      // non-critical
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-navy-950/90 backdrop-blur border-b border-navy-700">
@@ -24,6 +36,19 @@ export default async function Nav() {
         </nav>
 
 <div className="hidden lg:flex items-center gap-5">
+              {admin && (
+                <Link href="/admin" className="relative nav-link">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-gold-400 text-navy-950 rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              )}
               {user ? (
                 <Link href="/dashboard" className="nav-link">
                   Dashboard

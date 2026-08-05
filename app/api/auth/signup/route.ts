@@ -41,5 +41,18 @@ export async function POST(req: Request) {
   const userId = Number(result.lastInsertRowid);
   await createSession(userId);
 
+  try {
+    await db
+      .prepare("INSERT INTO notifications (type, title, message, meta) VALUES (?, ?, ?, ?)")
+      .run(
+        "signup",
+        "New member joined",
+        `${name || email} just created an account.`,
+        JSON.stringify({ userId, email, name })
+      );
+  } catch {
+    // non-critical — don't fail signup if notification insert fails
+  }
+
   return NextResponse.json({ ok: true });
 }

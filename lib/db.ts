@@ -383,6 +383,16 @@ async function init() {
     redemption_preference TEXT NOT NULL DEFAULT 'auto_subscription'
   );
 
+  CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL DEFAULT 'signup',
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    meta TEXT NOT NULL DEFAULT '{}',
+    read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS referral_redemptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

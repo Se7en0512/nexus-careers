@@ -50,19 +50,31 @@ interface FeedbackItem {
   created_at: string;
 }
 
+interface NotificationItem {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  meta: string;
+  read: number;
+  created_at: string;
+}
+
 export default function AdminPanel({
   sites,
   jobs,
   courses,
   feedback,
+  notifications,
 }: {
   sites: Site[];
   jobs: Job[];
   courses: Course[];
   feedback: FeedbackItem[];
+  notifications: NotificationItem[];
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback">("site");
+  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback" | "notifications">("site");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
@@ -205,6 +217,28 @@ export default function AdminPanel({
         >
           Feedback
         </button>
+        <button
+          onClick={() => {
+            setTab("notifications");
+            const unread = notifications.filter((n) => !n.read).length;
+            if (unread > 0) {
+              fetch("/api/admin/notifications", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "mark_all_read" }),
+              }).then(() => router.refresh());
+            }
+          }}
+          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+            tab === "notifications" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
+          }`}
+        >
+          Notifications {notifications.filter((n) => !n.read).length > 0 && (
+            <span className="ml-1 bg-gold-400 text-navy-950 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+              {notifications.filter((n) => !n.read).length}
+            </span>
+          )}
+        </button>
       </div>
 
       {error && <p className="form-error">{error}</p>}
@@ -284,9 +318,30 @@ export default function AdminPanel({
 
       <section className="flex flex-col gap-2">
         <h3 className="font-mono text-[11.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">
-          {tab === "site" ? `Platforms (${sites.length})` : tab === "job" ? `Job posts (${jobs.length})` : tab === "course" ? `Courses (${courses.length})` : `Feedback (${feedback.length})`}
+          {tab === "site" ? `Platforms (${sites.length})` : tab === "job" ? `Job posts (${jobs.length})` : tab === "course" ? `Courses (${courses.length})` : tab === "notifications" ? `Notifications (${notifications.length})` : `Feedback (${feedback.length})`}
         </h3>
-        {tab === "feedback" ? (
+        {tab === "notifications" ? (
+          notifications.length === 0 ? (
+            <p className="panel p-8 text-center text-ink-500 text-[14px]">No notifications yet.</p>
+          ) : (
+            notifications.map((n) => (
+              <div key={n.id} className={`panel p-4 flex flex-col gap-1.5 ${!n.read ? "border-gold-400/30 bg-navy-800" : ""}`}>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-[13px] font-medium">
+                    {n.type === "signup" ? "👤" : "🔔"} {n.title}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    {!n.read && <span className="w-2 h-2 rounded-full bg-gold-400 flex-shrink-0" />}
+                    <p className="text-[11px] text-ink-500 flex-shrink-0">
+                      {new Date(n.created_at + "Z").toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[13px] text-ink-300">{n.message}</p>
+              </div>
+            ))
+          )
+        ) : tab === "feedback" ? (
           feedback.map((item) => (
             <div key={item.id} className="panel p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between gap-4">

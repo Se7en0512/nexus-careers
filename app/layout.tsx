@@ -30,6 +30,22 @@ export const metadata: Metadata = {
   },
   description:
     "A structured roadmap, practical tools, and scam protection for aspiring and current Filipino Virtual Assistants.",
+  openGraph: {
+    title: "Thrive — Foundation for Filipino VAs",
+    description:
+      "A structured roadmap, practical tools, and scam protection for aspiring and current Filipino Virtual Assistants.",
+    url: "https://thrive-ph.vercel.app",
+    siteName: "Thrive",
+    locale: "en_PH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Thrive — Foundation for Filipino VAs",
+    description:
+      "A structured roadmap, practical tools, and scam protection for aspiring and current Filipino Virtual Assistants.",
+  },
+  metadataBase: new URL("https://thrive-ph.vercel.app"),
 };
 
 export default function RootLayout({

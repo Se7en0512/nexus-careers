@@ -57,6 +57,17 @@ export type AdminJob = JobRow;
 export type AdminCourse = CourseRow;
 export type AdminFeedback = FeedbackRow;
 
+interface NotificationRow {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  meta: string;
+  read: number;
+  created_at: string;
+}
+export type AdminNotification = NotificationRow;
+
 export default async function AdminPage() {
   const user = await getSessionUser();
   if (!user) redirect("/signup?next=/admin");
@@ -73,6 +84,11 @@ export default async function AdminPage() {
   const courses: AdminCourse[] = courseRows.map((c) => ({ ...c }));
   const feedback: AdminFeedback[] = feedbackRows.map((f) => ({ ...f }));
 
+  const notifRows = (await db
+    .prepare("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50")
+    .all()) as unknown as NotificationRow[];
+  const notifications: AdminNotification[] = notifRows.map((n) => ({ ...n }));
+
   return (
     <>
       <section className="page-hero">
@@ -88,7 +104,7 @@ export default async function AdminPage() {
       </section>
 
       <div className="wrap py-16">
-        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} />
+        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} />
       </div>
     </>
   );
