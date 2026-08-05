@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+declare global {
+  interface Window {
+    turnstile: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
+  }
+}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -10,6 +16,21 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  useEffect(() => {
+    if (!turnstileRef.current || turnstileRef.current.dataset.rendered) return;
+    const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
+    if (!sitekey || !window.turnstile) return;
+    const id = window.turnstile.render(turnstileRef.current, {
+      sitekey,
+      callback: (token: string) => setTurnstileToken(token),
+      "expired-callback": () => setTurnstileToken(""),
+      theme: "light",
+    });
+    turnstileRef.current.dataset.rendered = id;
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +40,7 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, turnstile_token: turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -62,6 +83,7 @@ export default function LoginForm() {
           Forgot your password?
         </Link>
       </div>
+      <div ref={turnstileRef} className="flex justify-center"></div>
       {error && <p className="form-error">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? "Signing in..." : "Sign In"}

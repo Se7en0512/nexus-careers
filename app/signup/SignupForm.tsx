@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+declare global {
+  interface Window {
+    turnstile: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id: string) => void };
+  }
+}
 
 export default function SignupForm() {
   const router = useRouter();
@@ -12,6 +18,32 @@ export default function SignupForm() {
   const [updatesOptIn, setUpdatesOptIn] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pwHint, setPwHint] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  useEffect(() => {
+    if (!turnstileRef.current || turnstileRef.current.dataset.rendered) return;
+    const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
+    if (!sitekey || !window.turnstile) return;
+    const id = window.turnstile.render(turnstileRef.current, {
+      sitekey,
+      callback: (token: string) => setTurnstileToken(token),
+      "expired-callback": () => setTurnstileToken(""),
+      theme: "light",
+    });
+    turnstileRef.current.dataset.rendered = id;
+  }, []);
+
+  useEffect(() => {
+    if (password.length < 8) { setPwHint(""); return; }
+    const checks: string[] = [];
+    if (password.length > 128) checks.push("max 128 chars");
+    if (!/[A-Z]/.test(password)) checks.push("add uppercase");
+    if (!/[^a-zA-Z0-9]/.test(password)) checks.push("add special char");
+    if (!/[0-9]/.test(password)) checks.push("add number");
+    setPwHint(checks.length ? `Weak: ${checks.join(", ")}` : "");
+  }, [password]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +53,7 @@ export default function SignupForm() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, updates_opt_in: updatesOptIn }),
+        body: JSON.stringify({ name, email, password, updates_opt_in: updatesOptIn, turnstile_token: turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -68,10 +100,12 @@ export default function SignupForm() {
           className="field"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="8+ characters"
+          placeholder="8+ chars, uppercase, number, special"
           minLength={8}
+          maxLength={128}
           required
         />
+        {pwHint && <p className="text-xs text-amber-500 mt-1">{pwHint}</p>}
       </div>
       <label className="flex items-start gap-3 cursor-pointer">
         <input
@@ -85,6 +119,7 @@ export default function SignupForm() {
            anytime. (<em>Not required to sign up.</em>)
          </span>
       </label>
+      <div ref={turnstileRef} className="flex justify-center"></div>
       {error && <p className="form-error">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? "Working..." : "Create Account"}

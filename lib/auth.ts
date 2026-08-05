@@ -2,7 +2,7 @@ import { cookies, headers } from "next/headers";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { db } from "./db";
 
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 export const SESSION_COOKIE = "nexus_session";
 
 export interface UserRow {

@@ -1,25 +1,28 @@
-// Simple in-memory sliding-window rate limiter.
-// Note: sufficient for single-instance deployments (Vercel serverless, or one Node server).
-// If instances multiply, move to a shared store (Redis/DB).
+import { db } from "./db";
 
-const buckets = new Map<string, number[]>();
-let lastPrune = 0;
+// DB-backed rate limiter using a simple rate_limits table.
+// Survives cold starts and works across serverless invocations.
 
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
   const now = Date.now();
-  if (now - lastPrune > 60_000) {
-    lastPrune = now;
-    for (const [k, hits] of buckets) {
-      if (hits.length === 0 || now - hits[hits.length - 1] >= windowMs) buckets.delete(k);
-    }
+  const windowStart = now - windowMs;
+
+  // Clean old entries periodically (1 in 20 chance)
+  if (Math.random() < 0.05) {
+    await db.prepare("DELETE FROM rate_limits WHERE timestamp < ?").run(windowStart);
   }
-  const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
-  if (hits.length >= limit) {
-    buckets.set(key, hits);
+
+  // Count hits in window
+  const row = (await db
+    .prepare("SELECT COUNT(*) AS n FROM rate_limits WHERE key = ? AND timestamp > ?")
+    .get(key, windowStart)) as { n: number } | undefined;
+
+  if (row && row.n >= limit) {
     return false;
   }
-  hits.push(now);
-  buckets.set(key, hits);
+
+  // Record this hit
+  await db.prepare("INSERT INTO rate_limits (key, timestamp) VALUES (?, ?)").run(key, now);
   return true;
 }
 

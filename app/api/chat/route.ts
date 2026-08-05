@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Login required" }, { status: 401 });
   }
 
-  if (!rateLimit(getClientIp(req), 10, 60 * 1000)) {
+  if (!(await rateLimit(getClientIp(req), 10, 60 * 1000))) {
     return NextResponse.json(
       { error: "You're sending messages too fast — please wait a moment." },
       { status: 429 }

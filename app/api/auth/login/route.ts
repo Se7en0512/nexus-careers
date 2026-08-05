@@ -2,17 +2,23 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPassword, createSession } from "@/lib/auth";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
   if (!data) return NextResponse.json({ error: "Request body must be JSON" }, { status: 400 });
 
   const ip = getClientIp(req);
-  if (!rateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
+  if (!(await rateLimit(`login:${ip}`, 10, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "Too many attempts — please wait 15 minutes before trying again." },
       { status: 429 }
     );
+  }
+
+  const turnstileToken = String(data.turnstile_token || "");
+  if (!(await verifyTurnstile(turnstileToken, ip))) {
+    return NextResponse.json({ error: "Security check failed. Please try again." }, { status: 403 });
   }
 
   const email = String(data.email || "").trim().toLowerCase();
@@ -25,10 +31,6 @@ export async function POST(req: Request) {
   if (!user || !verifyPassword(password, user.password_hash)) {
     return NextResponse.json({ error: "Wrong email or password" }, { status: 401 });
   }
-
-// TODO(email service): once an email provider is set up, require email_verified
-  // before allowing login: if (!user.email_verified) return 403 "verify your email first".
-  // For now this is NOT required because no verification email is being sent yet.
 
   await createSession(user.id);
   return NextResponse.json({ ok: true });

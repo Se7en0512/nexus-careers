@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Login required" }, { status: 401 });
   }
   const ip = getClientIp(req);
-  if (!rateLimit(`wins:${ip}`, 5, 10 * 60 * 1000)) {
+  if (!(await rateLimit(`wins:${ip}`, 5, 10 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many submissions — please wait 10 minutes." }, { status: 429 });
   }
   const data = await req.json().catch(() => null);

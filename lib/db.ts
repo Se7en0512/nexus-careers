@@ -411,6 +411,12 @@ async function init() {
     amount INTEGER NOT NULL DEFAULT 299,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS rate_limits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL,
+    timestamp INTEGER NOT NULL
+  );
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:

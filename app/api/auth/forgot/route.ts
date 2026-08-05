@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const ip = getClientIp(req);
-  if (!rateLimit(`forgot:${ip}`, 5, 15 * 60 * 1000)) {
+  if (!(await rateLimit(`forgot:${ip}`, 5, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "Too many requests — please wait 15 minutes before trying again." },
       { status: 429 }

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const ip = getClientIp(req);
-  if (!rateLimit(`feedback:${ip}`, 3, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`feedback:${ip}`, 3, 60 * 60 * 1000))) {
     return NextResponse.json(
       { error: "You've already submitted feedback recently — please wait an hour." },
       { status: 429 }
