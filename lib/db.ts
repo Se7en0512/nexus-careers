@@ -417,6 +417,11 @@ async function init() {
     key TEXT NOT NULL,
     timestamp INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS site_config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:
@@ -661,10 +666,24 @@ async function seedCourses() {
   for (const c of courses) await insert.run(...c);
 }
 
+async function seedSiteConfig() {
+  const defaults: Record<string, string> = {
+    marquee_text: "Welcome to Thrive! Help us keep this site running — donate via PayPal ☕",
+    paypal_link: "https://paypal.me/PhillipWendyll",
+  };
+  for (const [key, value] of Object.entries(defaults)) {
+    const existing = await rawPrepare("SELECT 1 FROM site_config WHERE key = ?").get(key);
+    if (!existing) {
+      await rawPrepare("INSERT INTO site_config (key, value) VALUES (?, ?)").run(key, value);
+    }
+  }
+}
+
   await migrate();
   await seedApplySites();
   await seedNiches();
   await seedJobs();
   await seedTestimonials();
   await seedCourses();
+  await seedSiteConfig();
 }

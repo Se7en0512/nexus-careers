@@ -66,15 +66,17 @@ export default function AdminPanel({
   courses,
   feedback,
   notifications,
+  config,
 }: {
   sites: Site[];
   jobs: Job[];
   courses: Course[];
   feedback: FeedbackItem[];
   notifications: NotificationItem[];
+  config: Record<string, string>;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback" | "notifications">("site");
+  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback" | "notifications" | "config">("site");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
@@ -82,6 +84,7 @@ export default function AdminPanel({
   const [site, setSite] = useState({ name: "", url: "", category: "Global Job Board", description: "", platformType: "job_board", nicheTags: "all" });
   const [job, setJob] = useState({ title: "", company: "", url: "", niche: "admin", description: "", rateRange: "", clientType: "" });
   const [course, setCourse] = useState({ title: "", provider: "", url: "", description: "", badge: "Free", category: "Marketing", difficulty: "Beginner" });
+  const [siteConfig, setSiteConfig] = useState({ marquee_text: config.marquee_text || "", paypal_link: config.paypal_link || "" });
 
   const handleSiteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,6 +185,25 @@ export default function AdminPanel({
     }
   };
 
+  const saveConfig = async (key: string, value: string) => {
+    setBusy(true);
+    setError("");
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "config", key, value }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.error || "Error");
+      setMsg("Saved.");
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex gap-2">
@@ -238,6 +260,14 @@ export default function AdminPanel({
               {notifications.filter((n) => !n.read).length}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => setTab("config")}
+          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+            tab === "config" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
+          }`}
+        >
+          Site Config
         </button>
       </div>
 
@@ -314,6 +344,42 @@ export default function AdminPanel({
           </div>
           <button className="btn-primary self-start" disabled={busy}>{busy ? "Saving..." : "Add course"}</button>
         </form>
+      )}
+
+      {tab === "config" && (
+        <div className="panel p-7 flex flex-col gap-5">
+          <h3 className="font-serif font-medium text-[19px]">Site Configuration</h3>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="form-label">Marquee Text (scrolling announcement bar)</label>
+              <div className="flex gap-2">
+                <input
+                  className="field flex-1"
+                  value={siteConfig.marquee_text}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, marquee_text: e.target.value })}
+                  placeholder="Welcome message..."
+                />
+                <button onClick={() => saveConfig("marquee_text", siteConfig.marquee_text)} disabled={busy} className="btn-primary !px-4">
+                  Save
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="form-label">PayPal.me Link</label>
+              <div className="flex gap-2">
+                <input
+                  className="field flex-1"
+                  value={siteConfig.paypal_link}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, paypal_link: e.target.value })}
+                  placeholder="https://paypal.me/YourUsername"
+                />
+                <button onClick={() => saveConfig("paypal_link", siteConfig.paypal_link)} disabled={busy} className="btn-primary !px-4">
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <section className="flex flex-col gap-2">

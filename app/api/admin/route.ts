@@ -93,6 +93,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (data.type === "config") {
+    const key = String(data.key || "").trim();
+    const value = String(data.value || "").trim();
+    if (!key || !["marquee_text", "paypal_link"].includes(key)) {
+      return NextResponse.json({ error: "Invalid config key" }, { status: 400 });
+    }
+    await db.prepare("INSERT INTO site_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(key, value);
+    return NextResponse.json({ ok: true });
+  }
+
   return NextResponse.json({ error: "Unknown type" }, { status: 400 });
 }
 

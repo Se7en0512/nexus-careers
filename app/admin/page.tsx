@@ -89,6 +89,10 @@ export default async function AdminPage() {
     .all()) as unknown as NotificationRow[];
   const notifications: AdminNotification[] = notifRows.map((n) => ({ ...n }));
 
+  const configRows = (await db.prepare("SELECT key, value FROM site_config").all()) as Array<{ key: string; value: string }>;
+  const config: Record<string, string> = {};
+  for (const r of configRows) config[r.key] = r.value;
+
   return (
     <>
       <section className="page-hero">
@@ -104,7 +108,7 @@ export default async function AdminPage() {
       </section>
 
       <div className="wrap py-16">
-        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} />
+        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} config={config} />
       </div>
     </>
   );
