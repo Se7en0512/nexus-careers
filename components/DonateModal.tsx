@@ -1,6 +1,18 @@
 "use client";
 
-export default function DonateModal({ paypalLink, onClose }: { paypalLink: string; onClose: () => void }) {
+export default function DonateModal({
+  paypalLink,
+  gcashNumber,
+  onClose,
+}: {
+  paypalLink: string;
+  gcashNumber: string;
+  onClose: () => void;
+}) {
+  const gcashQrUrl = gcashNumber
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(gcashNumber)}&bgcolor=ffffff&color=000000`
+    : "";
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
@@ -12,16 +24,40 @@ export default function DonateModal({ paypalLink, onClose }: { paypalLink: strin
         <p className="text-ink-400 text-[14px] text-center leading-relaxed">
           Thrive is free and community-driven. If this site helped you, consider buying us a coffee to keep it running.
         </p>
-        <a
-          href={paypalLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary !px-8 !py-3 !text-[15px] inline-flex items-center gap-2"
-        >
-          ☕ Donate via PayPal
-        </a>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
+          {gcashNumber && (
+            <div className="flex-1 panel p-5 flex flex-col items-center gap-3">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-gold-400">GCash</p>
+              <img
+                src={gcashQrUrl}
+                alt="GCash QR Code"
+                width={180}
+                height={180}
+                className="rounded-lg bg-white p-2"
+              />
+              <p className="text-ink-500 text-[11px] text-center">Scan with GCash app</p>
+            </div>
+          )}
+
+          <div className="flex-1 panel p-5 flex flex-col items-center gap-3">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-gold-400">PayPal</p>
+            <div className="w-[180px] h-[180px] bg-white rounded-lg flex items-center justify-center">
+              <p className="text-navy-950 font-bold text-[16px]">PayPal</p>
+            </div>
+            <a
+              href={paypalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary !px-6 !py-2 !text-[13px]"
+            >
+              Donate via PayPal
+            </a>
+          </div>
+        </div>
+
         <p className="text-ink-500 text-[11px] text-center">
-          You&apos;ll be redirected to PayPal. Any amount helps!
+          Any amount helps — even the price of a coffee!
         </p>
       </div>
     </div>

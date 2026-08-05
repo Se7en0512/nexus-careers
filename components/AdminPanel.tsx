@@ -84,7 +84,7 @@ export default function AdminPanel({
   const [site, setSite] = useState({ name: "", url: "", category: "Global Job Board", description: "", platformType: "job_board", nicheTags: "all" });
   const [job, setJob] = useState({ title: "", company: "", url: "", niche: "admin", description: "", rateRange: "", clientType: "" });
   const [course, setCourse] = useState({ title: "", provider: "", url: "", description: "", badge: "Free", category: "Marketing", difficulty: "Beginner" });
-  const [siteConfig, setSiteConfig] = useState({ marquee_text: config.marquee_text || "", paypal_link: config.paypal_link || "" });
+  const [siteConfig, setSiteConfig] = useState({ marquee_text: config.marquee_text || "", paypal_link: config.paypal_link || "", gcash_number: config.gcash_number || "" });
 
   const handleSiteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -377,6 +377,22 @@ export default function AdminPanel({
                   Save
                 </button>
               </div>
+            </div>
+            <div>
+              <label className="form-label">GCash Number (shown as QR only, not as text)</label>
+              <div className="flex gap-2">
+                <input
+                  className="field flex-1"
+                  type="tel"
+                  value={siteConfig.gcash_number}
+                  onChange={(e) => setSiteConfig({ ...siteConfig, gcash_number: e.target.value })}
+                  placeholder="09XXXXXXXXX"
+                />
+                <button onClick={() => saveConfig("gcash_number", siteConfig.gcash_number)} disabled={busy} className="btn-primary !px-4">
+                  Save
+                </button>
+              </div>
+              <p className="text-[11px] text-ink-500 mt-1">Number is encoded in QR code only — never displayed as readable text on the site.</p>
             </div>
           </div>
         </div>

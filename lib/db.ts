@@ -670,6 +670,7 @@ async function seedSiteConfig() {
   const defaults: Record<string, string> = {
     marquee_text: "Welcome to Thrive! Help us keep this site running — donate via PayPal ☕",
     paypal_link: "https://paypal.me/PhillipWendyll",
+    gcash_number: "09923999895",
   };
   for (const [key, value] of Object.entries(defaults)) {
     const existing = await rawPrepare("SELECT 1 FROM site_config WHERE key = ?").get(key);

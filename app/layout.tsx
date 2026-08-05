@@ -77,7 +77,7 @@ export default async function RootLayout({
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />
-        <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} />
+        <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} gcashNumber={config.gcash_number || ""} />
       </body>
     </html>
   );

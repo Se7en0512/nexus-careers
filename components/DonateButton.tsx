@@ -3,7 +3,13 @@
 import { useState } from "react";
 import DonateModal from "./DonateModal";
 
-export default function DonateButton({ paypalLink }: { paypalLink: string }) {
+export default function DonateButton({
+  paypalLink,
+  gcashNumber,
+}: {
+  paypalLink: string;
+  gcashNumber: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -15,7 +21,13 @@ export default function DonateButton({ paypalLink }: { paypalLink: string }) {
       >
         ☕ Donate
       </button>
-      {open && <DonateModal paypalLink={paypalLink} onClose={() => setOpen(false)} />}
+      {open && (
+        <DonateModal
+          paypalLink={paypalLink}
+          gcashNumber={gcashNumber}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </>
   );
 }
