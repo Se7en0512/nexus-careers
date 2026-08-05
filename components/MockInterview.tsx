@@ -21,6 +21,8 @@ interface Round {
   improvements: string;
 }
 
+const STORAGE_KEY = "thrive_mock_interview";
+
 export default function MockInterview() {
   const [stage, setStage] = useState<"setup" | "interview" | "done">("setup");
   const [niche, setNiche] = useState(NICHES[0].key);
@@ -33,10 +35,37 @@ export default function MockInterview() {
   const recRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.stage) setStage(data.stage);
+        if (data.niche) setNiche(data.niche);
+        if (data.rounds?.length) setRounds(data.rounds);
+        if (data.current) setCurrent(data.current);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       recRef.current?.stop();
     };
   }, []);
+
+  useEffect(() => {
+    if (stage !== "setup") {
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ stage, niche, rounds, current }));
+      } catch {
+        // non-critical
+      }
+    } else {
+      sessionStorage.removeItem(STORAGE_KEY);
+    }
+  }, [stage, niche, rounds, current]);
 
   const TOTAL = 5;
 

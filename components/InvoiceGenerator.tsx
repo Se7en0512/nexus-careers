@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PrintButton from "@/components/PrintButton";
 
 interface LineItem {
@@ -19,6 +19,8 @@ interface InvoiceData {
     total: number;
 }
 
+const STORAGE_KEY = "thrive_invoice_draft";
+
 export default function InvoiceGenerator() {
     const [clientName, setClientName] = useState("");
     const [clientEmail, setClientEmail] = useState("");
@@ -28,6 +30,33 @@ export default function InvoiceGenerator() {
     const [invoice, setInvoice] = useState<InvoiceData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.clientName) setClientName(data.clientName);
+                if (data.clientEmail) setClientEmail(data.clientEmail);
+                if (data.currency) setCurrency(data.currency);
+                if (data.dueDate) setDueDate(data.dueDate);
+                if (data.items?.length) setItems(data.items);
+                if (data.invoice) setInvoice(data.invoice);
+            }
+        } catch {
+            // ignore corrupted storage
+        }
+    }, []);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                clientName, clientEmail, currency, dueDate, items, invoice,
+            }));
+        } catch {
+            // storage full — non-critical
+        }
+    }, [clientName, clientEmail, currency, dueDate, items, invoice]);
 
     const updateItem = (idx: number, field: keyof LineItem, value: string | number) => {
         setItems(items.map((it, i) => (i === idx ? { ...it, [field]: value } : it)));

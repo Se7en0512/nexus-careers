@@ -15,6 +15,8 @@ const SUGGESTIONS = [
   "What should I say in my first interview?",
 ];
 
+const STORAGE_KEY = "thrive_assistant_chat";
+
 export default function VAAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -24,8 +26,30 @@ export default function VAAssistant() {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (Array.isArray(data) && data.length <= 50) setMessages(data);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
+      } catch {
+        // non-critical
+      }
+    }
+  }, [messages]);
 
   const send = async (text: string) => {
     const content = text.trim();

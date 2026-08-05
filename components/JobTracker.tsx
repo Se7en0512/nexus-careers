@@ -380,78 +380,121 @@ export default function JobTracker({ initialApplications = [], isGuest }: JobTra
         </form>
       )}
 
-      <div className="panel border border-navy-700 overflow-x-auto rounded-[3px]">
+      <div className="panel border border-navy-700 rounded-[3px]">
         {apps.length === 0 ? (
           <div className="p-8 text-center text-ink-500 font-mono text-sm">
             No tracked applications yet. Click "+ Add Application" to start.
           </div>
         ) : (
-          <table className="w-full text-left border-collapse font-sans text-[13.5px]">
-            <thead>
-              <tr className="bg-navy-950 border-b border-navy-700 font-mono text-[11px] uppercase tracking-wider text-ink-500">
-                <th className="p-4 pl-6">Date</th>
-                <th className="p-4">Company</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">Platform</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Follow-Up</th>
-                <th className="p-4">Notes</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Mobile card layout */}
+            <div className="md:hidden flex flex-col">
               {apps.map((app) => {
                 const s = STATUSES.find((item) => item.value === app.status) || STATUSES[0];
                 const isOverdue = app.follow_up_date && app.follow_up_date < todayStr();
                 return (
-                  <tr key={app.id} className="border-b border-navy-800 hover:bg-navy-900/50 transition-colors">
-                    <td className="p-4 pl-6 font-mono text-ink-300">{app.applied_date}</td>
-                    <td className="p-4 font-semibold text-ink-50">{app.company}</td>
-                    <td className="p-4 text-ink-100">{app.role}</td>
-                    <td className="p-4 text-ink-300">{app.platform}</td>
-                    <td className="p-4">
+                  <div key={app.id} className="p-5 border-b border-navy-800 last:border-b-0">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink-50 truncate">{app.company}</p>
+                        <p className="text-[13px] text-ink-300 truncate">{app.role}</p>
+                      </div>
                       <span
-                        className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
                         style={{ backgroundColor: s.bg, color: s.text }}
                       >
                         {s.label}
                       </span>
-                    </td>
-                    <td className="p-4 whitespace-nowrap">
-                      {app.follow_up_date ? (
-                        <span
-                          className={`font-mono text-xs ${isOverdue ? "text-red-400" : "text-ink-300"}`}
-                          title={isOverdue ? "Overdue — follow up now!" : "Follow-up date"}
-                        >
-                          {isOverdue ? "!" : ""}
-                          {app.follow_up_date}
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink-500 font-mono mb-2">
+                      <span>{app.applied_date}</span>
+                      <span>{app.platform}</span>
+                      {app.follow_up_date && (
+                        <span className={isOverdue ? "text-red-400" : ""}>
+                          {isOverdue ? "! " : ""}Follow-up: {app.follow_up_date}
                         </span>
-                      ) : (
-                        <em className="text-ink-600 font-mono">—</em>
                       )}
-                    </td>
-                    <td className="p-4 text-ink-400 max-w-[200px] truncate" title={app.notes}>
-                      {app.notes || <em className="text-ink-600 font-mono">—</em>}
-                    </td>
-                    <td className="p-4 pr-6 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => handleEdit(app)}
-                        className="text-xs font-mono text-gold-400 hover:text-gold-300 mr-4 transition-colors"
-                      >
-                        [Edit]
-                      </button>
-                      <button
-                        onClick={() => handleDelete(app.id)}
-                        className="text-xs font-mono text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        [Delete]
-                      </button>
-                    </td>
-                  </tr>
+                    </div>
+                    {app.notes && <p className="text-[12px] text-ink-400 truncate mb-2" title={app.notes}>{app.notes}</p>}
+                    <div className="flex gap-3">
+                      <button onClick={() => handleEdit(app)} className="text-[11px] font-mono text-gold-400 hover:text-gold-300">[Edit]</button>
+                      <button onClick={() => handleDelete(app.id)} className="text-[11px] font-mono text-red-400 hover:text-red-300">[Delete]</button>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop table layout */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse font-sans text-[13.5px]">
+                <thead>
+                  <tr className="bg-navy-950 border-b border-navy-700 font-mono text-[11px] uppercase tracking-wider text-ink-500">
+                    <th className="p-4 pl-6">Date</th>
+                    <th className="p-4">Company</th>
+                    <th className="p-4">Role</th>
+                    <th className="p-4">Platform</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Follow-Up</th>
+                    <th className="p-4">Notes</th>
+                    <th className="p-4 pr-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {apps.map((app) => {
+                    const s = STATUSES.find((item) => item.value === app.status) || STATUSES[0];
+                    const isOverdue = app.follow_up_date && app.follow_up_date < todayStr();
+                    return (
+                      <tr key={app.id} className="border-b border-navy-800 hover:bg-navy-900/50 transition-colors">
+                        <td className="p-4 pl-6 font-mono text-ink-300">{app.applied_date}</td>
+                        <td className="p-4 font-semibold text-ink-50">{app.company}</td>
+                        <td className="p-4 text-ink-100">{app.role}</td>
+                        <td className="p-4 text-ink-300">{app.platform}</td>
+                        <td className="p-4">
+                          <span
+                            className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ backgroundColor: s.bg, color: s.text }}
+                          >
+                            {s.label}
+                          </span>
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          {app.follow_up_date ? (
+                            <span
+                              className={`font-mono text-xs ${isOverdue ? "text-red-400" : "text-ink-300"}`}
+                              title={isOverdue ? "Overdue — follow up now!" : "Follow-up date"}
+                            >
+                              {isOverdue ? "!" : ""}
+                              {app.follow_up_date}
+                            </span>
+                          ) : (
+                            <em className="text-ink-600 font-mono">—</em>
+                          )}
+                        </td>
+                        <td className="p-4 text-ink-400 max-w-[200px] truncate" title={app.notes}>
+                          {app.notes || <em className="text-ink-600 font-mono">—</em>}
+                        </td>
+                        <td className="p-4 pr-6 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => handleEdit(app)}
+                            className="text-xs font-mono text-gold-400 hover:text-gold-300 mr-4 transition-colors"
+                          >
+                            [Edit]
+                          </button>
+                          <button
+                            onClick={() => handleDelete(app.id)}
+                            className="text-xs font-mono text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            [Delete]
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

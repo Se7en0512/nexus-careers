@@ -32,39 +32,46 @@ export default async function DashboardPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const progress = (await db.prepare("SELECT stage, checks, updated_at FROM progress WHERE user_id = ?").get(user.id)) as
-    | { stage: string; checks: string; updated_at: string }
-    | undefined;
+  const [
+    progress,
+    quizzes,
+    vaScore,
+    userRow,
+    planDone,
+    portfolio,
+    certificates,
+    appsCountRow,
+    streak,
+  ] = await Promise.all([
+    db.prepare("SELECT stage, checks, updated_at FROM progress WHERE user_id = ?").get(user.id),
+    db.prepare("SELECT quiz, result, payload, created_at FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC").all(user.id),
+    db.prepare("SELECT va_score FROM users WHERE id = ?").get(user.id),
+    db.prepare("SELECT updates_opt_in FROM users WHERE id = ?").get(user.id),
+    db.prepare("SELECT day FROM daily_plan_progress WHERE user_id = ? AND done = 1").all(user.id),
+    db.prepare("SELECT slug, updated_at FROM portfolios WHERE user_id = ?").get(user.id),
+    db.prepare("SELECT id, stage_key, stage_title, date_issued FROM certificates WHERE user_id = ? ORDER BY date_issued").all(user.id),
+    db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id),
+    getStreak(user.id),
+  ]);
 
   let checks: Record<string, number[]> = {};
-  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
-  const currentStageKey = progress?.stage || "umpisa";
+  const progressRow = progress as { stage: string; checks: string; updated_at: string } | undefined;
+  try { checks = progressRow ? JSON.parse(progressRow.checks) : {}; } catch { checks = {}; }
+  const currentStageKey = progressRow?.stage || "umpisa";
   const currentStage = stageFromKey(currentStageKey);
 
-  const quizzes = (await db
-    .prepare(
-      "SELECT quiz, result, payload, created_at FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC"
-    )
-    .all(user.id)) as unknown as Array<{ quiz: string; result: string; payload: string; created_at: string }>;
+  const quizRows = quizzes as unknown as Array<{ quiz: string; result: string; payload: string; created_at: string }>;
+  const readiness = quizRows.find((q) => q.quiz === "readiness");
+  const niche = quizRows.find((q) => q.quiz === "niche");
 
-  const readiness = quizzes.find((q) => q.quiz === "readiness");
-  const niche = quizzes.find((q) => q.quiz === "niche");
-
-  const vaScore = (await db.prepare("SELECT va_score FROM users WHERE id = ?").get(user.id)) as { va_score: number } | undefined;
-  const userRow = (await db.prepare("SELECT updates_opt_in FROM users WHERE id = ?").get(user.id)) as { updates_opt_in: number } | undefined;
-  const planDone = (await db
-    .prepare("SELECT day FROM daily_plan_progress WHERE user_id = ? AND done = 1")
-    .all(user.id)) as unknown as Array<{ day: number }>;
-  const doneDays = new Set(planDone.map((d) => d.day));
+  const vaScoreRow = vaScore as { va_score: number } | undefined;
+  const userRowTyped = userRow as { updates_opt_in: number } | undefined;
+  const planDoneRows = planDone as unknown as Array<{ day: number }>;
+  const doneDays = new Set(planDoneRows.map((d) => d.day));
   const nextDay = PLAN_30.find((d) => !doneDays.has(d.day));
-  const portfolio = (await db.prepare("SELECT slug, updated_at FROM portfolios WHERE user_id = ?").get(user.id)) as
-    | { slug: string; updated_at: string }
-    | undefined;
-  const certificates = (await db
-    .prepare("SELECT id, stage_key, stage_title, date_issued FROM certificates WHERE user_id = ? ORDER BY date_issued")
-    .all(user.id)) as unknown as Array<{ id: number; stage_key: string; stage_title: string; date_issued: string }>;
-
-  const appsCount = ((await db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id)) as { n: number } | undefined)?.n ?? 0;
+  const portfolioRow = portfolio as { slug: string; updated_at: string } | undefined;
+  const certRows = certificates as unknown as Array<{ id: number; stage_key: string; stage_title: string; date_issued: string }>;
+  const appsCount = (appsCountRow as { n: number } | undefined)?.n ?? 0;
   const checkinStreak = await getCheckinStreak(user.id);
   const weeklyCheckedIn = await hasCheckedInThisWeek(user.id);
 
@@ -78,7 +85,6 @@ export default async function DashboardPage() {
   const totalItems = ROADMAP.reduce((acc, s) => acc + s.items.length, 0);
   const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
 
-  const streak = await getStreak(user.id);
   const roadmap = await roadmapCompletion(user.id);
   await refreshHireReadyBadge(user.id);
   const hireReady = await hasBadge(user.id, "hire_ready");
@@ -88,7 +94,7 @@ export default async function DashboardPage() {
       ? { label: `Continue Day ${nextDay.day} of the 30-Day Plan`, href: "/30-day-plan" }
       : !roadmap.complete
         ? { label: `Continue the ${currentStage?.title || "roadmap"} stage`, href: `/get-started#${currentStageKey}` }
-        : !portfolio
+        : !portfolioRow
           ? { label: "Create a Portfolio", href: "/portfolio-builder" }
           : { label: "See Job Alerts", href: "/jobs" };
 
@@ -143,7 +149,7 @@ export default async function DashboardPage() {
                 <p className="text-[12.5px] text-ink-500 mt-2">Roadmap ({totalDone}/{totalItems})</p>
               </div>
               <div className="bg-navy-900 p-6">
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{vaScore?.va_score ?? 0}</p>
+                <p className="font-mono text-[22px] text-gold-400 leading-none">{vaScoreRow?.va_score ?? 0}</p>
                 <p className="text-[12.5px] text-ink-500 mt-2">VA Score</p>
               </div>
               <div className="bg-navy-900 p-6">
@@ -245,7 +251,7 @@ export default async function DashboardPage() {
                     <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Readiness Check</p>
                     {readiness && <p className="text-[13px] text-ink-500">taken on {readiness.created_at}</p>}
                   </div>
-                  <ScoreRing score={vaScore?.va_score ?? 0} size={64} />
+                  <ScoreRing score={vaScoreRow?.va_score ?? 0} size={64} />
                 </div>
                 <p className="text-[15px] font-semibold mb-4">{readiness ? readiness.result : "No result saved yet."}</p>
                 <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
@@ -271,7 +277,7 @@ export default async function DashboardPage() {
             </div>
             <CertificateSection
               stages={ROADMAP.map((s) => ({ key: s.key, title: s.title, complete: pct(s.key) === 100 }))}
-              earned={certificates.map((c) => ({ id: c.id, stage_key: c.stage_key, stage_title: c.stage_title }))}
+              earned={certRows.map((c) => ({ id: c.id, stage_key: c.stage_key, stage_title: c.stage_title }))}
             />
           </section>
 
@@ -283,20 +289,20 @@ export default async function DashboardPage() {
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
               <div>
-                <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{portfolio ? "✓" : "—"}</p>
-                <p className="text-[14.5px] font-semibold mb-1">{portfolio ? "Your portfolio is published." : "You don't have a portfolio yet."}</p>
+                <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{portfolioRow ? "✓" : "—"}</p>
+                <p className="text-[14.5px] font-semibold mb-1">{portfolioRow ? "Your portfolio is published." : "You don't have a portfolio yet."}</p>
                 <p className="text-[12.5px] text-ink-500">
-                  {portfolio
-                    ? `Live at /portfolio/${portfolio.slug} — share the link with every application.`
+                  {portfolioRow
+                    ? `Live at /portfolio/${portfolioRow.slug} — share the link with every application.`
                     : "Create a shareable page with your skills and sample work."}
                 </p>
               </div>
               <div className="flex flex-col gap-2.5 sm:flex-row">
                 <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                  {portfolio ? "EDIT PORTFOLIO →" : "CREATE PORTFOLIO →"}
+                  {portfolioRow ? "EDIT PORTFOLIO →" : "CREATE PORTFOLIO →"}
                 </Link>
-                {portfolio && (
-                  <Link href={`/portfolio/${portfolio.slug}`} target="_blank" className="btn-secondary !py-[10px] !px-[16px] !text-[12px] text-center">
+                {portfolioRow && (
+                  <Link href={`/portfolio/${portfolioRow.slug}`} target="_blank" className="btn-secondary !py-[10px] !px-[16px] !text-[12px] text-center">
                     VIEW PREVIEW ↗
                   </Link>
                 )}
@@ -401,7 +407,7 @@ export default async function DashboardPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
               <div className="panel p-7">
-                <AccountSettings name={user.name || user.email} email={user.email} updatesOptIn={userRow?.updates_opt_in === 1} />
+                <AccountSettings name={user.name || user.email} email={user.email} updatesOptIn={userRowTyped?.updates_opt_in === 1} />
               </div>
               <div className="flex flex-col gap-6">
                 <div className="panel p-7">
