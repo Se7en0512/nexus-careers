@@ -16,10 +16,6 @@ export default function DonatePage() {
       .catch(() => {});
   }, []);
 
-  const gcashQrUrl = gcashNumber
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(gcashNumber)}&bgcolor=ffffff&color=000000`
-    : "";
-
   return (
     <div className="max-w-xl mx-auto px-4 py-16 flex flex-col items-center gap-8 text-center">
       <h1 className="font-serif text-[32px] font-medium">Support Thrive</h1>
@@ -35,11 +31,11 @@ export default function DonatePage() {
           <div className="flex-1 panel p-6 flex flex-col items-center gap-3">
             <p className="font-mono text-[11.5px] uppercase tracking-[0.1em] text-gold-400">GCash</p>
             <img
-              src={gcashQrUrl}
+              src="/gcash-qr.jpg"
               alt="GCash QR Code"
               width={180}
               height={180}
-              className="rounded-lg bg-white p-2"
+              className="rounded-lg"
             />
             <p className="text-ink-500 text-[12px]">Scan with GCash app</p>
           </div>

@@ -24,7 +24,7 @@ export default function MarqueeBar({ text }: { text: string }) {
   if (!text) return null;
 
   return (
-    <div className="w-full bg-gold-400 text-navy-950 overflow-hidden" style={{ height: 32 }}>
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-gold-400 text-navy-950 overflow-hidden" style={{ height: 32 }}>
       <div className="h-full flex items-center">
         <div ref={innerRef} className="whitespace-nowrap font-mono text-[12px] tracking-wide flex">
           <span className="px-8">{text}</span>

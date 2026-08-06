@@ -9,10 +9,6 @@ export default function DonateModal({
   gcashNumber: string;
   onClose: () => void;
 }) {
-  const gcashQrUrl = gcashNumber
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(gcashNumber)}&bgcolor=ffffff&color=000000`
-    : "";
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
@@ -33,11 +29,11 @@ export default function DonateModal({
             <div className="flex-1 panel p-4 flex flex-col items-center gap-3">
               <p className="font-mono text-[11px] uppercase tracking-wider text-gold-400">GCash</p>
               <img
-                src={gcashQrUrl}
+                src="/gcash-qr.jpg"
                 alt="GCash QR Code"
                 width={160}
                 height={160}
-                className="rounded-lg bg-white p-2"
+                className="rounded-lg"
               />
               <p className="text-ink-500 text-[11px] text-center">Scan with GCash app</p>
             </div>

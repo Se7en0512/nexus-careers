@@ -16,7 +16,7 @@ export default function DonateButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-gold-400 hover:bg-gold-300 text-navy-950 font-mono text-[13px] font-bold px-5 py-3 rounded-full shadow-lg transition-all hover:scale-105"
+        className="fixed bottom-10 right-6 z-50 bg-gold-400 hover:bg-gold-300 text-navy-950 font-mono text-[13px] font-bold px-5 py-3 rounded-full shadow-lg transition-all hover:scale-105"
         title="Support Thrive"
       >
         ☕ Donate

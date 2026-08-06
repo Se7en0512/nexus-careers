@@ -75,7 +75,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         <MarqueeBar text={config.marquee_text || ""} />
         <Nav />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-10">{children}</main>
         <Footer />
         <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} gcashNumber={config.gcash_number || ""} />
       </body>
