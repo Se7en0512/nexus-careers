@@ -5,6 +5,7 @@ import { hashPassword, createSession } from "@/lib/auth";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { verifyCaptcha } from "@/lib/captcha";
 import { sendVerificationEmail } from "@/lib/email";
+import { EMAIL_VERIFICATION_ENABLED } from "@/lib/feature-flags";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
@@ -52,21 +53,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "An account already exists for this email. Please sign in." }, { status: 409 });
   }
 
+  // TEMPORARILY DISABLED — auto-verify on signup
+  // Re-enable once a verified email domain is configured on Resend.
+  const autoVerify = EMAIL_VERIFICATION_ENABLED ? 0 : 1;
+
   const result = await db
-    .prepare("INSERT INTO users (email, password_hash, name, updates_opt_in) VALUES (?, ?, ?, ?)")
-    .run(email, hashPassword(password), name, updatesOptIn);
+    .prepare("INSERT INTO users (email, password_hash, name, updates_opt_in, email_verified) VALUES (?, ?, ?, ?, ?)")
+    .run(email, hashPassword(password), name, updatesOptIn, autoVerify);
   const userId = Number(result.lastInsertRowid);
   await createSession(userId);
 
-  // Send verification email
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
-  await db.prepare("INSERT INTO email_verifications (token, user_id, expires_at) VALUES (?, ?, ?)").run(token, userId, expiresAt);
+  // TEMPORARILY DISABLED — skip verification email
+  // Re-enable once a verified email domain is configured on Resend.
+  if (EMAIL_VERIFICATION_ENABLED) {
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    await db.prepare("INSERT INTO email_verifications (token, user_id, expires_at) VALUES (?, ?, ?)").run(token, userId, expiresAt);
 
-  const appUrl = process.env.APP_URL || (process.env.NODE_ENV === "production" ? null : "http://localhost:3000");
-  let emailSent = false;
-  if (appUrl) {
-    emailSent = await sendVerificationEmail(email, token, appUrl);
+    const appUrl = process.env.APP_URL || (process.env.NODE_ENV === "production" ? null : "http://localhost:3000");
+    if (appUrl) {
+      await sendVerificationEmail(email, token, appUrl);
+    }
   }
 
   try {
@@ -82,12 +89,5 @@ export async function POST(req: Request) {
     // non-critical
   }
 
-  if (!emailSent && appUrl) {
-    return NextResponse.json({
-      ok: true,
-      warning: "Account created but verification email could not be sent. You can resend it from Settings.",
-    });
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, verified: !!autoVerify });
 }

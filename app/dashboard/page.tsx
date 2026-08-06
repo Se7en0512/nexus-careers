@@ -117,11 +117,12 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* TEMPORARILY DISABLED — Re-enable once a verified email domain is configured on Resend.
       {user.email_verified === 0 && (
         <div className="wrap" style={{ marginTop: 16 }}>
           <ResendVerification />
         </div>
-      )}
+      )} */}
 
       <div className="wrap py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 items-start">
         {/* SECTION NAV */}

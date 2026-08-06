@@ -17,6 +17,7 @@
 
 import { db } from "./db";
 import { ROADMAP } from "@/data/roadmap";
+import { EMAIL_VERIFICATION_ENABLED } from "./feature-flags";
 
 export interface ProfileCheckItem {
   id: string;
@@ -116,7 +117,9 @@ async function buildChecklist(userId: number): Promise<ProfileCheckItem[]> {
   }
 
   const hasName = !!(userRow?.name && userRow.name.trim().length > 0);
-  const hasEmail = !!(userRow?.email_verified);
+  // TEMPORARILY DISABLED — treat email as verified
+  // Re-enable once a verified email domain is configured on Resend.
+  const hasEmail = EMAIL_VERIFICATION_ENABLED ? !!(userRow?.email_verified) : true;
 
   const items: ProfileCheckItem[] = [
     {
