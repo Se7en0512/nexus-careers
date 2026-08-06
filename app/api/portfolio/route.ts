@@ -5,8 +5,8 @@ import { recordDailyActivity, refreshHireReadyBadge } from "@/lib/gamification";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { logActivity } from "@/lib/activity";
 
-function slugify(name: string): string {
-  const base = name
+function slugify(input: string): string {
+  const base = input
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -16,10 +16,12 @@ function slugify(name: string): string {
   return base || "va";
 }
 
-async function uniqueSlug(base: string): Promise<string> {
+async function uniqueSlug(base: string, excludeId?: number): Promise<string> {
   let slug = base;
   let n = 2;
-  while (await db.prepare("SELECT 1 FROM portfolios WHERE slug = ?").get(slug)) {
+  for (;;) {
+    const existing = (await db.prepare("SELECT id FROM portfolios WHERE slug = ?").get(slug)) as { id: number } | undefined;
+    if (!existing || (excludeId && existing.id === excludeId)) break;
     slug = `${base}-${n}`;
     n++;
   }
@@ -53,6 +55,7 @@ export async function POST(req: Request) {
 
   const name = String(data.name || "").trim().slice(0, 60) || user.name || user.email;
   const bio = String(data.bio || "").trim().slice(0, 1000);
+  const tagline = String(data.tagline || "").trim().slice(0, 120);
   const skills = (Array.isArray(data.skills) ? data.skills : []).slice(0, 15).map((s: unknown) =>
     String(s).trim().slice(0, 40)
   ).filter(Boolean);
@@ -65,6 +68,37 @@ export async function POST(req: Request) {
     })
     .filter((l: { url: string }) => l.url);
 
+  // Projects (featured work samples)
+  const projects = (Array.isArray(data.projects) ? data.projects : [])
+    .slice(0, 6)
+    .map((p: unknown) => {
+      const o = (p ?? {}) as { title?: string; description?: string; role?: string; tools?: string; image?: string; liveUrl?: string; repoUrl?: string };
+      return {
+        title: String(o.title || "").trim().slice(0, 100),
+        description: String(o.description || "").trim().slice(0, 500),
+        role: String(o.role || "").trim().slice(0, 100),
+        tools: String(o.tools || "").trim().slice(0, 200),
+        image: String(o.image || "").trim().slice(0, 300),
+        liveUrl: String(o.liveUrl || "").trim().slice(0, 300),
+        repoUrl: String(o.repoUrl || "").trim().slice(0, 300),
+      };
+    })
+    .filter((p: { title: string }) => p.title);
+
+  // Theme
+  const validThemes = ["minimal", "modern", "creative", "professional"];
+  const theme = validThemes.includes(data.theme) ? data.theme : "minimal";
+
+  // Trust fields
+  const location = String(data.location || "").trim().slice(0, 100);
+  const availability = String(data.availability || "").trim().slice(0, 50);
+  const languages = (Array.isArray(data.languages) ? data.languages : []).slice(0, 5).map((l: unknown) => String(l).trim().slice(0, 30)).filter(Boolean);
+  const timezoneInfo = String(data.timezone_info || "").trim().slice(0, 50);
+  const responseTime = String(data.response_time || "").trim().slice(0, 50);
+
+  // Custom slug
+  const customSlugRaw = String(data.custom_slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
+
   if (links.some((l: { url: string }) => !l.url.startsWith("http"))) {
     return NextResponse.json({ error: "Every link must start with http" }, { status: 400 });
   }
@@ -75,14 +109,23 @@ export async function POST(req: Request) {
 
   let slug = existing?.slug;
   if (!slug) {
-    slug = await uniqueSlug(slugify(name));
+    // New portfolio
+    const baseSlug = customSlugRaw || slugify(name);
+    slug = await uniqueSlug(baseSlug);
     await db.prepare(
-      "INSERT INTO portfolios (user_id, slug, name, bio, skills, experience, links) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(user.id, slug, name, bio, JSON.stringify(skills), experience, JSON.stringify(links));
+      `INSERT INTO portfolios (user_id, slug, name, bio, tagline, skills, experience, links, projects, theme, custom_slug, location, availability, languages, timezone_info, response_time)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(user.id, slug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime);
   } else {
+    // Update existing
+    let finalSlug = slug!;
+    if (customSlugRaw && customSlugRaw !== existing!.slug) {
+      finalSlug = await uniqueSlug(customSlugRaw, existing!.id);
+    }
     await db.prepare(
-      "UPDATE portfolios SET name = ?, bio = ?, skills = ?, experience = ?, links = ?, updated_at = datetime('now') WHERE user_id = ?"
-    ).run(name, bio, JSON.stringify(skills), experience, JSON.stringify(links), user.id);
+      `UPDATE portfolios SET slug = ?, name = ?, bio = ?, tagline = ?, skills = ?, experience = ?, links = ?, projects = ?, theme = ?, custom_slug = ?, location = ?, availability = ?, languages = ?, timezone_info = ?, response_time = ?, updated_at = datetime('now') WHERE user_id = ?`
+    ).run(finalSlug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, user.id);
+    slug = finalSlug;
   }
 
   await recordDailyActivity(user.id);

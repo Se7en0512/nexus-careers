@@ -461,6 +461,29 @@ async function init() {
   );
 
   CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS portfolio_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+    visitor_id TEXT NOT NULL DEFAULT '',
+    path TEXT NOT NULL DEFAULT '',
+    referrer TEXT NOT NULL DEFAULT '',
+    user_agent TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_portfolio_views_port ON portfolio_views(portfolio_id, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS portfolio_link_clicks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+    link_label TEXT NOT NULL DEFAULT '',
+    link_url TEXT NOT NULL DEFAULT '',
+    visitor_id TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_portfolio_clicks_port ON portfolio_link_clicks(portfolio_id, created_at DESC);
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:
@@ -525,6 +548,18 @@ async function migrate() {
     );
     CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id, created_at DESC);
   `);
+
+  // Portfolio v2 columns
+  await addColumn("portfolios", "projects", "projects TEXT NOT NULL DEFAULT '[]'");
+  await addColumn("portfolios", "theme", "theme TEXT NOT NULL DEFAULT 'minimal'");
+  await addColumn("portfolios", "custom_slug", "custom_slug TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "tagline", "tagline TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "location", "location TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "availability", "availability TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "languages", "languages TEXT NOT NULL DEFAULT '[]'");
+  await addColumn("portfolios", "timezone_info", "timezone_info TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "response_time", "response_time TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "portfolio_views_count", "portfolio_views_count INTEGER NOT NULL DEFAULT 0");
 }
 
 /* ============ SEEDS ============ */
