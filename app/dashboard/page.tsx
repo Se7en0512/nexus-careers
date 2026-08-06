@@ -6,16 +6,23 @@ import { db } from "@/lib/db";
 import { ROADMAP, stageFromKey } from "@/data/roadmap";
 import { PLAN_30 } from "@/data/plan30";
 import { getStreak, hasBadge, refreshHireReadyBadge, roadmapCompletion, getCheckinStreak, hasCheckedInThisWeek } from "@/lib/gamification";
+import { getGreeting, getCoachMessage, getInsights, getMilestoneForecast, getSmartProgress, getStepsToHireReady, isStuck, type UserProfile } from "@/lib/personalization";
+import { getNextBestAction, getQuickActions } from "@/lib/recommendations";
 import WeeklyCheckin from "@/components/WeeklyCheckin";
 import Checklist from "@/components/Checklist";
 import LogoutButton from "@/components/LogoutButton";
 import ScoreRing from "@/components/ScoreRing";
 import CertificateSection from "@/components/CertificateSection";
 import AccountSettings from "@/components/AccountSettings";
-import ResendVerification from "@/components/ResendVerification";
 import ProfileStrengthCard from "@/components/ProfileStrengthCard";
 import DailyMotivation from "@/components/DailyMotivation";
 import ActivityTimeline from "@/components/ActivityTimeline";
+import NextBestAction from "@/components/NextBestAction";
+import PersonalizedInsights from "@/components/PersonalizedInsights";
+import MilestoneForecast from "@/components/MilestoneForecast";
+import MotivationalCoach from "@/components/MotivationalCoach";
+import AdaptiveQuickActions from "@/components/AdaptiveQuickActions";
+import SmartProgressSummary from "@/components/SmartProgressSummary";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -59,7 +66,7 @@ export default async function DashboardPage() {
     db.prepare("SELECT id, stage_key, stage_title, date_issued FROM certificates WHERE user_id = ? ORDER BY date_issued").all(user.id),
     db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id),
     getStreak(user.id),
-    db.prepare("SELECT experience_level, main_goal, interests FROM user_onboarding WHERE user_id = ?").get(user.id),
+    db.prepare("SELECT experience_level, main_goal, weekly_hours, interests FROM user_onboarding WHERE user_id = ?").get(user.id),
   ]);
 
   let checks: Record<string, number[]> = {};
@@ -89,40 +96,53 @@ export default async function DashboardPage() {
     return items ? Math.round((done / items) * 100) : 0;
   };
 
-  const onboardingRow = onboarding as { experience_level?: string; main_goal?: string; interests?: string } | undefined;
+  const onboardingRow = onboarding as { experience_level?: string; main_goal?: string; weekly_hours?: string; interests?: string } | undefined;
   const firstName = (user.name || user.email).split(" ")[0];
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const isNewUser = !onboardingRow?.experience_level;
   const totalDone = ROADMAP.reduce((acc, s) => acc + (checks[s.key]?.length || 0), 0);
   const totalItems = ROADMAP.reduce((acc, s) => acc + s.items.length, 0);
   const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
 
-  const progressMessage =
-    totalDone === 0
-      ? "Ready to start your VA journey?"
-      : overallPct < 25
-        ? "You're off to a great start — keep going!"
-        : overallPct < 50
-          ? "Great progress — you're building real momentum."
-          : overallPct < 75
-            ? "You're making solid progress — keep it up!"
-            : overallPct < 100
-              ? "Almost there — finish strong!"
-              : "You've completed the roadmap — incredible work!";
-
   const roadmap = await roadmapCompletion(user.id);
   await refreshHireReadyBadge(user.id);
   const hireReady = await hasBadge(user.id, "hire_ready");
 
-  const nextAction =
-    nextDay
-      ? { label: `Continue Day ${nextDay.day} of the 30-Day Plan`, href: "/30-day-plan" }
-      : !roadmap.complete
-        ? { label: `Continue the ${currentStage?.title || "roadmap"} stage`, href: `/get-started#${currentStageKey}` }
-        : !portfolioRow
-          ? { label: "Create a Portfolio", href: "/portfolio-builder" }
-          : { label: "See Job Alerts", href: "/jobs" };
+  // Build user profile for personalization engine
+  const interests = (() => {
+    try { return JSON.parse(onboardingRow?.interests || "[]"); } catch { return []; }
+  })() as string[];
+
+  const userProfile: UserProfile = {
+    name: user.name || user.email,
+    experienceLevel: onboardingRow?.experience_level || "",
+    mainGoal: onboardingRow?.main_goal || "",
+    weeklyHours: onboardingRow?.weekly_hours || "",
+    interests,
+    overallPct,
+    vaScore: vaScoreRow?.va_score ?? 0,
+    profileStrength: 0, // will be set below
+    hasPortfolio: !!portfolioRow,
+    hasReadinessQuiz: !!readiness,
+    hasNicheQuiz: !!niche,
+    certificatesCount: certRows.length,
+    applicationsCount: appsCount,
+    currentStreak: streak.current_streak,
+    longestStreak: streak.longest_streak,
+    lastActivityDate: streak.last_activity_date,
+    hireReady,
+    currentStage: currentStage?.title || "Getting Started",
+  };
+
+  // Get personalized data
+  const { greeting, subtext } = getGreeting(firstName, userProfile);
+  const nextBestAction = getNextBestAction(userProfile);
+  const coachMessage = getCoachMessage(userProfile);
+  const insights = getInsights(userProfile);
+  const milestone = getMilestoneForecast(userProfile);
+  const progressItems = getSmartProgress(userProfile);
+  const stepsToHireReady = getStepsToHireReady(userProfile);
+  const quickActions = getQuickActions(userProfile);
+  const stuck = isStuck(userProfile);
 
   return (
     <>
@@ -131,11 +151,16 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
               <div className="eyebrow">// Dashboard</div>
-              <h1 className="mb-0">{greeting}, {firstName} 👋</h1>
-              <p className="mt-4">{progressMessage}</p>
+              <h1 className="mb-0">{greeting}</h1>
+              <p className="mt-4">{subtext}</p>
               {isNewUser && (
                 <p className="mt-2 text-[13.5px] text-ink-500">
                   Start by completing the Welcome Wizard to personalize your experience.
+                </p>
+              )}
+              {stuck && (
+                <p className="mt-2 text-[13.5px] text-amber-400">
+                  It&apos;s okay to take breaks — we&apos;re here when you&apos;re ready.
                 </p>
               )}
             </div>
@@ -174,6 +199,8 @@ export default async function DashboardPage() {
               <div className="eyebrow">01 · Overview</div>
               <h2 className="!text-[24px]">Your progress right now</h2>
             </div>
+
+            {/* Stats grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-6">
               <div className="bg-navy-900 p-6">
                 <p className="text-[26px] leading-none mb-2">🔥</p>
@@ -193,6 +220,7 @@ export default async function DashboardPage() {
                 <p className="text-[12.5px] text-ink-500 mt-2">Hire-Ready Badge</p>
               </div>
             </div>
+
             {/* 4-stage progress bar */}
             <div className="flex flex-col gap-1.5 mb-6">
               <div className="h-[6px] bg-navy-800 rounded-full overflow-hidden">
@@ -206,18 +234,41 @@ export default async function DashboardPage() {
                 ))}
               </div>
             </div>
-            <div className="border border-navy-700 bg-navy-900 rounded-[3px] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-500 mb-1">Next up</p>
-                <p className="text-[15px] font-semibold">{nextAction.label}</p>
-              </div>
-              <Link href={nextAction.href} className="btn-primary !py-[10px] !px-[16px] !text-[12px] whitespace-nowrap self-start">
-                CONTINUE →
-              </Link>
+
+            {/* Next Best Action — THE most important card */}
+            <div className="mb-6">
+              <NextBestAction rec={nextBestAction} />
             </div>
-            <div className="mt-6">
+
+            {/* Personalized sections in 2-column grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Motivational Coach */}
+              <MotivationalCoach message={coachMessage} />
+
+              {/* Milestone Forecast */}
+              <MilestoneForecast milestone={milestone} />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mb-6">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-500 mb-3">Quick Actions</p>
+              <AdaptiveQuickActions actions={quickActions} />
+            </div>
+
+            {/* Insights */}
+            {insights.length > 0 && (
+              <div className="mb-6">
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-500 mb-3">Insights</p>
+                <PersonalizedInsights insights={insights} />
+              </div>
+            )}
+
+            {/* Smart Progress Summary + Profile Strength */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SmartProgressSummary items={progressItems} stepsToHireReady={stepsToHireReady} />
               <ProfileStrengthCard />
             </div>
+
             <div className="mt-6">
               <WeeklyCheckin initialApps={appsCount} streak={checkinStreak} checkedIn={weeklyCheckedIn} />
             </div>
