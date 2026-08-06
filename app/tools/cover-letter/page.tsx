@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CoverLetterPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/login?next=/tools/cover-letter");
+  if (!user) redirect("/signup?next=/tools/cover-letter");
 
   return (
     <>

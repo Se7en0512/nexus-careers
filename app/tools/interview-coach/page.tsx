@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InterviewCoachPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/login?next=/tools/interview-coach");
+  if (!user) redirect("/signup?next=/tools/interview-coach");
 
   return (
     <>

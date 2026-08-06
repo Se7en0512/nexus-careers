@@ -170,8 +170,8 @@ export default async function DashboardPage() {
       return ["overview", "roadmap", "portfolio", "settings"].includes(s.id);
     }
     if (userLevel === "intermediate") {
-      // Intermediate: hide activity, results, certificates, tracker (show later)
-      return !["activity", "results", "certificates", "tracker"].includes(s.id);
+      // Intermediate: hide activity, results, certificates (show later)
+      return !["activity", "results", "certificates"].includes(s.id);
     }
     // Advanced: show everything
     return true;
@@ -378,6 +378,11 @@ export default async function DashboardPage() {
                     title: "Job Alerts",
                     desc: "New WFH jobs for Filipino VAs, refreshed regularly.",
                     href: "/jobs",
+                  },
+                  {
+                    title: "Resume Builder",
+                    desc: "A clean, client-ready resume in minutes — live preview, export as PDF.",
+                    href: "/tools/resume-builder",
                   },
                 ].map((t) => (
                   <div key={t.title} className="panel p-7 hover-lift">

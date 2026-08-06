@@ -41,13 +41,6 @@ const INTEREST_OPTIONS = [
 
 const DRAFT_KEY = "thrive_onboarding_draft";
 
-const LOADING_STEPS = [
-  "Analyzing your preferences...",
-  "Building your personalized roadmap...",
-  "Setting up your dashboard...",
-  "Almost ready...",
-];
-
 export default function WelcomeWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -57,8 +50,6 @@ export default function WelcomeWizard() {
   const [interests, setInterests] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [skipping, setSkipping] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(0);
-  const [completed, setCompleted] = useState(false);
 
   // Adaptive: experienced users skip the interests step (step 4)
   const isExperienced = experience === "freelancing" || experience === "some";
@@ -105,7 +96,6 @@ export default function WelcomeWizard() {
 
   const complete = async () => {
     setSaving(true);
-    setCompleted(true);
     try {
       await fetch("/api/onboarding", {
         method: "POST",
@@ -119,11 +109,6 @@ export default function WelcomeWizard() {
       });
     } catch {
       // proceed anyway
-    }
-    // Animate loading steps
-    for (let i = 0; i < LOADING_STEPS.length; i++) {
-      setLoadingStep(i);
-      await new Promise((r) => setTimeout(r, 600));
     }
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
     router.push("/dashboard");
@@ -159,43 +144,6 @@ export default function WelcomeWizard() {
   };
 
   const progress = step === lastStep ? 100 : Math.round((step / totalSteps) * 100);
-
-  // Loading animation on completion
-  if (completed) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-[560px] text-center">
-          <div className="text-[56px] mb-6 animate-bounce">🚀</div>
-          <h1 className="font-serif text-[32px] font-medium mb-3">
-            Building your experience...
-          </h1>
-          <div className="mt-8 space-y-4">
-            {LOADING_STEPS.map((text, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-3 text-[14.5px] transition-all duration-300 ${
-                  i <= loadingStep ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                }`}
-              >
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
-                  i < loadingStep ? "bg-gold-400 text-navy-950" : i === loadingStep ? "bg-gold-400/20 text-gold-400 animate-pulse" : "bg-navy-800 text-ink-500"
-                }`}>
-                  {i < loadingStep ? "✓" : i + 1}
-                </span>
-                <span className={i <= loadingStep ? "text-ink-50" : "text-ink-500"}>{text}</span>
-              </div>
-            ))}
-          </div>
-          <div className="h-[3px] bg-navy-800 rounded-full overflow-hidden mt-8">
-            <div
-              className="h-full bg-gold-400 transition-all duration-500"
-              style={{ width: `${Math.min(100, (loadingStep + 1) * 25)}%` }}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -279,9 +227,7 @@ export default function WelcomeWizard() {
                 ← Back
               </button>
               <button
-                onClick={() => {
-                  if (isExperienced) setStep(2); else setStep(2);
-                }}
+                onClick={() => setStep(2)}
                 disabled={!canNext()}
                 className="btn-primary flex-1 disabled:opacity-40"
               >
