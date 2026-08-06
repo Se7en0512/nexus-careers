@@ -148,9 +148,43 @@ export default async function DashboardPage() {
   const stepsToHireReady = getStepsToHireReady(userProfile);
   const quickActions = getQuickActions(userProfile);
 
+  // Determine user level for progressive dashboard
+  const hasOnboarding = !!onboardingRow?.experience_level;
+  const hasQuizzes = !!readiness || !!niche;
+  const hasStartedRoadmap = totalDone > 0;
+
+  // NEW: no onboarding, no quizzes, no roadmap progress
+  // INTERMEDIATE: has onboarding but <75% roadmap
+  // ADVANCED: >=75% roadmap
+  const userLevel: "new" | "intermediate" | "advanced" = !hasOnboarding
+    ? "new"
+    : overallPct >= 75
+      ? "advanced"
+      : "intermediate";
+
+  // Filter sections by user level
+  const visibleSections = SECTIONS.filter((s) => {
+    if (userLevel === "new") {
+      // New users: only overview, roadmap, portfolio, settings
+      return ["overview", "roadmap", "portfolio", "settings"].includes(s.id);
+    }
+    if (userLevel === "intermediate") {
+      // Intermediate: hide activity, results, certificates, tracker (show later)
+      return !["activity", "results", "certificates", "tracker"].includes(s.id);
+    }
+    // Advanced: show everything
+    return true;
+  });
+
+  // Re-number visible sections for nav
+  const numberedSections = visibleSections.map((s, i) => ({
+    ...s,
+    num: String(i + 1).padStart(2, "0"),
+  }));
+
   return (
     <>
-      {/* NEW HERO — Greeting + Today's Focus + Stats */}
+      {/* HERO — Greeting + Today's Focus + Stats */}
       <TodayFocus
         greeting={greeting}
         subtext={subtext}
@@ -162,17 +196,10 @@ export default async function DashboardPage() {
         hireReady={hireReady}
       />
 
-      {/* TEMPORARILY DISABLED — Re-enable once a verified email domain is configured on Resend.
-      {user.email_verified === 0 && (
-        <div className="wrap" style={{ marginTop: 16 }}>
-          <ResendVerification />
-        </div>
-      )} */}
-
       <div className="wrap py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 items-start">
-        {/* SECTION NAV */}
+        {/* SECTION NAV — filtered and re-numbered */}
         <nav className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 -mx-8 px-8 lg:mx-0 lg:px-0">
-          {SECTIONS.map((s) => (
+          {numberedSections.map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
@@ -186,12 +213,80 @@ export default async function DashboardPage() {
 
         {/* MAIN CONTENT */}
         <div className="flex flex-col gap-14 min-w-0">
-          {/* 01 OVERVIEW — simplified, no duplicate hero */}
+
+          {/* ═══════════════════════════════════════════════════════
+              01 OVERVIEW — always visible
+          ═══════════════════════════════════════════════════════ */}
           <section id="overview" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">01 · Overview</div>
               <h2 className="!text-[24px]">Your progress right now</h2>
             </div>
+
+            {/* NEW USER: Onboarding checklist */}
+            {userLevel === "new" && (
+              <div className="panel p-7 mb-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="text-[22px]">🚀</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-gold-400">
+                    Get Started in 3 Steps
+                  </span>
+                </div>
+                <p className="text-[14.5px] text-ink-500 mb-6">
+                  Complete these to unlock your personalized dashboard.
+                </p>
+                <div className="flex flex-col gap-4">
+                  {[
+                    {
+                      done: !!readiness,
+                      title: "Take the Readiness Quiz",
+                      desc: "2 minutes — find out where to start.",
+                      href: "/tools/readiness",
+                    },
+                    {
+                      done: !!onboardingRow?.main_goal,
+                      title: "Set Your Career Goal",
+                      desc: "Tell us what you want — we'll personalize everything.",
+                      href: "/get-started",
+                    },
+                    {
+                      done: !!portfolioRow,
+                      title: "Create Your Portfolio",
+                      desc: "5 minutes — build a page clients can view.",
+                      href: "/portfolio-builder",
+                    },
+                  ].map((step, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-start gap-4 p-4 rounded-[3px] border transition-colors ${
+                        step.done
+                          ? "border-emerald-500/30 bg-emerald-500/5"
+                          : "border-navy-700 bg-navy-800/40"
+                      }`}
+                    >
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-mono text-[13px] font-semibold ${
+                        step.done
+                          ? "bg-emerald-500 text-navy-950"
+                          : "bg-navy-700 text-ink-500"
+                      }`}>
+                        {step.done ? "✓" : i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[14.5px] font-semibold ${step.done ? "text-emerald-400" : ""}`}>
+                          {step.title}
+                        </p>
+                        <p className="text-[12.5px] text-ink-500 mt-0.5">{step.desc}</p>
+                      </div>
+                      {!step.done && (
+                        <Link href={step.href} className="flex-shrink-0 btn-primary !py-[8px] !px-[14px] !text-[11px]">
+                          START →
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 4-stage progress bar */}
             <div className="flex flex-col gap-1.5 mb-6">
@@ -238,63 +333,77 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 02 READINESS INSIGHTS */}
-          <section id="readiness" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">02 · Readiness Insights</div>
-              <h2 className="!text-[24px]">How prepared are you?</h2>
-            </div>
-            <CareerReadinessInsights />
-          </section>
+          {/* ═══════════════════════════════════════════════════════
+              02 READINESS INSIGHTS — intermediate + advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel !== "new" && (
+            <section id="readiness" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">02 · Readiness Insights</div>
+                <h2 className="!text-[24px]">How prepared are you?</h2>
+              </div>
+              <CareerReadinessInsights />
+            </section>
+          )}
 
-          {/* 03 CAREER JOURNEY */}
-          <section id="journey" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">03 · Career Journey</div>
-              <h2 className="!text-[24px]">Your path to becoming a VA</h2>
-            </div>
-            <CareerJourneyMap
-              overallPct={overallPct}
-              hasPortfolio={!!portfolioRow}
-              hasReadinessQuiz={!!readiness}
-              hasNicheQuiz={!!niche}
-              certificatesCount={certRows.length}
-              applicationsCount={appsCount}
-              hireReady={hireReady}
-            />
-          </section>
-
-          {/* 04 WEEKLY PLAN */}
-          <section id="weekly-plan" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">04 · Weekly Plan</div>
-              <h2 className="!text-[24px]">Your personalized week</h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SmartWeeklyPlan
+          {/* ═══════════════════════════════════════════════════════
+              03 CAREER JOURNEY — intermediate + advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel !== "new" && (
+            <section id="journey" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">03 · Career Journey</div>
+                <h2 className="!text-[24px]">Your path to becoming a VA</h2>
+              </div>
+              <CareerJourneyMap
                 overallPct={overallPct}
                 hasPortfolio={!!portfolioRow}
                 hasReadinessQuiz={!!readiness}
-                mainGoal={onboardingRow?.main_goal || ""}
-                currentStage={currentStage?.title || "Getting Started"}
-                applicationsCount={appsCount}
+                hasNicheQuiz={!!niche}
                 certificatesCount={certRows.length}
-              />
-              <WeeklyAIReview
-                overallPct={overallPct}
-                hasPortfolio={!!portfolioRow}
-                hasReadinessQuiz={!!readiness}
-                mainGoal={onboardingRow?.main_goal || ""}
-                currentStage={currentStage?.title || "Getting Started"}
                 applicationsCount={appsCount}
-                certificatesCount={certRows.length}
-                currentStreak={streak.current_streak}
-                vaScore={vaScoreRow?.va_score ?? 0}
+                hireReady={hireReady}
               />
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* 05 DAILY MOTIVATION */}
+          {/* ═══════════════════════════════════════════════════════
+              04 WEEKLY PLAN — intermediate + advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel !== "new" && (
+            <section id="weekly-plan" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">04 · Weekly Plan</div>
+                <h2 className="!text-[24px]">Your personalized week</h2>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SmartWeeklyPlan
+                  overallPct={overallPct}
+                  hasPortfolio={!!portfolioRow}
+                  hasReadinessQuiz={!!readiness}
+                  mainGoal={onboardingRow?.main_goal || ""}
+                  currentStage={currentStage?.title || "Getting Started"}
+                  applicationsCount={appsCount}
+                  certificatesCount={certRows.length}
+                />
+                <WeeklyAIReview
+                  overallPct={overallPct}
+                  hasPortfolio={!!portfolioRow}
+                  hasReadinessQuiz={!!readiness}
+                  mainGoal={onboardingRow?.main_goal || ""}
+                  currentStage={currentStage?.title || "Getting Started"}
+                  applicationsCount={appsCount}
+                  certificatesCount={certRows.length}
+                  currentStreak={streak.current_streak}
+                  vaScore={vaScoreRow?.va_score ?? 0}
+                />
+              </div>
+            </section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              05 DAILY MOTIVATION — always visible
+          ═══════════════════════════════════════════════════════ */}
           <section id="motivation" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">05 · Daily Motivation</div>
@@ -303,18 +412,24 @@ export default async function DashboardPage() {
             <DailyMotivation />
           </section>
 
-          {/* 06 ACTIVITY */}
-          <section id="activity" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">06 · Activity</div>
-              <h2 className="!text-[24px]">Your recent activity</h2>
-            </div>
-            <div className="panel p-7">
-              <ActivityTimeline userId={user.id} />
-            </div>
-          </section>
+          {/* ═══════════════════════════════════════════════════════
+              06 ACTIVITY — advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel === "advanced" && (
+            <section id="activity" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">06 · Activity</div>
+                <h2 className="!text-[24px]">Your recent activity</h2>
+              </div>
+              <div className="panel p-7">
+                <ActivityTimeline userId={user.id} />
+              </div>
+            </section>
+          )}
 
-          {/* 07 ROADMAP PROGRESS */}
+          {/* ═══════════════════════════════════════════════════════
+              07 ROADMAP — always visible
+          ═══════════════════════════════════════════════════════ */}
           <section id="roadmap" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">07 · Roadmap Progress</div>
@@ -327,7 +442,7 @@ export default async function DashboardPage() {
                     <span className="font-mono text-[11px] text-gold-400">{s.num}</span>
                     {s.key === currentStageKey && (
                       <span className="font-mono text-[10px] text-navy-950 bg-gold-400 rounded-full px-2 py-0.5 uppercase tracking-wide">
-                        You're here
+                        You&apos;re here
                       </span>
                     )}
                   </div>
@@ -368,50 +483,60 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 08 MY RESULTS */}
-          <section id="results" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">08 · My Results</div>
-              <h2 className="!text-[24px]">Your saved quiz results</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="panel p-7">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <div>
-                    <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Readiness Check</p>
-                    {readiness && <p className="text-[13px] text-ink-500">taken on {readiness.created_at}</p>}
+          {/* ═══════════════════════════════════════════════════════
+              08 MY RESULTS — advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel === "advanced" && (
+            <section id="results" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">08 · My Results</div>
+                <h2 className="!text-[24px]">Your saved quiz results</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="panel p-7">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Readiness Check</p>
+                      {readiness && <p className="text-[13px] text-ink-500">taken on {readiness.created_at}</p>}
+                    </div>
+                    <ScoreRing score={vaScoreRow?.va_score ?? 0} size={64} />
                   </div>
-                  <ScoreRing score={vaScoreRow?.va_score ?? 0} size={64} />
+                  <p className="text-[15px] font-semibold mb-4">{readiness ? readiness.result : "No result saved yet."}</p>
+                  <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                    {readiness ? "RETAKE →" : "TAKE IT NOW →"}
+                  </Link>
                 </div>
-                <p className="text-[15px] font-semibold mb-4">{readiness ? readiness.result : "No result saved yet."}</p>
-                <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
-                  {readiness ? "RETAKE →" : "TAKE IT NOW →"}
-                </Link>
+                <div className="panel p-7">
+                  <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Niche Finder</p>
+                  <p className="text-[15px] font-semibold mt-4 mb-4">{niche ? niche.result : "No result saved yet."}</p>
+                  <p className="text-[12px] text-ink-500 mb-4">{niche ? `taken on ${niche.created_at}` : "Find out which niche fits you."}</p>
+                  <Link href="/tools/niche-finder" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                    {niche ? "RETAKE →" : "TAKE IT NOW →"}
+                  </Link>
+                </div>
               </div>
-              <div className="panel p-7">
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Niche Finder</p>
-                <p className="text-[15px] font-semibold mt-4 mb-4">{niche ? niche.result : "No result saved yet."}</p>
-                <p className="text-[12px] text-ink-500 mb-4">{niche ? `taken on ${niche.created_at}` : "Find out which niche fits you."}</p>
-                <Link href="/tools/niche-finder" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
-                  {niche ? "RETAKE →" : "TAKE IT NOW →"}
-                </Link>
+            </section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              09 CERTIFICATES — advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel === "advanced" && (
+            <section id="certificates" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">09 · My Certificates</div>
+                <h2 className="!text-[24px]">Completed stages and certificates</h2>
               </div>
-            </div>
-          </section>
+              <CertificateSection
+                stages={ROADMAP.map((s) => ({ key: s.key, title: s.title, complete: pct(s.key) === 100 }))}
+                earned={certRows.map((c) => ({ id: c.id, stage_key: c.stage_key, stage_title: c.stage_title }))}
+              />
+            </section>
+          )}
 
-          {/* 09 CERTIFICATES */}
-          <section id="certificates" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">09 · My Certificates</div>
-              <h2 className="!text-[24px]">Completed stages and certificates</h2>
-            </div>
-            <CertificateSection
-              stages={ROADMAP.map((s) => ({ key: s.key, title: s.title, complete: pct(s.key) === 100 }))}
-              earned={certRows.map((c) => ({ id: c.id, stage_key: c.stage_key, stage_title: c.stage_title }))}
-            />
-          </section>
-
-          {/* 10 PORTFOLIO */}
+          {/* ═══════════════════════════════════════════════════════
+              10 PORTFOLIO — always visible (important for all levels)
+          ═══════════════════════════════════════════════════════ */}
           <section id="portfolio" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">10 · Portfolio</div>
@@ -440,96 +565,106 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 11 JOB TRACKER */}
-          <section id="tracker" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">11 · Job Tracker</div>
-              <h2 className="!text-[24px]">Track your applications</h2>
-            </div>
-            <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-              <div>
-                <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{appsCount}</p>
-                <p className="text-[14.5px] font-semibold mb-1">Applications tracked</p>
-                <p className="text-[12.5px] text-ink-500">
-                  Keep track of where you applied, interview schedules, and follow-ups.
-                </p>
+          {/* ═══════════════════════════════════════════════════════
+              11 JOB TRACKER — advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel === "advanced" && (
+            <section id="tracker" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">11 · Job Tracker</div>
+                <h2 className="!text-[24px]">Track your applications</h2>
               </div>
-              <div className="flex flex-col gap-2.5 sm:flex-row">
-                <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                  OPEN JOB TRACKER →
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* 12 TOOLS */}
-          <section id="tools" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">12 · Tools</div>
-              <h2 className="!text-[24px]">Everything you need, free</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                {
-                  title: "AI VA Assistant",
-                  desc: "Ask anything about getting hired — rates, negotiation, interviews.",
-                  href: "/assistant",
-                },
-                {
-                  title: "AI Mock Interview",
-                  desc: "5 real questions for your niche, graded with feedback.",
-                  href: "/tools/mock-interview",
-                },
-                {
-                  title: "Interview Coach",
-                  desc: "Guide to the questions most often asked — and how to answer.",
-                  href: "/tools/interview-coach",
-                },
-                {
-                  title: "Cover Letter Builder",
-                  desc: "A letter with substance — not a generic template.",
-                  href: "/tools/cover-letter",
-                },
-                {
-                  title: "Pitch Calculator",
-                  desc: "Find the rate you need to hit your target.",
-                  href: "/tools/pitch-calculator",
-                },
-                {
-                  title: "Job Alerts",
-                  desc: "New WFH jobs for Filipino VAs, refreshed regularly.",
-                  href: "/jobs",
-                },
-              ].map((t) => (
-                <div key={t.title} className="panel p-7">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <h3 className="font-semibold text-[15.5px]">{t.title}</h3>
-                  </div>
-                  <p className="text-[13.5px] text-ink-500 mb-4">{t.desc}</p>
-                  <Link href={t.href} className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300">
-                    OPEN →
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="panel p-7 mt-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
                 <div>
-                  <h3 className="font-semibold text-[15.5px] mb-2">More tools & courses</h3>
-                  <p className="text-[13.5px] text-ink-500 max-w-[560px]">
-                    Invoice Generator, Contract Red-Flag Checker, Budget Calculator, Timezone
-                    Converter, Resume Builder, Contributions Calculator, and the full course
-                    library — all unlocked.
+                  <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{appsCount}</p>
+                  <p className="text-[14.5px] font-semibold mb-1">Applications tracked</p>
+                  <p className="text-[12.5px] text-ink-500">
+                    Keep track of where you applied, interview schedules, and follow-ups.
                   </p>
                 </div>
-                <Link href="/courses" className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300 border border-gold-400/50 rounded-full px-3.5 py-1.5">
-                  BROWSE THE LIBRARY →
-                </Link>
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
+                    OPEN JOB TRACKER →
+                  </Link>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* 13 ACCOUNT SETTINGS */}
+          {/* ═══════════════════════════════════════════════════════
+              12 TOOLS — intermediate + advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel !== "new" && (
+            <section id="tools" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">12 · Tools</div>
+                <h2 className="!text-[24px]">Everything you need, free</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "AI VA Assistant",
+                    desc: "Ask anything about getting hired — rates, negotiation, interviews.",
+                    href: "/assistant",
+                  },
+                  {
+                    title: "AI Mock Interview",
+                    desc: "5 real questions for your niche, graded with feedback.",
+                    href: "/tools/mock-interview",
+                  },
+                  {
+                    title: "Interview Coach",
+                    desc: "Guide to the questions most often asked — and how to answer.",
+                    href: "/tools/interview-coach",
+                  },
+                  {
+                    title: "Cover Letter Builder",
+                    desc: "A letter with substance — not a generic template.",
+                    href: "/tools/cover-letter",
+                  },
+                  {
+                    title: "Pitch Calculator",
+                    desc: "Find the rate you need to hit your target.",
+                    href: "/tools/pitch-calculator",
+                  },
+                  {
+                    title: "Job Alerts",
+                    desc: "New WFH jobs for Filipino VAs, refreshed regularly.",
+                    href: "/jobs",
+                  },
+                ].map((t) => (
+                  <div key={t.title} className="panel p-7">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <h3 className="font-semibold text-[15.5px]">{t.title}</h3>
+                    </div>
+                    <p className="text-[13.5px] text-ink-500 mb-4">{t.desc}</p>
+                    <Link href={t.href} className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300">
+                      OPEN →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              <div className="panel p-7 mt-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold text-[15.5px] mb-2">More tools & courses</h3>
+                    <p className="text-[13.5px] text-ink-500 max-w-[560px]">
+                      Invoice Generator, Contract Red-Flag Checker, Budget Calculator, Timezone
+                      Converter, Resume Builder, Contributions Calculator, and the full course
+                      library — all unlocked.
+                    </p>
+                  </div>
+                  <Link href="/courses" className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300 border border-gold-400/50 rounded-full px-3.5 py-1.5">
+                    BROWSE THE LIBRARY →
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              13 ACCOUNT SETTINGS — always visible
+          ═══════════════════════════════════════════════════════ */}
           <section id="settings" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">13 · Account Settings</div>
