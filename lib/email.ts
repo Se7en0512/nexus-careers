@@ -7,7 +7,6 @@ function getResend() {
 }
 
 function getFromAddress() {
-  // Use custom domain if configured, otherwise fall back to Resend sandbox
   const domain = process.env.RESEND_FROM_DOMAIN;
   if (domain) return `Thrive <noreply@${domain}>`;
   return "Thrive <onboarding@resend.dev>";
@@ -23,8 +22,22 @@ export async function sendVerificationEmail(email: string, token: string, appUrl
   const verifyLink = `${appUrl}/api/auth/verify?token=${token}`;
   const from = getFromAddress();
 
+  // DIAGNOSTIC LOGGING
+  console.log("[email-diag] ═══════════════════════════════════════");
+  console.log("[email-diag] RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+  console.log("[email-diag] RESEND_API_KEY length:", process.env.RESEND_API_KEY?.length);
+  console.log("[email-diag] RESEND_API_KEY prefix:", process.env.RESEND_API_KEY?.substring(0, 8) + "...");
+  console.log("[email-diag] RESEND_FROM_DOMAIN:", process.env.RESEND_FROM_DOMAIN || "(not set)");
+  console.log("[email-diag] APP_URL:", appUrl);
+  console.log("[email-diag] FROM address:", from);
+  console.log("[email-diag] TO address:", email);
+  console.log("[email-diag] TOKEN:", token);
+  console.log("[email-diag] VERIFY URL:", verifyLink);
+  console.log("[email-diag] NODE_ENV:", process.env.NODE_ENV);
+  console.log("[email-diag] ═══════════════════════════════════════");
+
   try {
-    const { data, error } = await resend.emails.send({
+    const response = await resend.emails.send({
       from,
       to: email,
       subject: "Verify your Thrive account",
@@ -47,15 +60,24 @@ export async function sendVerificationEmail(email: string, token: string, appUrl
       `,
     });
 
-    if (error) {
-      console.error("[email] Resend error:", JSON.stringify(error));
+    // DIAGNOSTIC: Log the FULL Resend response
+    console.log("[email-diag] ═══ RESEND RESPONSE ═══");
+    console.log("[email-diag] Response type:", typeof response);
+    console.log("[email-diag] Response keys:", Object.keys(response));
+    console.log("[email-diag] response.data:", JSON.stringify(response.data));
+    console.log("[email-diag] response.error:", JSON.stringify(response.error));
+    console.log("[email-diag] response.data?.id:", response.data?.id);
+    console.log("[email-diag] ═══ END RESEND RESPONSE ═══");
+
+    if (response.error) {
+      console.error("[email-diag] ❌ RESEND RETURNED ERROR:", JSON.stringify(response.error));
       return false;
     }
 
-    console.log("[email] Verification email sent to", email, "— id:", data?.id);
+    console.log("[email-diag] ✅ Resend returned success. Email ID:", response.data?.id);
     return true;
   } catch (e) {
-    console.error("[email] Exception sending verification email:", e);
+    console.error("[email-diag] ❌ EXCEPTION:", e);
     return false;
   }
 }

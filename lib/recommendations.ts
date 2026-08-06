@@ -1,8 +1,9 @@
 /**
- * Recommendation Engine
+ * Recommendation Engine V2
  *
- * Determines the next best action, goal-based content prioritization,
- * and adaptive quick actions based on the user's profile and progress.
+ * Uses all UserProfile fields including experience, weekly hours, interests,
+ * VA score, profile strength, streak, and last activity to generate
+ * personalized recommendations.
  */
 
 import type { UserProfile } from "./personalization";
@@ -42,6 +43,106 @@ const GOAL_PRIORITIES: Record<string, string[]> = {
 
 export function getNextBestAction(profile: UserProfile): Recommendation {
   const recs: Recommendation[] = [];
+
+  // Use all profile fields for smarter prioritization
+  const isBeginner = profile.overallPct < 25;
+  const isIntermediate = profile.overallPct >= 25 && profile.overallPct < 75;
+  const isAdvanced = profile.overallPct >= 75;
+  const hasHighScore = profile.vaScore >= 70;
+  const isStale = !profile.lastActivityDate
+    ? true
+    : (Date.now() - new Date(profile.lastActivityDate).getTime()) / 86400000 >= 7;
+
+  // ── Goal-specific top picks ──
+  if (profile.mainGoal === "first_client" && profile.hasReadinessQuiz && isIntermediate) {
+    recs.push({
+      id: "build-portfolio-goal",
+      title: "Build Your Client-Ready Portfolio",
+      description: "Show clients what you can do. Your portfolio is your #1 sales tool.",
+      why: "Your goal is your first client. A portfolio is the single biggest factor in whether a client replies to your application.",
+      estimatedMinutes: 15,
+      benefit: "Clients who see a portfolio are 3x more likely to respond",
+      href: "/portfolio-builder",
+      priority: 110,
+      icon: "💼",
+      category: "building",
+    });
+  }
+
+  if (profile.mainGoal === "learn_skills" && isBeginner) {
+    recs.push({
+      id: "start-learning-path",
+      title: "Start Your Learning Path",
+      description: "The roadmap is your step-by-step guide to becoming a skilled VA.",
+      why: "Your goal is to learn skills. The roadmap covers exactly what clients are looking for.",
+      estimatedMinutes: 15,
+      benefit: "Build the skills clients actually pay for",
+      href: `/get-started#${profile.currentStage}`,
+      priority: 110,
+      icon: "🗺️",
+      category: "getting-started",
+    });
+  }
+
+  if (profile.mainGoal === "interviews" && profile.hasPortfolio) {
+    recs.push({
+      id: "mock-interview-goal",
+      title: "Practice a Mock Interview",
+      description: "Simulate a real client call with AI-powered feedback.",
+      why: "Your goal is interview prep. You already have a portfolio — now practice selling yourself.",
+      estimatedMinutes: 10,
+      benefit: "Walk into interviews with confidence",
+      href: "/tools/mock-interview",
+      priority: 110,
+      icon: "🎤",
+      category: "applying",
+    });
+  }
+
+  if (profile.mainGoal === "resume" && isBeginner) {
+    recs.push({
+      id: "build-resume-goal",
+      title: "Build Your VA Resume",
+      description: "Create a professional resume with our builder.",
+      why: "Your goal is a strong resume. Start now so you're ready when the right job appears.",
+      estimatedMinutes: 10,
+      benefit: "Apply to jobs with a polished resume",
+      href: "/tools/resume-builder",
+      priority: 110,
+      icon: "📄",
+      category: "building",
+    });
+  }
+
+  if (profile.mainGoal === "earn_more" && hasHighScore) {
+    recs.push({
+      id: "pitch-calculator",
+      title: "Calculate Your Rate",
+      description: "Find the rate you need to hit your income target.",
+      why: "Your goal is to earn more. The pitch calculator shows you exactly what to charge based on your skills and experience.",
+      estimatedMinutes: 5,
+      benefit: "Know your worth and stop undercharging",
+      href: "/tools/pitch-calculator",
+      priority: 110,
+      icon: "💰",
+      category: "advanced",
+    });
+  }
+
+  if (profile.mainGoal === "portfolio" && !profile.hasPortfolio) {
+    recs.push({
+      id: "create-portfolio-goal",
+      title: "Create Your Portfolio",
+      description: "Build a shareable page with your skills and experience.",
+      why: "Your goal is to improve your portfolio. Start by creating one — it's the foundation.",
+      estimatedMinutes: 15,
+      benefit: "3x your chances of landing a client",
+      href: "/portfolio-builder",
+      priority: 110,
+      icon: "💼",
+      category: "building",
+    });
+  }
 
   // 1. Onboarding not completed
   if (profile.overallPct === 0 && !profile.hasReadinessQuiz) {
@@ -203,6 +304,38 @@ export function getNextBestAction(profile: UserProfile): Recommendation {
     });
   }
 
+  // 11. Stale user — encourage comeback
+  if (isStale && profile.overallPct > 0 && profile.overallPct < 100) {
+    recs.push({
+      id: "comeback-roadmap",
+      title: "Pick Up Where You Left Off",
+      description: `You haven't been active in a while. Your roadmap is waiting at ${profile.overallPct}%.`,
+      why: "Even 10 minutes of progress today keeps your momentum alive. Small steps add up.",
+      estimatedMinutes: 10,
+      benefit: "Rebuild your streak and stay on track",
+      href: `/get-started#${profile.currentStage}`,
+      priority: 88,
+      icon: "🔄",
+      category: "getting-started",
+    });
+  }
+
+  // 12. High VA score but no applications — nudge
+  if (hasHighScore && profile.applicationsCount === 0 && profile.overallPct > 75) {
+    recs.push({
+      id: "start-applying",
+      title: "Start Applying to Jobs",
+      description: "You have the skills. Now it's time to find clients.",
+      why: "Your VA Score is strong and your roadmap is nearly done. The next step is to apply.",
+      estimatedMinutes: 10,
+      benefit: "Turn your preparation into real income",
+      href: "/jobs",
+      priority: 92,
+      icon: "🚀",
+      category: "applying",
+    });
+  }
+
   // Sort by priority and return the best
   recs.sort((a, b) => b.priority - a.priority);
   return recs[0] || {
@@ -226,6 +359,19 @@ export function getQuickActions(profile: UserProfile): QuickAction[] {
   const isBeginner = profile.overallPct < 25;
   const isIntermediate = profile.overallPct >= 25 && profile.overallPct < 75;
   const isAdvanced = profile.overallPct >= 75;
+
+  // Stale users get a comeback action first
+  const isStale = !profile.lastActivityDate
+    ? true
+    : (Date.now() - new Date(profile.lastActivityDate).getTime()) / 86400000 >= 7;
+
+  if (isStale && profile.overallPct > 0) {
+    return [
+      { label: "Continue Roadmap", href: `/get-started#${profile.currentStage}`, icon: "🗺️", priority: 100 },
+      { label: "Daily Motivation", href: "/dashboard#motivation", icon: "☀️", priority: 90 },
+      { label: "Track Applications", href: "/tools/tracker", icon: "📤", priority: 80 },
+    ];
+  }
 
   if (isBeginner) {
     return [

@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 
+const GOAL_OPTIONS = [
+  { value: "first_client", label: "Get my first client" },
+  { value: "learn_skills", label: "Learn new VA skills" },
+  { value: "resume", label: "Build a professional resume" },
+  { value: "portfolio", label: "Improve my portfolio" },
+  { value: "interviews", label: "Practice interviews" },
+  { value: "earn_more", label: "Earn more as a VA" },
+];
+
 export default function AccountSettings({
   name,
   email,
   updatesOptIn,
+  mainGoal,
 }: {
   name: string;
   email: string;
   updatesOptIn: boolean;
+  mainGoal?: string;
 }) {
   const [displayName, setDisplayName] = useState(name);
   const [updatesOptInState, setUpdatesOptInState] = useState(updatesOptIn);
+  const [goal, setGoal] = useState(mainGoal || "");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
@@ -58,6 +70,26 @@ export default function AccountSettings({
     } catch (e) {
       setUpdatesOptInState(!v);
       setErr(e instanceof Error ? e.message : "Error");
+    }
+  };
+
+  const saveGoal = async () => {
+    setBusy(true);
+    setErr("");
+    setMsg("");
+    try {
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ main_goal: goal }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error");
+      show("Goal updated.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Error");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -117,6 +149,38 @@ export default function AccountSettings({
           </button>
         </div>
         <p className="font-mono text-[11.5px] text-ink-500 mt-2">Email (can't be changed): {email}</p>
+      </div>
+
+      <div>
+        <h3 className="font-mono text-xs uppercase tracking-[0.1em] text-gold-400 mb-4">Career Goal</h3>
+        <p className="text-[13px] text-ink-500 mb-3">Your current goal drives personalized recommendations.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-[520px]">
+          {GOAL_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setGoal(opt.value)}
+              className={`text-left p-3 rounded-[3px] border text-[13px] transition-colors ${
+                goal === opt.value
+                  ? "border-gold-400 bg-gold-400/10 text-ink-50"
+                  : "border-navy-700 bg-navy-900 text-ink-500 hover:border-navy-600"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  goal === opt.value ? "border-gold-400" : "border-navy-600"
+                }`}>
+                  {goal === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-gold-400" />}
+                </div>
+                {opt.label}
+              </div>
+            </button>
+          ))}
+        </div>
+        {goal !== mainGoal && (
+          <button onClick={saveGoal} disabled={busy} className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] mt-3">
+            Save Goal
+          </button>
+        )}
       </div>
 
       <div>

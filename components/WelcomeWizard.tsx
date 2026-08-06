@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 const EXPERIENCE_OPTIONS = [
@@ -39,6 +39,15 @@ const INTEREST_OPTIONS = [
   "General Virtual Assistant",
 ];
 
+const DRAFT_KEY = "thrive_onboarding_draft";
+
+const LOADING_STEPS = [
+  "Analyzing your preferences...",
+  "Building your personalized roadmap...",
+  "Setting up your dashboard...",
+  "Almost ready...",
+];
+
 export default function WelcomeWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -47,6 +56,46 @@ export default function WelcomeWizard() {
   const [time, setTime] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [skipping, setSkipping] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [completed, setCompleted] = useState(false);
+
+  // Adaptive: experienced users skip the interests step (step 4)
+  const isExperienced = experience === "freelancing" || experience === "some";
+  const totalSteps = isExperienced ? 4 : 5;
+  const lastStep = isExperienced ? 4 : 5;
+
+  // Load draft on mount
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) {
+        const data = JSON.parse(draft);
+        if (data.experience) setExperience(data.experience);
+        if (data.goal) setGoal(data.goal);
+        if (data.time) setTime(data.time);
+        if (data.interests?.length) setInterests(data.interests);
+        if (typeof data.step === "number" && data.step > 0 && data.step < 5) {
+          setStep(data.step);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Save draft on state changes
+  const saveDraft = useCallback(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, experience, goal, time, interests }));
+    } catch {
+      // ignore
+    }
+  }, [step, experience, goal, time, interests]);
+
+  useEffect(() => {
+    if (step > 0 && step < 5) saveDraft();
+  }, [step, saveDraft]);
 
   const toggleInterest = (interest: string) => {
     setInterests((prev) =>
@@ -56,6 +105,7 @@ export default function WelcomeWizard() {
 
   const complete = async () => {
     setSaving(true);
+    setCompleted(true);
     try {
       await fetch("/api/onboarding", {
         method: "POST",
@@ -70,6 +120,31 @@ export default function WelcomeWizard() {
     } catch {
       // proceed anyway
     }
+    // Animate loading steps
+    for (let i = 0; i < LOADING_STEPS.length; i++) {
+      setLoadingStep(i);
+      await new Promise((r) => setTimeout(r, 600));
+    }
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    router.push("/dashboard");
+    router.refresh();
+  };
+
+  const skip = async () => {
+    setSkipping(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          experience_level: "",
+          main_goal: "",
+          weekly_hours: "",
+          interests: [],
+        }),
+      });
+    } catch {}
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
     router.push("/dashboard");
     router.refresh();
   };
@@ -79,11 +154,48 @@ export default function WelcomeWizard() {
     if (step === 1) return !!experience;
     if (step === 2) return !!goal;
     if (step === 3) return !!time;
-    if (step === 4) return interests.length > 0;
+    if (step === 4) return isExperienced || interests.length > 0;
     return true;
   };
 
-  const progress = step === 5 ? 100 : Math.round((step / 5) * 100);
+  const progress = step === lastStep ? 100 : Math.round((step / totalSteps) * 100);
+
+  // Loading animation on completion
+  if (completed) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-[560px] text-center">
+          <div className="text-[56px] mb-6 animate-bounce">🚀</div>
+          <h1 className="font-serif text-[32px] font-medium mb-3">
+            Building your experience...
+          </h1>
+          <div className="mt-8 space-y-4">
+            {LOADING_STEPS.map((text, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-3 text-[14.5px] transition-all duration-300 ${
+                  i <= loadingStep ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
+                  i < loadingStep ? "bg-gold-400 text-navy-950" : i === loadingStep ? "bg-gold-400/20 text-gold-400 animate-pulse" : "bg-navy-800 text-ink-500"
+                }`}>
+                  {i < loadingStep ? "✓" : i + 1}
+                </span>
+                <span className={i <= loadingStep ? "text-ink-50" : "text-ink-500"}>{text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="h-[3px] bg-navy-800 rounded-full overflow-hidden mt-8">
+            <div
+              className="h-full bg-gold-400 transition-all duration-500"
+              style={{ width: `${Math.min(100, (loadingStep + 1) * 25)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -96,9 +208,9 @@ export default function WelcomeWizard() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          {step > 0 && step < 5 && (
+          {step > 0 && step < lastStep && (
             <p className="font-mono text-[10.5px] text-ink-500 mt-2 text-right">
-              Step {step} of 5
+              Step {step} of {totalSteps}
             </p>
           )}
         </div>
@@ -116,6 +228,11 @@ export default function WelcomeWizard() {
             <button onClick={() => setStep(1)} className="btn-primary mt-8">
               GET STARTED →
             </button>
+            <p className="mt-4">
+              <button onClick={skip} className="text-[13px] text-ink-500 hover:text-ink-400 underline underline-offset-2">
+                Skip for now
+              </button>
+            </p>
           </div>
         )}
 
@@ -162,13 +279,20 @@ export default function WelcomeWizard() {
                 ← Back
               </button>
               <button
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  if (isExperienced) setStep(2); else setStep(2);
+                }}
                 disabled={!canNext()}
                 className="btn-primary flex-1 disabled:opacity-40"
               >
                 CONTINUE →
               </button>
             </div>
+            <p className="mt-4 text-center">
+              <button onClick={skip} className="text-[13px] text-ink-500 hover:text-ink-400 underline underline-offset-2">
+                Skip for now
+              </button>
+            </p>
           </div>
         )}
 
@@ -264,7 +388,9 @@ export default function WelcomeWizard() {
                 ← Back
               </button>
               <button
-                onClick={() => setStep(4)}
+                onClick={() => {
+                  if (isExperienced) setStep(lastStep); else setStep(4);
+                }}
                 disabled={!canNext()}
                 className="btn-primary flex-1 disabled:opacity-40"
               >
@@ -274,10 +400,10 @@ export default function WelcomeWizard() {
           </div>
         )}
 
-        {/* Step 4: Interests */}
-        {step === 4 && (
+        {/* Step 4: Interests (skipped for experienced users) */}
+        {step === 4 && !isExperienced && (
           <div>
-            <div className="eyebrow mb-4">Step 4</div>
+            <div className="eyebrow mb-4">Step {totalSteps}</div>
             <h2 className="font-serif text-[26px] font-medium mb-2">
               Choose your interests
             </h2>
@@ -310,7 +436,7 @@ export default function WelcomeWizard() {
                 ← Back
               </button>
               <button
-                onClick={() => setStep(5)}
+                onClick={() => setStep(lastStep)}
                 disabled={!canNext()}
                 className="btn-primary flex-1 disabled:opacity-40"
               >
@@ -320,8 +446,8 @@ export default function WelcomeWizard() {
           </div>
         )}
 
-        {/* Step 5: Complete */}
-        {step === 5 && (
+        {/* Final step: Complete (summary + confirm) */}
+        {step === lastStep && (
           <div className="text-center">
             <div className="text-[56px] mb-4">🎉</div>
             <h1 className="font-serif text-[32px] font-medium mb-3">
@@ -330,12 +456,39 @@ export default function WelcomeWizard() {
             <p className="text-[16px] text-ink-500 mb-2 max-w-[400px] mx-auto">
               Based on your answers, we&apos;ve personalized your Thrive PH experience. Let&apos;s start building your VA career.
             </p>
+            {/* Summary of answers */}
+            <div className="mt-6 mb-6 max-w-[360px] mx-auto space-y-2 text-left">
+              {experience && (
+                <div className="flex items-center gap-2 text-[13px] text-ink-500">
+                  <span className="text-gold-400">✓</span>
+                  <span>Experience: {EXPERIENCE_OPTIONS.find((o) => o.value === experience)?.label}</span>
+                </div>
+              )}
+              {goal && (
+                <div className="flex items-center gap-2 text-[13px] text-ink-500">
+                  <span className="text-gold-400">✓</span>
+                  <span>Goal: {GOAL_OPTIONS.find((o) => o.value === goal)?.label}</span>
+                </div>
+              )}
+              {time && (
+                <div className="flex items-center gap-2 text-[13px] text-ink-500">
+                  <span className="text-gold-400">✓</span>
+                  <span>Time: {TIME_OPTIONS.find((o) => o.value === time)?.label}</span>
+                </div>
+              )}
+              {interests.length > 0 && (
+                <div className="flex items-center gap-2 text-[13px] text-ink-500">
+                  <span className="text-gold-400">✓</span>
+                  <span>Interests: {interests.join(", ")}</span>
+                </div>
+              )}
+            </div>
             <button
               onClick={complete}
               disabled={saving}
-              className="btn-primary mt-8"
+              className="btn-primary mt-4"
             >
-              {saving ? "Saving..." : "GO TO MY DASHBOARD →"}
+              {saving ? "Setting up..." : "GO TO MY DASHBOARD →"}
             </button>
           </div>
         )}

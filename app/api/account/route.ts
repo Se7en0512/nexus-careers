@@ -23,6 +23,15 @@ export async function PATCH(req: Request) {
     await db.prepare("UPDATE users SET updates_opt_in = ? WHERE id = ?").run(value, user.id);
   }
 
+  if ("main_goal" in data) {
+    const goal = String(data.main_goal || "").trim().slice(0, 30);
+    const validGoals = ["first_client", "learn_skills", "resume", "portfolio", "interviews", "earn_more", ""];
+    if (!validGoals.includes(goal)) {
+      return NextResponse.json({ error: "Invalid goal value" }, { status: 400 });
+    }
+    await db.prepare("UPDATE user_onboarding SET main_goal = ? WHERE user_id = ?").run(goal, user.id);
+  }
+
   return NextResponse.json({ ok: true });
 }
 
