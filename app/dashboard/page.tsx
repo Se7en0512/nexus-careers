@@ -6,18 +6,17 @@ import { db } from "@/lib/db";
 import { ROADMAP, stageFromKey } from "@/data/roadmap";
 import { PLAN_30 } from "@/data/plan30";
 import { getStreak, hasBadge, refreshHireReadyBadge, roadmapCompletion, getCheckinStreak, hasCheckedInThisWeek } from "@/lib/gamification";
-import { getGreeting, getCoachMessage, getInsights, getMilestoneForecast, getSmartProgress, getStepsToHireReady, isStuck, type UserProfile } from "@/lib/personalization";
+import { getGreeting, getCoachMessage, getInsights, getMilestoneForecast, getSmartProgress, getStepsToHireReady, type UserProfile } from "@/lib/personalization";
 import { getNextBestAction, getQuickActions } from "@/lib/recommendations";
 import WeeklyCheckin from "@/components/WeeklyCheckin";
 import Checklist from "@/components/Checklist";
-import LogoutButton from "@/components/LogoutButton";
 import ScoreRing from "@/components/ScoreRing";
 import CertificateSection from "@/components/CertificateSection";
 import AccountSettings from "@/components/AccountSettings";
 import ProfileStrengthCard from "@/components/ProfileStrengthCard";
 import DailyMotivation from "@/components/DailyMotivation";
 import ActivityTimeline from "@/components/ActivityTimeline";
-import NextBestAction from "@/components/NextBestAction";
+import TodayFocus from "@/components/TodayFocus";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import MilestoneForecast from "@/components/MilestoneForecast";
 import MotivationalCoach from "@/components/MotivationalCoach";
@@ -105,7 +104,6 @@ export default async function DashboardPage() {
 
   const onboardingRow = onboarding as { experience_level?: string; main_goal?: string; weekly_hours?: string; interests?: string } | undefined;
   const firstName = (user.name || user.email).split(" ")[0];
-  const isNewUser = !onboardingRow?.experience_level;
   const totalDone = ROADMAP.reduce((acc, s) => acc + (checks[s.key]?.length || 0), 0);
   const totalItems = ROADMAP.reduce((acc, s) => acc + s.items.length, 0);
   const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
@@ -149,32 +147,20 @@ export default async function DashboardPage() {
   const progressItems = getSmartProgress(userProfile);
   const stepsToHireReady = getStepsToHireReady(userProfile);
   const quickActions = getQuickActions(userProfile);
-  const stuck = isStuck(userProfile);
 
   return (
     <>
-      <section className="page-hero">
-        <div className="wrap">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="eyebrow">// Dashboard</div>
-              <h1 className="mb-0">{greeting}</h1>
-              <p className="mt-4">{subtext}</p>
-              {isNewUser && (
-                <p className="mt-2 text-[13.5px] text-ink-500">
-                  Start by completing the Welcome Wizard to personalize your experience.
-                </p>
-              )}
-              {stuck && (
-                <p className="mt-2 text-[13.5px] text-amber-400">
-                  It&apos;s okay to take breaks — we&apos;re here when you&apos;re ready.
-                </p>
-              )}
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </section>
+      {/* NEW HERO — Greeting + Today's Focus + Stats */}
+      <TodayFocus
+        greeting={greeting}
+        subtext={subtext}
+        rec={nextBestAction}
+        vaScore={vaScoreRow?.va_score ?? 0}
+        overallPct={overallPct}
+        currentStreak={streak.current_streak}
+        longestStreak={streak.longest_streak}
+        hireReady={hireReady}
+      />
 
       {/* TEMPORARILY DISABLED — Re-enable once a verified email domain is configured on Resend.
       {user.email_verified === 0 && (
@@ -200,32 +186,11 @@ export default async function DashboardPage() {
 
         {/* MAIN CONTENT */}
         <div className="flex flex-col gap-14 min-w-0">
-          {/* 01 OVERVIEW */}
+          {/* 01 OVERVIEW — simplified, no duplicate hero */}
           <section id="overview" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">01 · Overview</div>
               <h2 className="!text-[24px]">Your progress right now</h2>
-            </div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-6">
-              <div className="bg-navy-900 p-6">
-                <p className="text-[26px] leading-none mb-2">🔥</p>
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{streak.current_streak}<span className="text-[13px] text-ink-500">-day</span></p>
-                <p className="text-[12.5px] text-ink-500 mt-2">Streak (longest: {streak.longest_streak})</p>
-              </div>
-              <div className="bg-navy-900 p-6">
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{overallPct}%</p>
-                <p className="text-[12.5px] text-ink-500 mt-2">Roadmap ({totalDone}/{totalItems})</p>
-              </div>
-              <div className="bg-navy-900 p-6">
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{vaScoreRow?.va_score ?? 0}</p>
-                <p className="text-[12.5px] text-ink-500 mt-2">VA Score</p>
-              </div>
-              <div className="bg-navy-900 p-6">
-                <p className="font-mono text-[22px] text-gold-400 leading-none">{hireReady ? "✓" : "—"}</p>
-                <p className="text-[12.5px] text-ink-500 mt-2">Hire-Ready Badge</p>
-              </div>
             </div>
 
             {/* 4-stage progress bar */}
@@ -242,17 +207,9 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Next Best Action — THE most important card */}
-            <div className="mb-6">
-              <NextBestAction rec={nextBestAction} />
-            </div>
-
             {/* Personalized sections in 2-column grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Motivational Coach */}
               <MotivationalCoach message={coachMessage} />
-
-              {/* Milestone Forecast */}
               <MilestoneForecast milestone={milestone} />
             </div>
 
