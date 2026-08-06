@@ -110,65 +110,6 @@ const FAQ_ITEMS = [
 ];
 
 /* ────────────────────────────────────────────────────────
-   SHOWCASE DATA (preserved from original)
-   ──────────────────────────────────────────────────────── */
-const SHOWCASE: Array<{ group: string; blurb: string; items: Array<{ label: string; href: string }> }> = [
-  {
-    group: "Start Here",
-    blurb: "Find out exactly where you should begin.",
-    items: [
-      { label: "VA Readiness Check", href: "/tools/readiness" },
-      { label: "Niche Finder", href: "/tools/niche-finder" },
-      { label: "VA Learning Path", href: "/walkthrough" },
-      { label: "Get Started Roadmap", href: "/get-started" },
-    ],
-  },
-  {
-    group: "Learn",
-    blurb: "Free courses, guides, and templates to build your skills.",
-    items: [
-      { label: "Course Library", href: "/courses" },
-      { label: "Tips & Guides", href: "/tips" },
-      { label: "Tutorials", href: "/tutorials" },
-      { label: "Free Templates", href: "/free-templates" },
-      { label: "Equipment Guide", href: "/equipment" },
-    ],
-  },
-  {
-    group: "Practice",
-    blurb: "AI tools that grade you and push you to get better.",
-    items: [
-      { label: "AI Mock Interview", href: "/tools/mock-interview" },
-      { label: "Interview Coach", href: "/tools/interview-coach" },
-      { label: "Resume Builder", href: "/tools/resume-builder" },
-      { label: "Cover Letter Builder", href: "/tools/cover-letter" },
-    ],
-  },
-  {
-    group: "Apply",
-    blurb: "Directories, job alerts, and scripts for the interview.",
-    items: [
-      { label: "Apply Here — 80+ Platforms", href: "/apply-here" },
-      { label: "Job Alerts", href: "/jobs" },
-      { label: "Portfolio Builder", href: "/portfolio-builder" },
-      { label: "Closing Scripts", href: "/closing-scripts" },
-      { label: "30-Day Plan", href: "/30-day-plan" },
-    ],
-  },
-  {
-    group: "Run Your VA Business",
-    blurb: "Track income, invoicing, and contributions — organized.",
-    items: [
-      { label: "Job Tracker", href: "/tools/tracker" },
-      { label: "Budget & Calculators", href: "/tools/budget" },
-      { label: "Invoice Generator", href: "/tools/invoice-generator" },
-      { label: "Contributions Calculator", href: "/tools/contributions-calculator" },
-      { label: "First 90 Days", href: "/first-90-days" },
-    ],
-  },
-];
-
-/* ────────────────────────────────────────────────────────
    PAGE COMPONENT
    ──────────────────────────────────────────────────────── */
 export default async function HomePage() {
@@ -240,39 +181,6 @@ export default async function HomePage() {
                   {s.value}
                 </div>
                 <div className="text-[12px] text-ink-500 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════
-          WHAT YOU CAN DO HERE — preserved from original
-          ═══════════════════════════════════════════════════ */}
-      <section className="border-b border-navy-700">
-        <div className="wrap py-[88px]">
-          <div className="section-head anim-fade-up">
-            <div className="eyebrow">What You Can Do Here</div>
-            <h2>One place for the whole journey — learn, practice, apply, and get paid.</h2>
-            <p>Everything is grouped by what you&apos;re trying to do, so you never have to dig through the footer.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-px bg-navy-700 border border-navy-700">
-            {SHOWCASE.map((s, i) => (
-              <div key={s.group} className={`bg-navy-900 p-7 flex flex-col hover-lift anim-fade-up delay-${Math.min(i + 1, 8)}`}>
-                <h3 className="font-serif text-[17px] font-medium text-gold-300 mb-1.5">{s.group}</h3>
-                <p className="text-[12.5px] text-ink-500 mb-5">{s.blurb}</p>
-                <div className="flex flex-col gap-[9px] mt-auto">
-                  {s.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="text-[13.5px] text-ink-300 hover:text-gold-300 transition-colors leading-snug"
-                    >
-                      <span className="text-gold-400 mr-1.5">→</span>
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
               </div>
             ))}
           </div>

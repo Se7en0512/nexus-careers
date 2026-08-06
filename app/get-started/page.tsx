@@ -47,65 +47,6 @@ export default async function GetStartedPage() {
         </div>
       </section>
 
-      <section className="py-16 border-b border-navy-700">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="eyebrow">First Step</div>
-            <h2>Start here — no matter who you are.</h2>
-            <p>Four steps with no wrong move. Start small, and simply go from there.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700">
-            {[
-              {
-                n: "01",
-                title: "Find out if you're ready",
-                body: "An 8-question readiness check that shows where you should start.",
-                href: "/tools/readiness",
-                label: "Take the Readiness Check",
-              },
-              {
-                n: "02",
-                title: "Find your niche",
-                body: "Discover which specialization fits your skills and personality.",
-                href: "/tools/niche-finder",
-                label: "Find Your Niche",
-              },
-              {
-                n: "03",
-                title: "Follow the 30-day plan",
-                body: "A one-day-at-a-time plan from start to level up.",
-                href: "/30-day-plan",
-                label: "See the 30-Day Plan",
-              },
-              {
-                n: "04",
-                title: "Read the Red Flags first",
-                body: "Know the signs of a scam and what to avoid before you start applying.",
-                href: "/red-flags",
-                label: "Read the Red Flags",
-              },
-            ].map((step) => (
-              <Link
-                key={step.n}
-                href={step.href}
-                className="bg-navy-900 p-8 hover:bg-navy-800 transition-colors group"
-              >
-                <div className="w-[34px] h-[34px] rounded-full bg-navy-800 border-[1.5px] border-gold-400 flex items-center justify-center font-mono text-xs text-gold-400 mb-5">
-                  {step.n}
-                </div>
-                <h3 className="font-semibold text-[16.5px] mb-2 group-hover:text-gold-300 transition-colors">
-                  {step.title}
-                </h3>
-                <p className="text-[14px] text-ink-500 leading-[1.55] mb-5">{step.body}</p>
-                <span className="font-mono text-[11.5px] text-gold-400 tracking-[0.04em] group-hover:text-gold-300 transition-colors">
-                  {step.label} →
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <div className="wrap py-16">
         <div className="flex flex-col gap-8">
           {ROADMAP.map((stage) => (
