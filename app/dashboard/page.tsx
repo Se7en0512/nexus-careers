@@ -307,31 +307,33 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Personalized sections in 2-column grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <MotivationalCoach message={coachMessage} />
-              <MilestoneForecast milestone={milestone} />
-            </div>
-
-            {/* Quick Actions */}
+            {/* Quick Actions — primary CTA */}
             <div className="mb-6">
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-500 mb-3">Quick Actions</p>
               <AdaptiveQuickActions actions={quickActions} />
             </div>
 
-            {/* Insights */}
-            {insights.length > 0 && (
-              <div className="mb-6">
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-500 mb-3">Insights</p>
-                <PersonalizedInsights insights={insights} />
-              </div>
-            )}
-
-            {/* Smart Progress Summary + Profile Strength */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Smart Progress + Profile Strength */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <SmartProgressSummary items={progressItems} stepsToHireReady={stepsToHireReady} />
               <ProfileStrengthCard />
             </div>
+
+            {/* Collapsible: Insights, Coach, Milestone — reduces overview from 8 blocks to 4 */}
+            <details className="group mb-6">
+              <summary className="flex items-center gap-2 cursor-pointer select-none text-ink-400 hover:text-ink-200 transition-colors py-2">
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.1em]">Your Insights</span>
+                <svg className="w-3.5 h-3.5 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </summary>
+              <div className="pt-2 space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <MotivationalCoach message={coachMessage} />
+                  <MilestoneForecast milestone={milestone} />
+                </div>
+                {insights.length > 0 && (
+                  <PersonalizedInsights insights={insights} />
+                )}
+              </div>
+            </details>
 
             <div className="mt-6">
               <WeeklyCheckin initialApps={appsCount} streak={checkinStreak} checkedIn={weeklyCheckedIn} />

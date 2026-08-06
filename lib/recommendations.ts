@@ -369,24 +369,21 @@ export function getQuickActions(profile: UserProfile): QuickAction[] {
     return [
       { label: "Continue Roadmap", href: `/get-started#${profile.currentStage}`, icon: "🗺️", priority: 100 },
       { label: "Daily Motivation", href: "/dashboard#motivation", icon: "☀️", priority: 90 },
-      { label: "Track Applications", href: "/tools/tracker", icon: "📤", priority: 80 },
-    ];
+    ].slice(0, 2);
   }
 
   if (isBeginner) {
     return [
       { label: "Start Roadmap", href: "/get-started", icon: "🗺️", priority: 100 },
       { label: "Take Readiness Quiz", href: "/tools/readiness", icon: "📝", priority: 90 },
-      { label: "Find Your Niche", href: "/tools/niche-finder", icon: "🎯", priority: 80 },
-    ];
+    ].slice(0, 2);
   }
 
   if (isAdvanced) {
     return [
       { label: "Track Applications", href: "/tools/tracker", icon: "📤", priority: 100 },
       { label: "Update Portfolio", href: "/portfolio-builder", icon: "💼", priority: 90 },
-      { label: "Browse Jobs", href: "/jobs", icon: "🔍", priority: 80 },
-    ];
+    ].slice(0, 2);
   }
 
   // Intermediate — goal-based
@@ -394,39 +391,32 @@ export function getQuickActions(profile: UserProfile): QuickAction[] {
     first_client: [
       { label: "Build Portfolio", href: "/portfolio-builder", icon: "💼", priority: 100 },
       { label: "Track Applications", href: "/tools/tracker", icon: "📤", priority: 90 },
-      { label: "Practice Interview", href: "/tools/mock-interview", icon: "🎤", priority: 80 },
     ],
     learn_skills: [
       { label: "Continue Roadmap", href: `/get-started#${profile.currentStage}`, icon: "🗺️", priority: 100 },
       { label: "Browse Courses", href: "/courses", icon: "📚", priority: 90 },
-      { label: "Take Skill Quiz", href: "/tutorials", icon: "📝", priority: 80 },
     ],
     resume: [
       { label: "Build Resume", href: "/tools/resume-builder", icon: "📄", priority: 100 },
       { label: "Create Portfolio", href: "/portfolio-builder", icon: "💼", priority: 90 },
-      { label: "Write Cover Letter", href: "/tools/cover-letter", icon: "✉️", priority: 80 },
     ],
     portfolio: [
       { label: "Build Portfolio", href: "/portfolio-builder", icon: "💼", priority: 100 },
       { label: "Continue Roadmap", href: `/get-started#${profile.currentStage}`, icon: "🗺️", priority: 90 },
-      { label: "Build Resume", href: "/tools/resume-builder", icon: "📄", priority: 80 },
     ],
     interviews: [
       { label: "Mock Interview", href: "/tools/mock-interview", icon: "🎤", priority: 100 },
       { label: "Interview Coach", href: "/tools/interview-coach", icon: "📚", priority: 90 },
-      { label: "Build Resume", href: "/tools/resume-builder", icon: "📄", priority: 80 },
     ],
     earn_more: [
       { label: "Browse Courses", href: "/courses", icon: "📚", priority: 100 },
       { label: "Update Portfolio", href: "/portfolio-builder", icon: "💼", priority: 90 },
-      { label: "Pitch Calculator", href: "/tools/pitch-calculator", icon: "💰", priority: 80 },
     ],
   };
 
   return goalActions[goal] || [
     { label: "Continue Roadmap", href: `/get-started#${profile.currentStage}`, icon: "🗺️", priority: 100 },
     { label: "Build Portfolio", href: "/portfolio-builder", icon: "💼", priority: 90 },
-    { label: "Track Applications", href: "/tools/tracker", icon: "📤", priority: 80 },
   ];
 }
 
