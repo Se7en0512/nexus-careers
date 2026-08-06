@@ -75,9 +75,15 @@ export default async function RootLayout({
         <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
       </head>
       <body className="min-h-screen flex flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-gold-400 focus:text-navy-950 focus:px-4 focus:py-2 focus:rounded-[3px] focus:font-mono focus:text-[13px]"
+        >
+          Skip to main content
+        </a>
         <MarqueeBar text={config.marquee_text || ""} />
         <Nav />
-        <main className="flex-1 pb-10">{children}</main>
+        <main id="main-content" className="flex-1 pb-10" tabIndex={-1}>{children}</main>
         <Footer />
         <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} gcashNumber={config.gcash_number || ""} />
         <ToastContainer />

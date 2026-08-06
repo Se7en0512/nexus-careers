@@ -198,14 +198,15 @@ export default async function DashboardPage() {
 
       <div className="wrap py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 items-start">
         {/* SECTION NAV — filtered and re-numbered */}
-        <nav className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 -mx-8 px-8 lg:mx-0 lg:px-0">
+        <nav aria-label="Dashboard sections" className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 -mx-8 px-8 lg:mx-0 lg:px-0">
           {numberedSections.map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="flex items-center gap-3 whitespace-nowrap lg:whitespace-normal font-mono text-[12px] uppercase tracking-[0.08em] text-ink-500 hover:text-gold-300 transition-colors border border-navy-800 lg:border-0 rounded-[3px] px-3.5 lg:px-0 py-2 lg:py-1.5"
+              aria-label={`${s.num} ${s.label}`}
+              className="flex items-center gap-3 whitespace-nowrap lg:whitespace-normal font-mono text-[12px] uppercase tracking-[0.08em] text-ink-500 hover:text-gold-300 transition-colors border border-navy-800 lg:border-0 rounded-[3px] px-3.5 lg:px-0 py-2 lg:py-1.5 min-h-[44px]"
             >
-              <span className="text-gold-400/70">{s.num}</span>
+              <span className="text-gold-400/70" aria-hidden="true">{s.num}</span>
               {s.label}
             </a>
           ))}
@@ -225,9 +226,9 @@ export default async function DashboardPage() {
 
             {/* NEW USER: Onboarding checklist */}
             {userLevel === "new" && (
-              <div className="panel p-7 mb-6">
+              <div className="panel p-7 mb-6" role="region" aria-label="Getting started checklist">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <span className="text-[22px]">🚀</span>
+                  <span className="text-[22px]" aria-hidden="true">🚀</span>
                   <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-gold-400">
                     Get Started in 3 Steps
                   </span>

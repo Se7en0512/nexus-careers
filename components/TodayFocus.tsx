@@ -51,7 +51,7 @@ export default function TodayFocus({
 
           <div className="relative">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="text-[22px]">{rec.icon}</span>
+              <span className="text-[22px]" aria-hidden="true">{rec.icon}</span>
               <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-gold-400">
                 Today&apos;s Focus
               </span>
@@ -112,7 +112,7 @@ export default function TodayFocus({
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mt-8">
           <div className="bg-navy-900/80 p-5">
-            <p className="text-[20px] leading-none mb-1.5">🔥</p>
+            <p className="text-[20px] leading-none mb-1.5" aria-hidden="true">🔥</p>
             <p className="font-mono text-[20px] text-gold-400 leading-none">{currentStreak}<span className="text-[12px] text-ink-500">-day</span></p>
             <p className="text-[11.5px] text-ink-500 mt-1.5">Streak{longestStreak > currentStreak ? ` (best: ${longestStreak})` : ""}</p>
           </div>

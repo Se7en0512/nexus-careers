@@ -97,7 +97,7 @@ export default function Checklist({ stageKey, items, saved }: ChecklistProps) {
                 <button
                   onClick={() => toggle(idx)}
                   disabled={saving}
-                  className={`w-full text-left flex gap-3 px-4 py-3 border rounded-[3px] transition-colors ${
+                  className={`w-full text-left flex gap-3 px-4 py-3 border rounded-[3px] transition-colors min-h-[48px] ${
                     done
                       ? "border-gold-400/40 bg-navy-800 text-ink-300"
                       : "border-gold-400/30 bg-navy-800/60 hover:border-gold-400/50 text-ink-50"
@@ -144,7 +144,7 @@ export default function Checklist({ stageKey, items, saved }: ChecklistProps) {
                   <button
                     onClick={() => toggle(idx)}
                     disabled={saving}
-                    className={`w-full text-left flex gap-3 px-4 py-3 border rounded-[3px] transition-colors ${
+                    className={`w-full text-left flex gap-3 px-4 py-3 border rounded-[3px] transition-colors min-h-[48px] ${
                       done
                         ? "border-gold-400/40 bg-navy-800 text-ink-300"
                         : "border-navy-700 bg-navy-900 hover:border-navy-600 text-ink-50"
