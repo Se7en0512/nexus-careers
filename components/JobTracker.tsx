@@ -240,7 +240,7 @@ export default function JobTracker({ initialApplications = [], isGuest }: JobTra
       <div className="flex justify-between items-center">
         <h2 className="font-serif font-medium text-2xl mb-0">Job Applications</h2>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn-primary !py-2.5 !px-5 !text-xs font-mono">
+          <button onClick={() => setShowForm(true)} className="btn-primary !py-3 !px-5 !text-xs font-mono">
             + Add Application
           </button>
         )}
@@ -371,10 +371,10 @@ export default function JobTracker({ initialApplications = [], isGuest }: JobTra
           {error && <p className="text-xs text-red-400 font-mono">{error}</p>}
 
           <div className="flex gap-3 mt-2">
-            <button type="submit" className="btn-primary !py-2.5 !px-5 !text-xs font-mono">
+            <button type="submit" className="btn-primary !py-3 !px-5 !text-xs font-mono">
               {editingId !== null ? "Save Changes" : "Save Application"}
             </button>
-            <button type="button" onClick={handleResetForm} className="btn-secondary !py-2.5 !px-5 !text-xs font-mono">
+            <button type="button" onClick={handleResetForm} className="btn-secondary !py-3 !px-5 !text-xs font-mono">
               Cancel
             </button>
           </div>

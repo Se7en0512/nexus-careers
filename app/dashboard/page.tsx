@@ -518,7 +518,7 @@ export default async function DashboardPage() {
               <div className="eyebrow">{sectionNum.roadmap} · Roadmap Progress</div>
               <h2 className="!text-[22px]">Roadmap & 30-Day Plan</h2>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
               {ROADMAP.map((s) => (
                 <div key={s.key} className={`bg-navy-900 p-6 ${s.key === currentStageKey ? "ring-1 ring-inset ring-gold-400/50" : ""}`}>
                   <div className="flex items-center justify-between mb-2">
@@ -545,7 +545,7 @@ export default async function DashboardPage() {
                     {currentStage?.num} · {currentStage?.title}
                   </h3>
                 </div>
-                <Link href="/30-day-plan" className="font-mono text-xs text-gold-400 hover:text-gold-300 tracking-[0.04em]">
+                <Link href="/30-day-plan" className="inline-flex items-center min-h-[44px] font-mono text-xs text-gold-400 hover:text-gold-300 tracking-[0.04em] py-2">
                   OPEN THE 30-DAY PLAN →
                 </Link>
               </div>

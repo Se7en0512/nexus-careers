@@ -157,7 +157,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         <div className="flex gap-1 bg-navy-800 rounded-[3px] p-1">
           {(["content", "projects", "trust", "theme"] as const).map(tab => (
             <button key={tab} type="button" onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 px-3 rounded-[2px] text-[12px] font-mono uppercase tracking-wider transition-colors ${
+              className={`flex-1 min-h-[44px] py-2.5 px-3 rounded-[2px] text-[12px] font-mono uppercase tracking-wider transition-colors ${
                 activeTab === tab ? "bg-gold-400 text-navy-950" : "text-ink-500 hover:text-ink-300"
               }`}>
               {tab === "content" ? "Content" : tab === "projects" ? "Projects" : tab === "trust" ? "Trust" : "Theme"}
@@ -246,7 +246,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {activeTab === "trust" && (
           <>
             <p className="text-[13.5px] text-ink-500">These details build trust with clients. The more you add, the more credible you look.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="form-label" htmlFor="pf-location">Location</label>
                 <input id="pf-location" className="field" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Manila, Philippines" />

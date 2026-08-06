@@ -327,7 +327,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-6 text-center">
-            <Link href="/niches" className="font-mono text-[12px] text-gold-400 hover:text-gold-300">
+            <Link href="/niches" className="inline-flex items-center min-h-[44px] font-mono text-[12px] text-gold-400 hover:text-gold-300 py-2">
               VIEW ALL NICHES & RESOURCES →
             </Link>
           </div>
