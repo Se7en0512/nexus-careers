@@ -93,6 +93,11 @@ export default async function AdminPage() {
   const config: Record<string, string> = {};
   for (const r of configRows) config[r.key] = r.value;
 
+  const totalUsers = ((await db.prepare("SELECT COUNT(*) AS n FROM users").get()) as { n: number }).n;
+  const thisWeek = ((await db.prepare("SELECT COUNT(*) AS n FROM users WHERE created_at >= datetime('now', '-7 days')").get()) as { n: number }).n;
+  const thisMonth = ((await db.prepare("SELECT COUNT(*) AS n FROM users WHERE created_at >= datetime('now', '-30 days')").get()) as { n: number }).n;
+  const pendingFeedback = ((await db.prepare("SELECT COUNT(*) AS n FROM feedback WHERE status = 'pending'").get()) as { n: number }).n;
+
   return (
     <>
       <section className="page-hero">
@@ -108,6 +113,22 @@ export default async function AdminPage() {
       </section>
 
       <div className="wrap py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {[
+            { label: "Total Users", value: totalUsers, icon: "👤" },
+            { label: "This Week", value: thisWeek, icon: "📈" },
+            { label: "This Month", value: thisMonth, icon: "📅" },
+            { label: "Pending Feedback", value: pendingFeedback, icon: "💬" },
+          ].map((stat) => (
+            <div key={stat.label} className="panel p-4 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[16px]">{stat.icon}</span>
+                <span className="font-mono text-[10.5px] uppercase tracking-wider text-ink-500">{stat.label}</span>
+              </div>
+              <p className="font-serif text-[28px] font-medium text-gold-400">{stat.value}</p>
+            </div>
+          ))}
+        </div>
         <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} config={config} />
       </div>
     </>
