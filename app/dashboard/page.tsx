@@ -501,18 +501,42 @@ export default async function DashboardPage() {
                     </div>
                     <ScoreRing score={vaScoreRow?.va_score ?? 0} size={64} />
                   </div>
-                  <p className="text-[15px] font-semibold mb-4">{readiness ? readiness.result : "No result saved yet."}</p>
-                  <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
-                    {readiness ? "RETAKE →" : "TAKE IT NOW →"}
-                  </Link>
+                  {readiness ? (
+                    <>
+                      <p className="text-[15px] font-semibold mb-4">{readiness.result}</p>
+                      <Link href="/tools/readiness" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                        RETAKE →
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[14px] text-ink-300 mb-2">Find out which stage to start from — 8 questions, 2 minutes.</p>
+                      <p className="text-[12.5px] text-ink-500 mb-4">It isn&apos;t a grade — it&apos;s a guide so you don&apos;t waste time on the wrong step.</p>
+                      <Link href="/tools/readiness" className="btn-primary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                        TAKE IT NOW →
+                      </Link>
+                    </>
+                  )}
                 </div>
                 <div className="panel p-7">
                   <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">Niche Finder</p>
-                  <p className="text-[15px] font-semibold mt-4 mb-4">{niche ? niche.result : "No result saved yet."}</p>
-                  <p className="text-[12px] text-ink-500 mb-4">{niche ? `taken on ${niche.created_at}` : "Find out which niche fits you."}</p>
-                  <Link href="/tools/niche-finder" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
-                    {niche ? "RETAKE →" : "TAKE IT NOW →"}
-                  </Link>
+                  {niche ? (
+                    <>
+                      <p className="text-[15px] font-semibold mt-4 mb-4">{niche.result}</p>
+                      <p className="text-[12px] text-ink-500 mb-4">taken on {niche.created_at}</p>
+                      <Link href="/tools/niche-finder" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                        RETAKE →
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[14px] text-ink-300 mt-4 mb-2">8 questions to find which VA specialization fits you.</p>
+                      <p className="text-[12.5px] text-ink-500 mb-4">The result is a recommendation — not a verdict. Based on your personality, skills, and interests.</p>
+                      <Link href="/tools/niche-finder" className="btn-primary !py-[10px] !px-[16px] !text-[12.5px] inline-block">
+                        FIND YOUR NICHE →
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -543,14 +567,18 @@ export default async function DashboardPage() {
               <h2 className="!text-[24px]">Your public page</h2>
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-              <div>
-                <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{portfolioRow ? "✓" : "—"}</p>
-                <p className="text-[14.5px] font-semibold mb-1">{portfolioRow ? "Your portfolio is published." : "You don't have a portfolio yet."}</p>
-                <p className="text-[12.5px] text-ink-500">
-                  {portfolioRow
-                    ? `Live at /portfolio/${portfolioRow.slug} — share the link with every application.`
-                    : "Create a shareable page with your skills and sample work."}
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]">
+                  {portfolioRow ? "✓" : "💼"}
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold mb-1">{portfolioRow ? "Your portfolio is published." : "Create your professional portfolio"}</p>
+                  <p className="text-[13px] text-ink-500">
+                    {portfolioRow
+                      ? `Live at /portfolio/${portfolioRow.slug} — share the link with every application.`
+                      : "A shareable page clients can view in under 5 minutes. Skills, projects, and trust signals — all in one link."}
+                  </p>
+                </div>
               </div>
               <div className="flex flex-col gap-2.5 sm:flex-row">
                 <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
@@ -574,14 +602,22 @@ export default async function DashboardPage() {
                 <div className="eyebrow">11 · Job Tracker</div>
                 <h2 className="!text-[24px]">Track your applications</h2>
               </div>
-              <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]">
+                  {appsCount > 0 ? "📊" : "📤"}
+                </div>
                 <div>
-                  <p className="font-mono text-[22px] text-gold-400 leading-none mb-2">{appsCount}</p>
-                  <p className="text-[14.5px] font-semibold mb-1">Applications tracked</p>
-                  <p className="text-[12.5px] text-ink-500">
-                    Keep track of where you applied, interview schedules, and follow-ups.
+                  <p className="text-[15px] font-semibold mb-1">
+                    {appsCount > 0 ? `${appsCount} applications tracked` : "Start tracking your applications"}
+                  </p>
+                  <p className="text-[13px] text-ink-500">
+                    {appsCount > 0
+                      ? "Keep track of where you applied, interview schedules, and follow-ups."
+                      : "Know exactly where you applied, who responded, and what to follow up on."}
                   </p>
                 </div>
+              </div>
                 <div className="flex flex-col gap-2.5 sm:flex-row">
                   <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
                     OPEN JOB TRACKER →
