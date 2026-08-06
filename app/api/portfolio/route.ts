@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordDailyActivity, refreshHireReadyBadge } from "@/lib/gamification";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { logActivity } from "@/lib/activity";
 
 function slugify(name: string): string {
   const base = name
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
 
   await recordDailyActivity(user.id);
   await refreshHireReadyBadge(user.id);
+  await logActivity(user.id, "portfolio_updated", { slug });
 
   return NextResponse.json({ ok: true, slug }, { status: 200 });
 }

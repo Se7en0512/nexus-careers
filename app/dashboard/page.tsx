@@ -14,6 +14,8 @@ import CertificateSection from "@/components/CertificateSection";
 import AccountSettings from "@/components/AccountSettings";
 import ResendVerification from "@/components/ResendVerification";
 import ProfileStrengthCard from "@/components/ProfileStrengthCard";
+import DailyMotivation from "@/components/DailyMotivation";
+import ActivityTimeline from "@/components/ActivityTimeline";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -21,13 +23,15 @@ export const dynamic = "force-dynamic";
 
 const SECTIONS = [
   { id: "overview", num: "01", label: "Overview" },
-  { id: "roadmap", num: "02", label: "Roadmap Progress" },
-  { id: "results", num: "03", label: "My Results" },
-  { id: "certificates", num: "04", label: "My Certificates" },
-  { id: "portfolio", num: "05", label: "Portfolio" },
-  { id: "tracker", num: "06", label: "Job Tracker" },
-  { id: "tools", num: "07", label: "Tools" },
-  { id: "settings", num: "08", label: "Account Settings" },
+  { id: "motivation", num: "02", label: "Daily Motivation" },
+  { id: "activity", num: "03", label: "Activity" },
+  { id: "roadmap", num: "04", label: "Roadmap Progress" },
+  { id: "results", num: "05", label: "My Results" },
+  { id: "certificates", num: "06", label: "My Certificates" },
+  { id: "portfolio", num: "07", label: "Portfolio" },
+  { id: "tracker", num: "08", label: "Job Tracker" },
+  { id: "tools", num: "09", label: "Tools" },
+  { id: "settings", num: "10", label: "Account Settings" },
 ];
 
 export default async function DashboardPage() {
@@ -44,6 +48,7 @@ export default async function DashboardPage() {
     certificates,
     appsCountRow,
     streak,
+    onboarding,
   ] = await Promise.all([
     db.prepare("SELECT stage, checks, updated_at FROM progress WHERE user_id = ?").get(user.id),
     db.prepare("SELECT quiz, result, payload, created_at FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC").all(user.id),
@@ -54,6 +59,7 @@ export default async function DashboardPage() {
     db.prepare("SELECT id, stage_key, stage_title, date_issued FROM certificates WHERE user_id = ? ORDER BY date_issued").all(user.id),
     db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id),
     getStreak(user.id),
+    db.prepare("SELECT experience_level, main_goal, interests FROM user_onboarding WHERE user_id = ?").get(user.id),
   ]);
 
   let checks: Record<string, number[]> = {};
@@ -83,9 +89,27 @@ export default async function DashboardPage() {
     return items ? Math.round((done / items) * 100) : 0;
   };
 
+  const onboardingRow = onboarding as { experience_level?: string; main_goal?: string; interests?: string } | undefined;
+  const firstName = (user.name || user.email).split(" ")[0];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const isNewUser = !onboardingRow?.experience_level;
   const totalDone = ROADMAP.reduce((acc, s) => acc + (checks[s.key]?.length || 0), 0);
   const totalItems = ROADMAP.reduce((acc, s) => acc + s.items.length, 0);
   const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
+
+  const progressMessage =
+    totalDone === 0
+      ? "Ready to start your VA journey?"
+      : overallPct < 25
+        ? "You're off to a great start — keep going!"
+        : overallPct < 50
+          ? "Great progress — you're building real momentum."
+          : overallPct < 75
+            ? "You're making solid progress — keep it up!"
+            : overallPct < 100
+              ? "Almost there — finish strong!"
+              : "You've completed the roadmap — incredible work!";
 
   const roadmap = await roadmapCompletion(user.id);
   await refreshHireReadyBadge(user.id);
@@ -107,10 +131,13 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
               <div className="eyebrow">// Dashboard</div>
-              <h1 className="mb-0">Hi, {user.name || user.email}.</h1>
-              <p className="mt-4">
-                Everything is free. The full roadmap, all tools, and every course are yours.
-              </p>
+              <h1 className="mb-0">{greeting}, {firstName} 👋</h1>
+              <p className="mt-4">{progressMessage}</p>
+              {isNewUser && (
+                <p className="mt-2 text-[13.5px] text-ink-500">
+                  Start by completing the Welcome Wizard to personalize your experience.
+                </p>
+              )}
             </div>
             <LogoutButton />
           </div>
@@ -196,10 +223,30 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 02 ROADMAP PROGRESS */}
+          {/* 02 DAILY MOTIVATION */}
+          <section id="motivation" className="scroll-mt-24">
+            <div className="section-head !mb-6">
+              <div className="eyebrow">02 · Daily Motivation</div>
+              <h2 className="!text-[24px]">Your daily boost</h2>
+            </div>
+            <DailyMotivation />
+          </section>
+
+          {/* 03 ACTIVITY */}
+          <section id="activity" className="scroll-mt-24">
+            <div className="section-head !mb-6">
+              <div className="eyebrow">03 · Activity</div>
+              <h2 className="!text-[24px]">Your recent activity</h2>
+            </div>
+            <div className="panel p-7">
+              <ActivityTimeline userId={user.id} />
+            </div>
+          </section>
+
+          {/* 04 ROADMAP PROGRESS */}
           <section id="roadmap" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">02 · Roadmap Progress</div>
+              <div className="eyebrow">04 · Roadmap Progress</div>
               <h2 className="!text-[24px]">Roadmap & 30-Day Plan</h2>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
@@ -253,7 +300,7 @@ export default async function DashboardPage() {
           {/* 03 MY RESULTS */}
           <section id="results" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">03 · My Results</div>
+              <div className="eyebrow">05 · My Results</div>
               <h2 className="!text-[24px]">Your saved quiz results</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -284,7 +331,7 @@ export default async function DashboardPage() {
           {/* 04 CERTIFICATES */}
           <section id="certificates" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">04 · My Certificates</div>
+              <div className="eyebrow">06 · My Certificates</div>
               <h2 className="!text-[24px]">Completed stages and certificates</h2>
             </div>
             <CertificateSection
@@ -296,7 +343,7 @@ export default async function DashboardPage() {
           {/* 05 PORTFOLIO */}
           <section id="portfolio" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">05 · Portfolio</div>
+              <div className="eyebrow">07 · Portfolio</div>
               <h2 className="!text-[24px]">Your public page</h2>
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -325,7 +372,7 @@ export default async function DashboardPage() {
           {/* 06 JOB TRACKER */}
           <section id="tracker" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">06 · Job Tracker</div>
+              <div className="eyebrow">08 · Job Tracker</div>
               <h2 className="!text-[24px]">Track your applications</h2>
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -347,7 +394,7 @@ export default async function DashboardPage() {
           {/* 07 TOOLS */}
           <section id="tools" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">07 · Tools</div>
+              <div className="eyebrow">09 · Tools</div>
               <h2 className="!text-[24px]">Everything you need, free</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -414,7 +461,7 @@ export default async function DashboardPage() {
           {/* 08 ACCOUNT SETTINGS */}
           <section id="settings" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">08 · Account Settings</div>
+              <div className="eyebrow">10 · Account Settings</div>
               <h2 className="!text-[24px]">Profile, password, and preferences</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">

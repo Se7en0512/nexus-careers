@@ -6,6 +6,7 @@ import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { verifyCaptcha } from "@/lib/captcha";
 import { sendVerificationEmail } from "@/lib/email";
 import { EMAIL_VERIFICATION_ENABLED } from "@/lib/feature-flags";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
     .run(email, hashPassword(password), name, updatesOptIn, autoVerify);
   const userId = Number(result.lastInsertRowid);
   await createSession(userId);
+  await logActivity(userId, "account_created", { email, name });
 
   // TEMPORARILY DISABLED — skip verification email
   // Re-enable once a verified email domain is configured on Resend.

@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PLAN_30 } from "@/data/plan30";
 import { recordDailyActivity } from "@/lib/gamification";
+import { logActivity } from "@/lib/activity";
 
 export async function GET() {
   let user;
@@ -41,6 +42,9 @@ export async function POST(req: Request) {
   ).run(user.id, day, done ? 1 : 0);
 
   await recordDailyActivity(user.id);
+  if (done) {
+    await logActivity(user.id, "daily_plan_progress", { day });
+  }
 
   return NextResponse.json({ ok: true, day, done });
 }

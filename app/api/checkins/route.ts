@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { recordWeeklyCheckin, getCheckinStreak, hasCheckedInThisWeek, phWeekStart } from "@/lib/gamification";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(req: Request) {
     let user;
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
 
     const note = String(data.note || "").trim().slice(0, 500);
     await recordWeeklyCheckin(user.id, apps, note);
+    await logActivity(user.id, "checkin_recorded", { applications: apps });
     const streak = await getCheckinStreak(user.id);
     const checkedIn = await hasCheckedInThisWeek(user.id);
 

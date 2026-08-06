@@ -441,6 +441,26 @@ async function init() {
     visitor_id TEXT PRIMARY KEY,
     last_seen INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS user_onboarding (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    experience_level TEXT NOT NULL DEFAULT '',
+    main_goal TEXT NOT NULL DEFAULT '',
+    weekly_hours TEXT NOT NULL DEFAULT '',
+    interests TEXT NOT NULL DEFAULT '[]',
+    completed_at INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS activity_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL DEFAULT '',
+    metadata TEXT NOT NULL DEFAULT '{}',
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id, created_at DESC);
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:
@@ -485,6 +505,26 @@ async function migrate() {
     // new schema — re-seed so rows get platform_type and niche_tags
     await client.executeMultiple("DELETE FROM apply_sites");
   }
+  // Onboarding & activity tables (created in later sessions)
+  await client.executeMultiple(`
+    CREATE TABLE IF NOT EXISTS user_onboarding (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      experience_level TEXT NOT NULL DEFAULT '',
+      main_goal TEXT NOT NULL DEFAULT '',
+      weekly_hours TEXT NOT NULL DEFAULT '',
+      interests TEXT NOT NULL DEFAULT '[]',
+      completed_at INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS activity_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      metadata TEXT NOT NULL DEFAULT '{}',
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+    CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id, created_at DESC);
+  `);
 }
 
 /* ============ SEEDS ============ */

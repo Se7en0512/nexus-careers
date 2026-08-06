@@ -2,6 +2,7 @@
 
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 
 export async function saveProgressAction(stageKey: string, checked: number[]) {
   const user = await getSessionUser();
@@ -17,4 +18,5 @@ export async function saveProgressAction(stageKey: string, checked: number[]) {
      VALUES (?, ?, ?, datetime('now'))
      ON CONFLICT(user_id) DO UPDATE SET checks = excluded.checks, updated_at = excluded.updated_at`
   ).run(user.id, stageKey, JSON.stringify(checks));
+  await logActivity(user.id, "roadmap_progress", { stage: stageKey, items_completed: checked.length });
 }

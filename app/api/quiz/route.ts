@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordDailyActivity, refreshHireReadyBadge } from "@/lib/gamification";
+import { logActivity } from "@/lib/activity";
 
 export async function GET(req: Request) {
   let user;
@@ -73,6 +74,7 @@ export async function POST(req: Request) {
 
   await recordDailyActivity(user.id);
   await refreshHireReadyBadge(user.id);
+  await logActivity(user.id, "quiz_completed", { quiz, result });
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

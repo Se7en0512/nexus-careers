@@ -67,9 +67,9 @@ export default function SignupForm() {
         setError(data.error || "Something went wrong — please try again.");
         return;
       }
-      // TEMPORARILY DISABLED — skip verify-email page, go straight to dashboard
+      // TEMPORARILY DISABLED — skip verify-email page, go straight to onboarding
       // Re-enable once a verified email domain is configured on Resend.
-      router.push(data.verified === false ? "/verify-email" : "/dashboard");
+      router.push(data.verified === false ? "/verify-email" : "/onboarding");
       router.refresh();
     } finally {
       setBusy(false);

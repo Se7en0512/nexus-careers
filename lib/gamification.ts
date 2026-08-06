@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { ROADMAP } from "@/data/roadmap";
+import { logActivity } from "./activity";
 
 export function phDateStr(d: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -115,7 +116,11 @@ export async function isHireReady(userId: number): Promise<boolean> {
 
 export async function refreshHireReadyBadge(userId: number): Promise<boolean> {
   if (!(await isHireReady(userId))) return false;
+  const existing = await db.prepare("SELECT 1 FROM user_badges WHERE user_id = ? AND badge_type = 'hire_ready'").get(userId);
   await db.prepare("INSERT OR IGNORE INTO user_badges (user_id, badge_type) VALUES (?, 'hire_ready')").run(userId);
+  if (!existing) {
+    await logActivity(userId, "hire_ready_unlocked");
+  }
   return true;
 }
 

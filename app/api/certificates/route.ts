@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ROADMAP } from "@/data/roadmap";
 import { refreshHireReadyBadge } from "@/lib/gamification";
+import { logActivity } from "@/lib/activity";
 
 export async function GET() {
   let user;
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
   const id = Number(result.lastInsertRowid);
 
   await refreshHireReadyBadge(user.id);
+  await logActivity(user.id, "certificate_earned", { stage: stageKey, title: stage.title });
 
   return NextResponse.json({ ok: true, id }, { status: 201 });
 }

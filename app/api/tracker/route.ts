@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordDailyActivity } from "@/lib/gamification";
+import { logActivity } from "@/lib/activity";
 
 const STATUSES = ["applied", "interviewing", "offered", "rejected", "ghosted"];
 
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
     .run(user.id, company, role, platform, status, appliedDate, sourceUrl, followUpDate, notes);
 
   await recordDailyActivity(user.id);
+  await logActivity(user.id, "job_applied", { company, role });
 
   return NextResponse.json({
     ok: true,
