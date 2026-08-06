@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/Button";
+import { showToast } from "@/components/Toast";
 
 interface FeedbackItem {
   name: string;
@@ -45,6 +46,7 @@ export default function FeedbackSection() {
         return setError(data.error || "Something went wrong.");
       }
       setMsg("Thanks! Your feedback was sent — it will show here once approved.");
+      showToast("success", "Feedback submitted — thank you!");
       setContent("");
       setRating(5);
     } finally {

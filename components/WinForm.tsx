@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
+import { showToast } from "@/components/Toast";
 
 export default function WinForm() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function WinForm() {
       });
       if (!res.ok) throw new Error();
       setStatus("done");
+      showToast("success", "Win submitted! Keep collecting those wins.");
       timerRef.current = setTimeout(() => router.refresh(), 1200);
     } catch {
       setStatus("error");

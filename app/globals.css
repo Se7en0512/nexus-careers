@@ -76,6 +76,15 @@ body {
     background: var(--color-gold-300);
     transform: translateY(-1px);
   }
+  .btn-primary:active {
+    transform: translateY(0);
+    background: var(--color-gold-300);
+  }
+  .btn-primary:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 
   .btn-secondary {
     font-family: var(--font-mono);
@@ -98,6 +107,15 @@ body {
     border-color: var(--color-gold-400);
     background: var(--color-navy-800);
   }
+  .btn-secondary:active {
+    border-color: var(--color-gold-400);
+    background: var(--color-navy-700);
+  }
+  .btn-secondary:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 
   .btn-danger {
     font-family: var(--font-mono);
@@ -114,6 +132,14 @@ body {
   }
   .btn-danger:hover {
     background: var(--red-dim);
+  }
+  .btn-danger:active {
+    background: rgba(217, 126, 107, 0.25);
+  }
+  .btn-danger:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
   }
 
   .section {

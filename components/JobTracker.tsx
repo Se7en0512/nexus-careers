@@ -205,7 +205,14 @@ export default function JobTracker({ initialApplications = [], isGuest }: JobTra
   };
 
   if (loading) {
-    return <p className="font-mono text-sm text-ink-500">Loading Job Tracker...</p>;
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {[...Array(5)].map((_, i) => <div key={i} className="skeleton h-20 bg-navy-900 rounded-[3px]" />)}
+        </div>
+        <div className="skeleton h-64 bg-navy-900 rounded-[3px]" />
+      </div>
+    );
   }
 
   return (

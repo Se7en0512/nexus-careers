@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getPortfolioStrength, type PortfolioStrengthResult } from "@/lib/portfolio-strength";
 import Button from "@/components/Button";
+import { showToast } from "@/components/Toast";
 
 interface Project {
   title: string;
@@ -142,6 +143,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
       setSavedSlug(data.slug);
       router.refresh();
+      showToast("success", "Portfolio saved successfully!");
     } finally {
       setBusy(false);
     }

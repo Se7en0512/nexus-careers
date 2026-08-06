@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/components/Button";
+import { showToast } from "@/components/Toast";
 
 interface WeeklyCheckinProps {
     initialApps: number;
@@ -34,6 +35,7 @@ export default function WeeklyCheckin({ initialApps, streak, checkedIn }: Weekly
                 throw new Error(d?.error || "Failed to save check-in.");
             }
             setSaved(true);
+            showToast("success", "Weekly check-in saved!");
         } catch (e: any) {
             setError(e.message || "Failed to save check-in.");
         } finally {
