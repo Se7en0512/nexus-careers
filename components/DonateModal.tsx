@@ -22,7 +22,10 @@ export default function DonateModal({
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-500 hover:text-white text-lg">✕</button>
         <h2 className="font-serif text-[22px] font-medium text-white">Support Thrive</h2>
         <p className="text-ink-400 text-[14px] text-center leading-relaxed">
-          Thrive is free and community-driven. If this site helped you, consider buying us a coffee to keep it running.
+          Thrive is free and will stay free. But running this site — servers, database, AI tools — costs real money every month. We&apos;re a small team doing this for the Filipino VA community, and every little bit helps us keep the lights on.
+        </p>
+        <p className="text-ink-500 text-[12px] text-center">
+          No pressure. If Thrive has helped you land a client, learn a skill, or avoid a scam, consider donating via GCash or PayPal.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full">

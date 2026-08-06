@@ -24,7 +24,10 @@ export default function DonatePage() {
     <div className="max-w-xl mx-auto px-4 py-16 flex flex-col items-center gap-8 text-center">
       <h1 className="font-serif text-[32px] font-medium">Support Thrive</h1>
       <p className="text-ink-400 text-[15px] leading-relaxed max-w-md">
-        Thrive is free and built for the Filipino VA community. If this platform has helped you in any way, consider supporting us so we can keep it running and improving.
+        Thrive is free and will stay free. But running this site — servers, database, AI tools — costs real money every month. We&apos;re a small team doing this for the Filipino VA community, and every little bit helps us keep the lights on.
+      </p>
+      <p className="text-ink-500 text-[13px] max-w-md">
+        No pressure. If Thrive has helped you land a client, learn a skill, or avoid a scam, consider donating via GCash or PayPal.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
@@ -57,12 +60,21 @@ export default function DonatePage() {
 
       <div className="panel p-6 w-full text-left">
         <h3 className="font-mono text-[11.5px] uppercase tracking-[0.1em] text-gold-400 mb-3">Why donate?</h3>
-        <ul className="text-ink-400 text-[13px] space-y-2">
-          <li>• Covers server and database hosting costs</li>
-          <li>• Keeps all tools and resources 100% free</li>
-          <li>• Helps us add new features and content</li>
-          <li>• Supports the Filipino VA community</li>
+        <p className="text-ink-400 text-[13px] leading-relaxed mb-3">
+          Thrive is built and maintained by a small team with no corporate backing. Here&apos;s what your support helps cover:
+        </p>
+        <ul className="text-ink-400 text-[13px] space-y-2 mb-3">
+          <li>• Server and database hosting</li>
+          <li>• AI tools (chatbot, mock interview, cover letter generator)</li>
+          <li>• New features and content updates</li>
+          <li>• Keeping everything 100% free for all users</li>
         </ul>
+        <p className="text-ink-500 text-[13px] leading-relaxed">
+          We believe every Filipino VA deserves access to quality career tools — no paywalls, no hidden fees. If you&apos;ve found value in Thrive, a small donation goes a long way.
+        </p>
+        <p className="text-ink-500 text-[12px] mt-2 italic">
+          There&apos;s no minimum amount and absolutely no obligation. Give only if you want to.
+        </p>
       </div>
     </div>
   );
