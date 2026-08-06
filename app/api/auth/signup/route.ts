@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { hashPassword, createSession } from "@/lib/auth";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { verifyCaptcha } from "@/lib/captcha";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
@@ -55,6 +57,20 @@ export async function POST(req: Request) {
     .run(email, hashPassword(password), name, updatesOptIn);
   const userId = Number(result.lastInsertRowid);
   await createSession(userId);
+
+  // Send verification email
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  await db.prepare("INSERT INTO email_verifications (token, user_id, expires_at) VALUES (?, ?, ?)").run(token, userId, expiresAt);
+
+  const appUrl = process.env.APP_URL || (process.env.NODE_ENV === "production" ? null : "http://localhost:3000");
+  if (appUrl) {
+    try {
+      await sendVerificationEmail(email, token, appUrl);
+    } catch (e) {
+      console.error("[signup] Failed to send verification email:", e);
+    }
+  }
 
   try {
     await db

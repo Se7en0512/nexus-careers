@@ -11,3 +11,4 @@ next-env.d.ts
 .env*.local
 server.log
 .vercel
+.env*.local

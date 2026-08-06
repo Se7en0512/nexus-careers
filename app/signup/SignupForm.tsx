@@ -15,6 +15,7 @@ export default function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [updatesOptIn, setUpdatesOptIn] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -47,6 +48,10 @@ export default function SignupForm() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -60,7 +65,7 @@ export default function SignupForm() {
         setError(data.error || "Something went wrong — please try again.");
         return;
       }
-      router.push("/dashboard");
+      router.push("/verify-email");
       router.refresh();
     } finally {
       setBusy(false);
@@ -106,6 +111,23 @@ export default function SignupForm() {
           required
         />
         {pwHint && <p className="text-xs text-amber-500 mt-1">{pwHint}</p>}
+      </div>
+      <div>
+        <label className="form-label" htmlFor="s-pass-confirm">Confirm Password</label>
+        <input
+          id="s-pass-confirm"
+          type="password"
+          className="field"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Re-enter your password"
+          minLength={8}
+          maxLength={128}
+          required
+        />
+        {confirmPassword && password !== confirmPassword && (
+          <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
+        )}
       </div>
       <label className="flex items-start gap-3 cursor-pointer">
         <input
