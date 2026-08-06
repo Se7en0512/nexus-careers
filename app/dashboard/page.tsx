@@ -33,17 +33,17 @@ export const dynamic = "force-dynamic";
 
 const SECTIONS = [
   { id: "overview", num: "01", label: "Overview" },
-  { id: "readiness", num: "02", label: "Readiness Insights" },
-  { id: "journey", num: "03", label: "Career Journey" },
-  { id: "weekly-plan", num: "04", label: "Weekly Plan" },
-  { id: "motivation", num: "05", label: "Daily Motivation" },
-  { id: "activity", num: "06", label: "Activity" },
-  { id: "roadmap", num: "07", label: "Roadmap Progress" },
-  { id: "results", num: "08", label: "My Results" },
-  { id: "certificates", num: "09", label: "My Certificates" },
-  { id: "portfolio", num: "10", label: "Portfolio" },
-  { id: "tracker", num: "11", label: "Job Tracker" },
-  { id: "tools", num: "12", label: "Tools" },
+  { id: "tools", num: "02", label: "Career Tools" },
+  { id: "roadmap", num: "03", label: "Roadmap Progress" },
+  { id: "motivation", num: "04", label: "Daily Motivation" },
+  { id: "weekly-plan", num: "05", label: "Weekly Plan" },
+  { id: "readiness", num: "06", label: "Readiness Insights" },
+  { id: "journey", num: "07", label: "Career Journey" },
+  { id: "activity", num: "08", label: "Activity" },
+  { id: "results", num: "09", label: "My Results" },
+  { id: "certificates", num: "10", label: "My Certificates" },
+  { id: "portfolio", num: "11", label: "Portfolio" },
+  { id: "tracker", num: "12", label: "Job Tracker" },
   { id: "settings", num: "13", label: "Account Settings" },
 ];
 
@@ -334,12 +334,83 @@ export default async function DashboardPage() {
           </section>
 
           {/* ═══════════════════════════════════════════════════════
-              02 READINESS INSIGHTS — intermediate + advanced only
+              02 TOOLS — intermediate + advanced only
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel !== "new" && (
+            <section id="tools" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">02 · Career Tools</div>
+                <h2 className="!text-[24px]">Everything you need, free</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "AI VA Assistant",
+                    desc: "Ask anything about getting hired — rates, negotiation, interviews.",
+                    href: "/assistant",
+                  },
+                  {
+                    title: "AI Mock Interview",
+                    desc: "5 real questions for your niche, graded with feedback.",
+                    href: "/tools/mock-interview",
+                  },
+                  {
+                    title: "Interview Coach",
+                    desc: "Guide to the questions most often asked — and how to answer.",
+                    href: "/tools/interview-coach",
+                  },
+                  {
+                    title: "Cover Letter Builder",
+                    desc: "A letter with substance — not a generic template.",
+                    href: "/tools/cover-letter",
+                  },
+                  {
+                    title: "Pitch Calculator",
+                    desc: "Find the rate you need to hit your target.",
+                    href: "/tools/pitch-calculator",
+                  },
+                  {
+                    title: "Job Alerts",
+                    desc: "New WFH jobs for Filipino VAs, refreshed regularly.",
+                    href: "/jobs",
+                  },
+                ].map((t) => (
+                  <div key={t.title} className="panel p-7 hover-lift">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <h3 className="font-semibold text-[15.5px]">{t.title}</h3>
+                    </div>
+                    <p className="text-[13.5px] text-ink-500 mb-4">{t.desc}</p>
+                    <Link href={t.href} className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300">
+                      OPEN →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              <div className="panel p-7 mt-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold text-[15.5px] mb-2">More tools & courses</h3>
+                    <p className="text-[13.5px] text-ink-500 max-w-[560px]">
+                      Invoice Generator, Contract Red-Flag Checker, Budget Calculator, Timezone
+                      Converter, Resume Builder, Contributions Calculator, and the full course
+                      library — all unlocked.
+                    </p>
+                  </div>
+                  <Link href="/courses" className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300 border border-gold-400/50 rounded-full px-3.5 py-1.5">
+                    BROWSE THE LIBRARY →
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              03 READINESS INSIGHTS — intermediate + advanced only
           ═══════════════════════════════════════════════════════ */}
           {userLevel !== "new" && (
             <section id="readiness" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">02 · Readiness Insights</div>
+                <div className="eyebrow">03 · Readiness Insights</div>
                 <h2 className="!text-[24px]">How prepared are you?</h2>
               </div>
               <CareerReadinessInsights />
@@ -621,77 +692,6 @@ export default async function DashboardPage() {
                 <div className="flex flex-col gap-2.5 sm:flex-row">
                   <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
                     OPEN JOB TRACKER →
-                  </Link>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              12 TOOLS — intermediate + advanced only
-          ═══════════════════════════════════════════════════════ */}
-          {userLevel !== "new" && (
-            <section id="tools" className="scroll-mt-24">
-              <div className="section-head !mb-6">
-                <div className="eyebrow">12 · Tools</div>
-                <h2 className="!text-[24px]">Everything you need, free</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  {
-                    title: "AI VA Assistant",
-                    desc: "Ask anything about getting hired — rates, negotiation, interviews.",
-                    href: "/assistant",
-                  },
-                  {
-                    title: "AI Mock Interview",
-                    desc: "5 real questions for your niche, graded with feedback.",
-                    href: "/tools/mock-interview",
-                  },
-                  {
-                    title: "Interview Coach",
-                    desc: "Guide to the questions most often asked — and how to answer.",
-                    href: "/tools/interview-coach",
-                  },
-                  {
-                    title: "Cover Letter Builder",
-                    desc: "A letter with substance — not a generic template.",
-                    href: "/tools/cover-letter",
-                  },
-                  {
-                    title: "Pitch Calculator",
-                    desc: "Find the rate you need to hit your target.",
-                    href: "/tools/pitch-calculator",
-                  },
-                  {
-                    title: "Job Alerts",
-                    desc: "New WFH jobs for Filipino VAs, refreshed regularly.",
-                    href: "/jobs",
-                  },
-                ].map((t) => (
-                  <div key={t.title} className="panel p-7">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="font-semibold text-[15.5px]">{t.title}</h3>
-                    </div>
-                    <p className="text-[13.5px] text-ink-500 mb-4">{t.desc}</p>
-                    <Link href={t.href} className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300">
-                      OPEN →
-                    </Link>
-                  </div>
-                ))}
-              </div>
-              <div className="panel p-7 mt-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-semibold text-[15.5px] mb-2">More tools & courses</h3>
-                    <p className="text-[13.5px] text-ink-500 max-w-[560px]">
-                      Invoice Generator, Contract Red-Flag Checker, Budget Calculator, Timezone
-                      Converter, Resume Builder, Contributions Calculator, and the full course
-                      library — all unlocked.
-                    </p>
-                  </div>
-                  <Link href="/courses" className="font-mono text-[11.5px] text-gold-400 hover:text-gold-300 border border-gold-400/50 rounded-full px-3.5 py-1.5">
-                    BROWSE THE LIBRARY →
                   </Link>
                 </div>
               </div>
