@@ -448,3 +448,63 @@ body {
     margin: 14mm;
   }
 }
+
+/* ===== CELEBRATIONS ===== */
+@keyframes celebrateScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes celebrateGlow {
+  0% { box-shadow: 0 0 0 0 rgba(217, 169, 78, 0.4); }
+  50% { box-shadow: 0 0 20px 4px rgba(217, 169, 78, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 169, 78, 0); }
+}
+@keyframes celebrateSlideUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastIn {
+  0% { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.celebrate-scale {
+  animation: celebrateScale 0.4s ease-out;
+}
+.celebrate-glow {
+  animation: celebrateGlow 0.8s ease-out;
+}
+.toast-enter {
+  animation: toastIn 0.3s ease-out both;
+}
+.toast-exit {
+  animation: toastOut 0.3s ease-in both;
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-navy-800) 25%, var(--color-navy-700) 50%, var(--color-navy-800) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 3px;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+}
