@@ -83,7 +83,7 @@ export default function NavLinks({ className = "" }: { className?: string }) {
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
-          <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-150 pointer-events-none group-hover:pointer-events-auto">
+          <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto">
             <div className="panel rounded-[8px] p-2 w-[230px] flex flex-col shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
               {group.items.map((item) => (
                 <Link

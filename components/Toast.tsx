@@ -6,6 +6,7 @@ export interface ToastMessage {
   id: string;
   type: "success" | "error" | "info";
   message: string;
+  exiting?: boolean;
 }
 
 let toastListeners: Array<(toast: ToastMessage) => void> = [];
@@ -25,6 +26,10 @@ export default function ToastContainer() {
   useEffect(() => {
     const handler = (toast: ToastMessage) => {
       setToasts((prev) => [...prev, toast]);
+      // Start exit animation at 2700ms, remove at 3000ms
+      setTimeout(() => {
+        setToasts((prev) => prev.map((t) => t.id === toast.id ? { ...t, exiting: true } : t));
+      }, 2700);
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== toast.id));
       }, 3000);
@@ -49,7 +54,7 @@ export default function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`toast-enter pointer-events-auto flex items-center gap-3 px-5 py-3.5 border rounded-[3px] shadow-xl ${colors[toast.type]}`}
+          className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 border rounded-[3px] shadow-xl ${colors[toast.type]} ${toast.exiting ? "toast-exit" : "toast-enter"}`}
         >
           <span className="font-mono text-[14px] font-bold">{icons[toast.type]}</span>
           <span className="text-[13.5px] text-ink-50">{toast.message}</span>

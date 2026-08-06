@@ -13,6 +13,9 @@ export default function Confetti({ active, duration = 2000 }: ConfettiProps) {
   useEffect(() => {
     if (!active || !canvasRef.current) return;
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) return;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -32,7 +35,7 @@ export default function Confetti({ active, duration = 2000 }: ConfettiProps) {
       rotationSpeed: number;
     }> = [];
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 30; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: -10,

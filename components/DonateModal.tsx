@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 export default function DonateModal({
   paypalLink,
   gcashNumber,
@@ -9,13 +11,27 @@ export default function DonateModal({
   gcashNumber: string;
   onClose: () => void;
 }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
+
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(onClose, 200);
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+    <div
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"}`}
+      onClick={handleClose}
+    >
       <div
-        className="bg-navy-900 border border-navy-700 rounded-lg p-8 max-w-sm w-full flex flex-col items-center gap-5 relative"
+        className={`bg-navy-900 border border-navy-700 rounded-lg p-8 max-w-sm w-full flex flex-col items-center gap-5 relative transition-all duration-200 ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-ink-500 hover:text-white text-lg">✕</button>
+        <button onClick={handleClose} className="absolute top-4 right-4 text-ink-500 hover:text-white text-lg">✕</button>
         <h2 className="font-serif text-[22px] font-medium text-white">Support Thrive</h2>
         <p className="text-ink-400 text-[13px] text-center leading-relaxed">
           Thrive is free and will stay free. But running this site costs real money every month. If it helped you, consider a small donation.
