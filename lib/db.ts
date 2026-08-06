@@ -668,7 +668,7 @@ async function seedCourses() {
 
 async function seedSiteConfig() {
   const defaults: Record<string, string> = {
-    marquee_text: "Running Thrive costs real money. A small donation helps us keep it free for everyone ☕",
+    marquee_text: "Welcome to Thrive! Running this site costs real money — a small donation helps us keep it free for everyone ☕",
     paypal_link: "https://paypal.me/PhillipWendyll",
     gcash_number: "09923999895",
   };
