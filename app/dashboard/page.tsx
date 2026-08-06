@@ -13,6 +13,7 @@ import ScoreRing from "@/components/ScoreRing";
 import CertificateSection from "@/components/CertificateSection";
 import AccountSettings from "@/components/AccountSettings";
 import ResendVerification from "@/components/ResendVerification";
+import ProfileStrengthCard from "@/components/ProfileStrengthCard";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -185,6 +186,9 @@ export default async function DashboardPage() {
               <Link href={nextAction.href} className="btn-primary !py-[10px] !px-[16px] !text-[12px] whitespace-nowrap self-start">
                 CONTINUE →
               </Link>
+            </div>
+            <div className="mt-6">
+              <ProfileStrengthCard />
             </div>
             <div className="mt-6">
               <WeeklyCheckin initialApps={appsCount} streak={checkinStreak} checkedIn={weeklyCheckedIn} />
