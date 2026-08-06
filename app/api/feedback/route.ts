@@ -22,6 +22,7 @@ export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
   const content = String(data?.content || "").trim().slice(0, 600);
   const rating = Math.min(5, Math.max(1, Math.round(Number(data?.rating) || 5)));
+  const displayName = String(data?.display_name || "").trim().slice(0, 40);
   if (content.length < 10) {
     return NextResponse.json(
       { error: "Feedback must be at least 10 characters." },
@@ -29,9 +30,11 @@ export async function POST(req: Request) {
     );
   }
 
+  const nameToUse = displayName || user.name || "Anonymous";
+
   await db.prepare(
     "INSERT INTO feedback (user_id, name, content, rating, status) VALUES (?, ?, ?, ?, 'pending')"
-  ).run(user.id, user.name || user.email, content, rating);
+  ).run(user.id, nameToUse, content, rating);
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

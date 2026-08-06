@@ -54,13 +54,14 @@ export default function WinForm() {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <div>
-          <label className="form-label" htmlFor="win-name">Name (or community name)</label>
+          <label className="form-label" htmlFor="win-name">Display name (optional)</label>
           <input
             id="win-name"
             className="field"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Maria S."
+            placeholder="e.g. Jenna R. — leave blank for anonymous"
+            maxLength={40}
           />
         </div>
         <div>

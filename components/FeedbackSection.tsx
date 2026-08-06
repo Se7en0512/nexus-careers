@@ -12,6 +12,7 @@ interface FeedbackItem {
 
 export default function FeedbackSection() {
   const [items, setItems] = useState<FeedbackItem[]>([]);
+  const [displayName, setDisplayName] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
@@ -35,7 +36,7 @@ export default function FeedbackSection() {
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, rating }),
+        body: JSON.stringify({ content, rating, display_name: displayName }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -54,6 +55,17 @@ export default function FeedbackSection() {
     <div className="flex flex-col gap-10">
       <form onSubmit={submit} className="panel p-7 flex flex-col gap-4">
         <h2 className="font-serif font-medium text-[19px]">Send feedback</h2>
+        <div>
+          <label className="form-label" htmlFor="feedback-name">Display name (optional)</label>
+          <input
+            id="feedback-name"
+            className="field"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="e.g. Jenna R. — leave blank to stay anonymous"
+            maxLength={40}
+          />
+        </div>
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
