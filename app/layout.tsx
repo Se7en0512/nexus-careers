@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import MarqueeBar from "@/components/MarqueeBar";
 import DonateButton from "@/components/DonateButton";
+import Heartbeat from "@/components/Heartbeat";
 import { db } from "@/lib/db";
 
 const newsreader = Newsreader({
@@ -78,6 +79,7 @@ export default async function RootLayout({
         <main className="flex-1 pb-10">{children}</main>
         <Footer />
         <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} gcashNumber={config.gcash_number || ""} />
+        <Heartbeat />
       </body>
     </html>
   );

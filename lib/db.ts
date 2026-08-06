@@ -428,6 +428,19 @@ async function init() {
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL DEFAULT '/',
+    visitor_id TEXT NOT NULL DEFAULT '',
+    user_agent TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS active_users (
+    visitor_id TEXT PRIMARY KEY,
+    last_seen INTEGER NOT NULL
+  );
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:

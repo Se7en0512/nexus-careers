@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser, isAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import AdminPanel from "@/components/AdminPanel";
+import LiveDashboard from "@/components/LiveDashboard";
 
 export const metadata: Metadata = { title: "Admin Panel" };
 
@@ -113,7 +114,8 @@ export default async function AdminPage() {
       </section>
 
       <div className="wrap py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <LiveDashboard />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 mb-8">
           {[
             { label: "Total Users", value: totalUsers, icon: "👤" },
             { label: "This Week", value: thisWeek, icon: "📈" },
