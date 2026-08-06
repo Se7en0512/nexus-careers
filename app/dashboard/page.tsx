@@ -26,6 +26,7 @@ import SmartProgressSummary from "@/components/SmartProgressSummary";
 import SmartWeeklyPlan from "@/components/SmartWeeklyPlan";
 import WeeklyAIReview from "@/components/WeeklyAIReview";
 import CareerJourneyMap from "@/components/CareerJourneyMap";
+import CareerReadinessInsights from "@/components/CareerReadinessInsights";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -33,17 +34,18 @@ export const dynamic = "force-dynamic";
 
 const SECTIONS = [
   { id: "overview", num: "01", label: "Overview" },
-  { id: "journey", num: "02", label: "Career Journey" },
-  { id: "weekly-plan", num: "03", label: "Weekly Plan" },
-  { id: "motivation", num: "04", label: "Daily Motivation" },
-  { id: "activity", num: "05", label: "Activity" },
-  { id: "roadmap", num: "06", label: "Roadmap Progress" },
-  { id: "results", num: "07", label: "My Results" },
-  { id: "certificates", num: "08", label: "My Certificates" },
-  { id: "portfolio", num: "09", label: "Portfolio" },
-  { id: "tracker", num: "10", label: "Job Tracker" },
-  { id: "tools", num: "11", label: "Tools" },
-  { id: "settings", num: "12", label: "Account Settings" },
+  { id: "readiness", num: "02", label: "Readiness Insights" },
+  { id: "journey", num: "03", label: "Career Journey" },
+  { id: "weekly-plan", num: "04", label: "Weekly Plan" },
+  { id: "motivation", num: "05", label: "Daily Motivation" },
+  { id: "activity", num: "06", label: "Activity" },
+  { id: "roadmap", num: "07", label: "Roadmap Progress" },
+  { id: "results", num: "08", label: "My Results" },
+  { id: "certificates", num: "09", label: "My Certificates" },
+  { id: "portfolio", num: "10", label: "Portfolio" },
+  { id: "tracker", num: "11", label: "Job Tracker" },
+  { id: "tools", num: "12", label: "Tools" },
+  { id: "settings", num: "13", label: "Account Settings" },
 ];
 
 export default async function DashboardPage() {
@@ -279,10 +281,19 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 02 CAREER JOURNEY */}
+          {/* 02 READINESS INSIGHTS */}
+          <section id="readiness" className="scroll-mt-24">
+            <div className="section-head !mb-6">
+              <div className="eyebrow">02 · Readiness Insights</div>
+              <h2 className="!text-[24px]">How prepared are you?</h2>
+            </div>
+            <CareerReadinessInsights />
+          </section>
+
+          {/* 03 CAREER JOURNEY */}
           <section id="journey" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">02 · Career Journey</div>
+              <div className="eyebrow">03 · Career Journey</div>
               <h2 className="!text-[24px]">Your path to becoming a VA</h2>
             </div>
             <CareerJourneyMap
@@ -296,10 +307,10 @@ export default async function DashboardPage() {
             />
           </section>
 
-          {/* 03 WEEKLY PLAN */}
+          {/* 04 WEEKLY PLAN */}
           <section id="weekly-plan" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">03 · Weekly Plan</div>
+              <div className="eyebrow">04 · Weekly Plan</div>
               <h2 className="!text-[24px]">Your personalized week</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -326,19 +337,19 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 04 DAILY MOTIVATION */}
+          {/* 05 DAILY MOTIVATION */}
           <section id="motivation" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">04 · Daily Motivation</div>
+              <div className="eyebrow">05 · Daily Motivation</div>
               <h2 className="!text-[24px]">Your daily boost</h2>
             </div>
             <DailyMotivation />
           </section>
 
-          {/* 05 ACTIVITY */}
+          {/* 06 ACTIVITY */}
           <section id="activity" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">05 · Activity</div>
+              <div className="eyebrow">06 · Activity</div>
               <h2 className="!text-[24px]">Your recent activity</h2>
             </div>
             <div className="panel p-7">
@@ -346,10 +357,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 06 ROADMAP PROGRESS */}
+          {/* 07 ROADMAP PROGRESS */}
           <section id="roadmap" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">06 · Roadmap Progress</div>
+              <div className="eyebrow">07 · Roadmap Progress</div>
               <h2 className="!text-[24px]">Roadmap & 30-Day Plan</h2>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
@@ -400,10 +411,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 07 MY RESULTS */}
+          {/* 08 MY RESULTS */}
           <section id="results" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">07 · My Results</div>
+              <div className="eyebrow">08 · My Results</div>
               <h2 className="!text-[24px]">Your saved quiz results</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -431,10 +442,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 08 CERTIFICATES */}
+          {/* 09 CERTIFICATES */}
           <section id="certificates" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">08 · My Certificates</div>
+              <div className="eyebrow">09 · My Certificates</div>
               <h2 className="!text-[24px]">Completed stages and certificates</h2>
             </div>
             <CertificateSection
@@ -443,10 +454,10 @@ export default async function DashboardPage() {
             />
           </section>
 
-          {/* 09 PORTFOLIO */}
+          {/* 10 PORTFOLIO */}
           <section id="portfolio" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">09 · Portfolio</div>
+              <div className="eyebrow">10 · Portfolio</div>
               <h2 className="!text-[24px]">Your public page</h2>
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -472,10 +483,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 10 JOB TRACKER */}
+          {/* 11 JOB TRACKER */}
           <section id="tracker" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">10 · Job Tracker</div>
+              <div className="eyebrow">11 · Job Tracker</div>
               <h2 className="!text-[24px]">Track your applications</h2>
             </div>
             <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -494,10 +505,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 11 TOOLS */}
+          {/* 12 TOOLS */}
           <section id="tools" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">11 · Tools</div>
+              <div className="eyebrow">12 · Tools</div>
               <h2 className="!text-[24px]">Everything you need, free</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -561,10 +572,10 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* 12 ACCOUNT SETTINGS */}
+          {/* 13 ACCOUNT SETTINGS */}
           <section id="settings" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">12 · Account Settings</div>
+              <div className="eyebrow">13 · Account Settings</div>
               <h2 className="!text-[24px]">Profile, password, and preferences</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
