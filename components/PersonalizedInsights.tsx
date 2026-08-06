@@ -8,7 +8,11 @@ const TYPE_STYLES: Record<string, string> = {
 };
 
 export default function PersonalizedInsights({ insights }: { insights: Insight[] }) {
-  if (insights.length === 0) return null;
+  if (insights.length === 0) return (
+    <div className="p-4 rounded-[3px] border border-navy-700 bg-navy-800/50 text-center">
+      <p className="text-[13px] text-ink-400">Complete your profile and take quizzes to unlock personalized insights.</p>
+    </div>
+  );
 
   return (
     <div className="space-y-3">

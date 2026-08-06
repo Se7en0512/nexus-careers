@@ -218,7 +218,13 @@ export default function SmartWeeklyPlan(profile: {
   const totalMinutes = tasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
   const completedMinutes = tasks.filter((t) => completedIds.has(t.id)).reduce((sum, t) => sum + t.estimatedMinutes, 0);
 
-  if (tasks.length === 0) return null;
+  if (tasks.length === 0) return (
+    <div className="panel p-8 text-center">
+      <p className="text-gold-400 text-[28px] mb-3">📋</p>
+      <p className="text-[14px] text-ink-300 mb-1">Your weekly plan builds as you complete roadmap items</p>
+      <p className="text-[12.5px] text-ink-500">Start with your first task — small steps lead to big wins.</p>
+    </div>
+  );
 
   return (
     <div className="panel p-7">

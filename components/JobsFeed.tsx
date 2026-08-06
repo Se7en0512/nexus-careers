@@ -173,9 +173,14 @@ export default function JobsFeed({ jobs, savedNiches }: { jobs: Job[]; savedNich
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 ? (
-          <p className="panel p-8 text-center text-ink-500 text-[14px]">
-            No job posts in this niche right now.
-          </p>
+          <div className="panel p-8 text-center">
+            <p className="text-gold-400 text-[28px] mb-3">🔍</p>
+            <p className="text-[14px] text-ink-300 mb-1">No jobs in this niche right now</p>
+            <p className="text-[12.5px] text-ink-500 mb-4">New opportunities appear daily. Try a different niche — versatility is a VA&apos;s superpower.</p>
+            <button onClick={() => { setActive("all"); setPrefs([]); }} className="btn-secondary !py-[8px] !px-[14px] !text-[11.5px]">
+              Clear filters
+            </button>
+          </div>
         ) : (
           filtered.map((j) => <JobCard key={j.id} job={j} />)
         )}

@@ -212,6 +212,13 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {activeTab === "projects" && (
           <>
             <p className="text-[13.5px] text-ink-500">Featured projects make your portfolio stand out. Each project shows your role, tools, and results.</p>
+            {projects.length === 0 && (
+              <div className="border border-dashed border-navy-600 rounded-[3px] p-8 text-center mb-4">
+                <p className="text-gold-400 text-[28px] mb-3">💼</p>
+                <p className="text-[14px] text-ink-300 mb-1">Add your first project</p>
+                <p className="text-[12.5px] text-ink-500">Even personal or volunteer work counts — it shows what you can do.</p>
+              </div>
+            )}
             {projects.map((project, i) => (
               <div key={i} className="border border-navy-700 rounded-[3px] p-4 space-y-3">
                 <div className="flex items-center justify-between">

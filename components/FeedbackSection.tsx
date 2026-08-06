@@ -117,9 +117,11 @@ export default function FeedbackSection() {
           Published feedback ({items.length})
         </h2>
         {items.length === 0 ? (
-          <p className="panel p-6 text-[13.5px] text-ink-500">
-            No published feedback yet — be the first to leave a note.
-          </p>
+          <div className="panel p-8 text-center">
+            <p className="text-gold-400 text-[28px] mb-3">★</p>
+            <p className="text-[14px] text-ink-300 mb-1">No feedback yet</p>
+            <p className="text-[12.5px] text-ink-500">Social proof matters — your first review builds trust with future clients.</p>
+          </div>
         ) : (
           items.map((item, i) => (
             <div key={i} className="panel p-5 flex flex-col gap-2">

@@ -404,7 +404,11 @@ export default function AdminPanel({
         </h3>
         {tab === "notifications" ? (
           notifications.length === 0 ? (
-            <p className="panel p-8 text-center text-ink-500 text-[14px]">No notifications yet.</p>
+            <div className="panel p-8 text-center">
+              <p className="text-gold-400 text-[28px] mb-3">🔔</p>
+              <p className="text-[14px] text-ink-300 mb-1">You&apos;re all caught up</p>
+              <p className="text-[12.5px] text-ink-500">New signups and feedback will appear here.</p>
+            </div>
           ) : (
             notifications.map((n) => (
               <div key={n.id} className={`panel p-4 flex flex-col gap-1.5 ${!n.read ? "border-gold-400/30 bg-navy-800" : ""}`}>
