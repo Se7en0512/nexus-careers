@@ -60,16 +60,13 @@ export async function POST(req: Request) {
 
   // Send verification email
   const token = randomBytes(32).toString("hex");
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
   await db.prepare("INSERT INTO email_verifications (token, user_id, expires_at) VALUES (?, ?, ?)").run(token, userId, expiresAt);
 
   const appUrl = process.env.APP_URL || (process.env.NODE_ENV === "production" ? null : "http://localhost:3000");
+  let emailSent = false;
   if (appUrl) {
-    try {
-      await sendVerificationEmail(email, token, appUrl);
-    } catch (e) {
-      console.error("[signup] Failed to send verification email:", e);
-    }
+    emailSent = await sendVerificationEmail(email, token, appUrl);
   }
 
   try {
@@ -82,7 +79,14 @@ export async function POST(req: Request) {
         JSON.stringify({ userId, email, name })
       );
   } catch {
-    // non-critical — don't fail signup if notification insert fails
+    // non-critical
+  }
+
+  if (!emailSent && appUrl) {
+    return NextResponse.json({
+      ok: true,
+      warning: "Account created but verification email could not be sent. You can resend it from Settings.",
+    });
   }
 
   return NextResponse.json({ ok: true });

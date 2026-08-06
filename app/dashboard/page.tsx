@@ -12,6 +12,7 @@ import LogoutButton from "@/components/LogoutButton";
 import ScoreRing from "@/components/ScoreRing";
 import CertificateSection from "@/components/CertificateSection";
 import AccountSettings from "@/components/AccountSettings";
+import ResendVerification from "@/components/ResendVerification";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -114,6 +115,12 @@ export default async function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {user.email_verified === 0 && (
+        <div className="wrap" style={{ marginTop: 16 }}>
+          <ResendVerification />
+        </div>
+      )}
 
       <div className="wrap py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 items-start">
         {/* SECTION NAV */}

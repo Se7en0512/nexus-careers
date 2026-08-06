@@ -12,6 +12,7 @@ export interface UserRow {
   plan: string;
   role: string;
   created_at: string;
+  email_verified?: number;
   expires_at?: number;
 }
 
@@ -64,7 +65,7 @@ export async function getSessionUser(): Promise<UserRow | null> {
   if (!token) return null;
   const row = (await db
     .prepare(
-    `SELECT u.id, u.email, u.name, u.plan, u.role, u.created_at, s.expires_at
+    `SELECT u.id, u.email, u.name, u.plan, u.role, u.created_at, u.email_verified, s.expires_at
         FROM sessions s JOIN users u ON u.id = s.user_id
         WHERE s.token = ?`
     )
