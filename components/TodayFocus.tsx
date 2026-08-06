@@ -60,6 +60,31 @@ export default function TodayFocus({
             <h2 className="text-[20px] lg:text-[24px] font-serif font-medium mb-2">{rec.title}</h2>
             <p className="text-[14.5px] text-ink-500 max-w-[600px] mb-5">{rec.description}</p>
 
+            {/* Priority + Difficulty + Time badges */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-5">
+              <span className={`font-mono text-[10.5px] uppercase tracking-[0.08em] px-2.5 py-1 rounded-[3px] border ${
+                rec.priority >= 100
+                  ? "border-red-400/30 bg-red-400/10 text-red-400"
+                  : rec.priority >= 80
+                    ? "border-gold-400/30 bg-gold-400/10 text-gold-400"
+                    : "border-navy-600 bg-navy-800 text-ink-500"
+              }`}>
+                {rec.priority >= 100 ? "High Priority" : rec.priority >= 80 ? "Medium Priority" : "Recommended"}
+              </span>
+              <span className={`font-mono text-[10.5px] uppercase tracking-[0.08em] px-2.5 py-1 rounded-[3px] border ${
+                rec.estimatedMinutes <= 5
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : rec.estimatedMinutes <= 15
+                    ? "border-gold-400/30 bg-gold-400/10 text-gold-400"
+                    : "border-navy-600 bg-navy-800 text-ink-500"
+              }`}>
+                {rec.estimatedMinutes <= 5 ? "Quick Win" : rec.estimatedMinutes <= 15 ? "Short Task" : "Deep Work"}
+              </span>
+              <span className="font-mono text-[11px] text-ink-500">
+                ⏱ ~{rec.estimatedMinutes} min
+              </span>
+            </div>
+
             {/* Reason + Benefit */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <div className="bg-navy-900/60 rounded-[3px] p-4">
@@ -80,9 +105,6 @@ export default function TodayFocus({
               >
                 CONTINUE →
               </a>
-              <span className="font-mono text-[12px] text-ink-500">
-                ⏱ ~{rec.estimatedMinutes} min
-              </span>
             </div>
           </div>
         </div>
