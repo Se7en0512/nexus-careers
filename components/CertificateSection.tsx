@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import EmptyState from "@/components/EmptyState";
 
 interface StageSummary {
   key: string;
@@ -91,14 +92,13 @@ export default function CertificateSection({
 
       {error && <p className="form-error !mt-4">{error}</p>}
       {stages.filter((s) => s.complete).length === 0 && earned.length === 0 && (
-        <div className="flex items-start gap-4 p-5 bg-navy-800/40 border border-navy-700 rounded-[3px] mt-4">
-          <div className="flex-shrink-0 text-[28px]">🏆</div>
-          <div>
-            <p className="text-[14px] font-semibold mb-1">Your first certificate is within reach</p>
-            <p className="text-[12.5px] text-ink-500">
-              Complete all checklist items in a roadmap stage to claim your certificate. Every stage you finish brings you one step closer.
-            </p>
-          </div>
+        <div className="mt-4">
+          <EmptyState
+            icon="🏆"
+            title="Your first certificate is within reach"
+            description="Complete all checklist items in a roadmap stage to claim your certificate. Every stage you finish brings you one step closer."
+            variant="motivational"
+          />
         </div>
       )}
     </div>

@@ -37,7 +37,7 @@ export default function DailyMotivation() {
       className={`border ${typeColors[item.type] || typeColors.tip} bg-navy-900 rounded-[3px] p-5 transition-colors`}
     >
       <div className="flex items-center gap-2.5 mb-3">
-        <span className="text-[18px]">{completed && item.type === "challenge" ? "✅" : item.emoji}</span>
+        <span className="text-[18px]" aria-hidden="true">{completed && item.type === "challenge" ? "✅" : item.emoji}</span>
         <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400">
           {typeLabels[item.type] || item.title}
         </span>
@@ -57,7 +57,7 @@ export default function DailyMotivation() {
           ) : (
             <button
               onClick={markDone}
-              className="font-mono text-[12px] text-gold-400 hover:text-gold-300 border border-gold-400/30 hover:border-gold-400/50 rounded-[3px] px-4 py-2 transition-colors"
+              className="font-mono text-[12px] text-gold-400 hover:text-gold-300 border border-gold-400/30 hover:border-gold-400/50 rounded-[3px] px-4 py-2 min-h-[44px] transition-colors"
             >
               MARK AS DONE →
             </button>

@@ -8,6 +8,7 @@ import { PLAN_30 } from "@/data/plan30";
 import { getStreak, hasBadge, refreshHireReadyBadge, roadmapCompletion, getCheckinStreak, hasCheckedInThisWeek } from "@/lib/gamification";
 import { getGreeting, getCoachMessage, getInsights, getMilestoneForecast, getSmartProgress, getStepsToHireReady, type UserProfile } from "@/lib/personalization";
 import { getNextBestAction, getQuickActions } from "@/lib/recommendations";
+import EmptyState from "@/components/EmptyState";
 import WeeklyCheckin from "@/components/WeeklyCheckin";
 import Checklist from "@/components/Checklist";
 import ScoreRing from "@/components/ScoreRing";
@@ -182,6 +183,9 @@ export default async function DashboardPage() {
     num: String(i + 1).padStart(2, "0"),
   }));
 
+  // Lookup for dynamic section numbers in eyebrow labels
+  const sectionNum = Object.fromEntries(numberedSections.map((s) => [s.id, s.num]));
+
   return (
     <>
       {/* HERO — Greeting + Today's Focus + Stats */}
@@ -220,7 +224,7 @@ export default async function DashboardPage() {
           ═══════════════════════════════════════════════════════ */}
           <section id="overview" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">01 · Overview</div>
+              <div className="eyebrow">{sectionNum.overview} · Overview</div>
               <h2 className="!text-[24px]">Your progress right now</h2>
             </div>
 
@@ -340,7 +344,7 @@ export default async function DashboardPage() {
           {userLevel !== "new" && (
             <section id="tools" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">02 · Career Tools</div>
+                <div className="eyebrow">{sectionNum.tools} · Career Tools</div>
                 <h2 className="!text-[24px]">Everything you need, free</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -411,7 +415,7 @@ export default async function DashboardPage() {
           {userLevel !== "new" && (
             <section id="readiness" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">03 · Readiness Insights</div>
+                <div className="eyebrow">{sectionNum.readiness} · Readiness Insights</div>
                 <h2 className="!text-[24px]">How prepared are you?</h2>
               </div>
               <CareerReadinessInsights />
@@ -424,7 +428,7 @@ export default async function DashboardPage() {
           {userLevel !== "new" && (
             <section id="journey" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">03 · Career Journey</div>
+                <div className="eyebrow">{sectionNum.journey} · Career Journey</div>
                 <h2 className="!text-[24px]">Your path to becoming a VA</h2>
               </div>
               <CareerJourneyMap
@@ -445,7 +449,7 @@ export default async function DashboardPage() {
           {userLevel !== "new" && (
             <section id="weekly-plan" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">04 · Weekly Plan</div>
+                <div className="eyebrow">{sectionNum["weekly-plan"]} · Weekly Plan</div>
                 <h2 className="!text-[24px]">Your personalized week</h2>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -478,7 +482,7 @@ export default async function DashboardPage() {
           ═══════════════════════════════════════════════════════ */}
           <section id="motivation" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">05 · Daily Motivation</div>
+              <div className="eyebrow">{sectionNum.motivation} · Daily Motivation</div>
               <h2 className="!text-[24px]">Your daily boost</h2>
             </div>
             <DailyMotivation />
@@ -490,7 +494,7 @@ export default async function DashboardPage() {
           {userLevel === "advanced" && (
             <section id="activity" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">06 · Activity</div>
+                <div className="eyebrow">{sectionNum.activity} · Activity</div>
                 <h2 className="!text-[24px]">Your recent activity</h2>
               </div>
               <div className="panel p-7">
@@ -504,7 +508,7 @@ export default async function DashboardPage() {
           ═══════════════════════════════════════════════════════ */}
           <section id="roadmap" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">07 · Roadmap Progress</div>
+              <div className="eyebrow">{sectionNum.roadmap} · Roadmap Progress</div>
               <h2 className="!text-[24px]">Roadmap & 30-Day Plan</h2>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
@@ -561,7 +565,7 @@ export default async function DashboardPage() {
           {userLevel === "advanced" && (
             <section id="results" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">08 · My Results</div>
+                <div className="eyebrow">{sectionNum.results} · My Results</div>
                 <h2 className="!text-[24px]">Your saved quiz results</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -620,7 +624,7 @@ export default async function DashboardPage() {
           {userLevel === "advanced" && (
             <section id="certificates" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">09 · My Certificates</div>
+                <div className="eyebrow">{sectionNum.certificates} · My Certificates</div>
                 <h2 className="!text-[24px]">Completed stages and certificates</h2>
               </div>
               <CertificateSection
@@ -635,34 +639,40 @@ export default async function DashboardPage() {
           ═══════════════════════════════════════════════════════ */}
           <section id="portfolio" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">10 · Portfolio</div>
+              <div className="eyebrow">{sectionNum.portfolio} · Portfolio</div>
               <h2 className="!text-[24px]">Your public page</h2>
             </div>
-            <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]">
-                  {portfolioRow ? "✓" : "💼"}
+            {portfolioRow ? (
+              <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
+                    ✓
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-semibold mb-1">Your portfolio is published.</p>
+                    <p className="text-[13px] text-ink-500">
+                      Live at /portfolio/{portfolioRow.slug} — share the link with every application.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[15px] font-semibold mb-1">{portfolioRow ? "Your portfolio is published." : "Create your professional portfolio"}</p>
-                  <p className="text-[13px] text-ink-500">
-                    {portfolioRow
-                      ? `Live at /portfolio/${portfolioRow.slug} — share the link with every application.`
-                      : "A shareable page clients can view in under 5 minutes. Skills, projects, and trust signals — all in one link."}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2.5 sm:flex-row">
-                <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                  {portfolioRow ? "EDIT PORTFOLIO →" : "CREATE PORTFOLIO →"}
-                </Link>
-                {portfolioRow && (
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
+                    EDIT PORTFOLIO →
+                  </Link>
                   <Link href={`/portfolio/${portfolioRow.slug}`} target="_blank" className="btn-secondary !py-[10px] !px-[16px] !text-[12px] text-center">
                     VIEW PREVIEW ↗
                   </Link>
-                )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <EmptyState
+                icon="💼"
+                title="Create your professional portfolio"
+                description="A shareable page clients can view in under 5 minutes. Skills, projects, and trust signals — all in one link."
+                action={{ label: "CREATE PORTFOLIO →", href: "/portfolio-builder" }}
+                variant="motivational"
+              />
+            )}
           </section>
 
           {/* ═══════════════════════════════════════════════════════
@@ -671,31 +681,37 @@ export default async function DashboardPage() {
           {userLevel === "advanced" && (
             <section id="tracker" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">11 · Job Tracker</div>
+                <div className="eyebrow">{sectionNum.tracker} · Job Tracker</div>
                 <h2 className="!text-[24px]">Track your applications</h2>
               </div>
-            <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]">
-                  {appsCount > 0 ? "📊" : "📤"}
+              {appsCount > 0 ? (
+                <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
+                      📊
+                    </div>
+                    <div>
+                      <p className="text-[15px] font-semibold mb-1">{appsCount} applications tracked</p>
+                      <p className="text-[13px] text-ink-500">
+                        Keep track of where you applied, interview schedules, and follow-ups.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2.5 sm:flex-row">
+                    <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
+                      OPEN JOB TRACKER →
+                    </Link>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[15px] font-semibold mb-1">
-                    {appsCount > 0 ? `${appsCount} applications tracked` : "Start tracking your applications"}
-                  </p>
-                  <p className="text-[13px] text-ink-500">
-                    {appsCount > 0
-                      ? "Keep track of where you applied, interview schedules, and follow-ups."
-                      : "Know exactly where you applied, who responded, and what to follow up on."}
-                  </p>
-                </div>
-              </div>
-                <div className="flex flex-col gap-2.5 sm:flex-row">
-                  <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                    OPEN JOB TRACKER →
-                  </Link>
-                </div>
-              </div>
+              ) : (
+                <EmptyState
+                  icon="📤"
+                  title="Start tracking your applications"
+                  description="Know exactly where you applied, who responded, and what to follow up on."
+                  action={{ label: "OPEN JOB TRACKER →", href: "/tools/tracker" }}
+                  variant="motivational"
+                />
+              )}
             </section>
           )}
 
@@ -704,7 +720,7 @@ export default async function DashboardPage() {
           ═══════════════════════════════════════════════════════ */}
           <section id="settings" className="scroll-mt-24">
             <div className="section-head !mb-6">
-              <div className="eyebrow">13 · Account Settings</div>
+              <div className="eyebrow">{sectionNum.settings} · Account Settings</div>
               <h2 className="!text-[24px]">Profile, password, and preferences</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">

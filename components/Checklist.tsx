@@ -62,7 +62,7 @@ export default function Checklist({ stageKey, items, saved }: ChecklistProps) {
       {/* Today's Mission header */}
       {!allDone && todayMission.length > 0 && (
         <div className="flex items-center gap-2.5 mb-4">
-          <span className="text-[18px]">🎯</span>
+          <span className="text-[18px]" aria-hidden="true">🎯</span>
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-gold-400">
               Today&apos;s Mission
@@ -79,7 +79,7 @@ export default function Checklist({ stageKey, items, saved }: ChecklistProps) {
       {/* Completed stages celebration */}
       {allDone && (
         <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[3px] mb-4">
-          <span className="text-[24px]">🎉</span>
+          <span className="text-[24px]" aria-hidden="true">🎉</span>
           <div>
             <p className="text-[14px] font-semibold text-emerald-400">Stage Complete!</p>
             <p className="text-[12.5px] text-ink-500">All tasks done — you can claim your certificate now.</p>
@@ -171,7 +171,7 @@ export default function Checklist({ stageKey, items, saved }: ChecklistProps) {
       {/* Milestone encouragement */}
       {!allDone && tasksLeft > 0 && tasksLeft <= 2 && (
         <div className="flex items-center gap-3 mt-4 p-3 bg-gold-400/5 border border-gold-400/20 rounded-[3px]">
-          <span className="text-[18px]">⭐</span>
+          <span className="text-[18px]" aria-hidden="true">⭐</span>
           <p className="text-[13px] text-ink-300">
             You&apos;re only <strong className="text-gold-400">{tasksLeft} task{tasksLeft > 1 ? "s" : ""}</strong> away from completing this stage!
           </p>
