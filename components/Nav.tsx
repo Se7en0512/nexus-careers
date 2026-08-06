@@ -59,7 +59,7 @@ export default async function Nav() {
                     Sign In
                   </Link>
                   <Link href="/signup" className="btn-primary !py-[9px] !px-[16px] !text-[12px]">
-                    Create Account
+                    Create Free Account
                   </Link>
                 </>
               )}

@@ -267,6 +267,168 @@ body {
   padding: 40px 36px;
 }
 
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 169, 78, 0.3); }
+  50%      { box-shadow: 0 0 0 10px rgba(217, 169, 78, 0); }
+}
+
+.anim-fade-up {
+  animation: fadeUp 0.6s ease-out both;
+}
+.anim-fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+.anim-scale-in {
+  animation: scaleIn 0.5s ease-out both;
+}
+
+/* stagger delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+.delay-7 { animation-delay: 0.7s; }
+.delay-8 { animation-delay: 0.8s; }
+
+/* Hover elevation for cards */
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Button ripple */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.25) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.btn-ripple:active::after {
+  opacity: 1;
+}
+
+/* Counter animation helper */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Timeline connector */
+.timeline-line {
+  position: relative;
+}
+.timeline-line::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-gold-400) 0%, var(--color-navy-700) 100%);
+}
+.timeline-line:last-child::before {
+  display: none;
+}
+
+/* Testimonial card shine */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(217,169,78,0.04), transparent);
+  transition: left 0.6s ease;
+}
+.card-shine:hover::before {
+  left: 100%;
+}
+
+/* FAQ accordion */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+.faq-item[data-open="true"] .faq-answer {
+  max-height: 200px;
+}
+
+/* Star rating */
+.star { color: var(--color-gold-400); }
+.star-empty { color: var(--color-navy-600); }
+
+/* Trust badge pill */
+.trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-navy-600);
+  font-size: 13px;
+  color: var(--color-ink-300);
+  transition: border-color 0.2s, color 0.2s;
+}
+.trust-pill:hover {
+  border-color: var(--color-gold-400);
+  color: var(--color-ink-50);
+}
+
+/* Glow ring for primary CTA */
+.glow-ring {
+  position: relative;
+}
+.glow-ring::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--color-gold-400), transparent, var(--color-gold-400));
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+.glow-ring:hover::before {
+  opacity: 0.5;
+}
+
 /* ===== RESUME PRINT ===== */
 @media print {
   body * {
