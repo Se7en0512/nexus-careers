@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import EmptyState from "@/components/EmptyState";
 
 interface Course {
   id: number;
@@ -101,9 +102,12 @@ export default function CourseLibrary({ courses }: { courses: Course[] }) {
       </div>
 
       {groups.length === 0 ? (
-        <p className="panel p-8 text-center text-ink-500 text-[14px]">
-          Nothing matched these filters. Try a different category or clear the search.
-        </p>
+        <EmptyState
+          icon="📚"
+          title="Nothing matched these filters"
+          description="Try a different category or clear the search to browse all courses."
+          variant="default"
+        />
       ) : (
         groups.map(([cat, list]) => (
           <section key={cat} className="mb-14">

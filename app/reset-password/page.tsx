@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Button from "@/components/Button";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -68,9 +69,9 @@ function ResetPasswordForm() {
         />
       </div>
       {error && <p className="form-error">{error}</p>}
-      <button className="btn-primary w-full" disabled={busy}>
+      <Button loading={busy} className="w-full">
         {busy ? "Saving..." : "Reset Password"}
-      </button>
+      </Button>
     </form>
   );
 }

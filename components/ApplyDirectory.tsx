@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { NICHE_LEARNING } from "@/data/niche-learning";
+import EmptyState from "@/components/EmptyState";
 
 interface Site {
   id: number;
@@ -86,9 +87,12 @@ export default function ApplyDirectory({ sites }: { sites: Site[] }) {
       </div>
 
       {categories.length === 0 ? (
-<p className="panel p-8 text-center text-ink-500 text-[14px]">
-           No matches for these filters.
-         </p>
+        <EmptyState
+          icon="🔍"
+          title="No matches for these filters"
+          description="Try adjusting your search or clearing filters to see more results."
+          variant="default"
+        />
       ) : (
         categories.map((cat) => (
           <section key={cat} className="mb-14">

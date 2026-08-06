@@ -225,7 +225,7 @@ export default async function DashboardPage() {
           <section id="overview" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">{sectionNum.overview} · Overview</div>
-              <h2 className="!text-[24px]">Your progress right now</h2>
+              <h2 className="!text-[22px]">Your progress right now</h2>
             </div>
 
             {/* NEW USER: Onboarding checklist */}
@@ -345,7 +345,7 @@ export default async function DashboardPage() {
             <section id="tools" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.tools} · Career Tools</div>
-                <h2 className="!text-[24px]">Everything you need, free</h2>
+                <h2 className="!text-[22px]">Everything you need, free</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
@@ -416,7 +416,7 @@ export default async function DashboardPage() {
             <section id="readiness" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.readiness} · Readiness Insights</div>
-                <h2 className="!text-[24px]">How prepared are you?</h2>
+                <h2 className="!text-[22px]">How prepared are you?</h2>
               </div>
               <CareerReadinessInsights />
             </section>
@@ -429,7 +429,7 @@ export default async function DashboardPage() {
             <section id="journey" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.journey} · Career Journey</div>
-                <h2 className="!text-[24px]">Your path to becoming a VA</h2>
+                <h2 className="!text-[22px]">Your path to becoming a VA</h2>
               </div>
               <CareerJourneyMap
                 overallPct={overallPct}
@@ -450,7 +450,7 @@ export default async function DashboardPage() {
             <section id="weekly-plan" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum["weekly-plan"]} · Weekly Plan</div>
-                <h2 className="!text-[24px]">Your personalized week</h2>
+                <h2 className="!text-[22px]">Your personalized week</h2>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <SmartWeeklyPlan
@@ -483,7 +483,7 @@ export default async function DashboardPage() {
           <section id="motivation" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">{sectionNum.motivation} · Daily Motivation</div>
-              <h2 className="!text-[24px]">Your daily boost</h2>
+              <h2 className="!text-[22px]">Your daily boost</h2>
             </div>
             <DailyMotivation />
           </section>
@@ -495,7 +495,7 @@ export default async function DashboardPage() {
             <section id="activity" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.activity} · Activity</div>
-                <h2 className="!text-[24px]">Your recent activity</h2>
+                <h2 className="!text-[22px]">Your recent activity</h2>
               </div>
               <div className="panel p-7">
                 <ActivityTimeline userId={user.id} />
@@ -509,7 +509,7 @@ export default async function DashboardPage() {
           <section id="roadmap" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">{sectionNum.roadmap} · Roadmap Progress</div>
-              <h2 className="!text-[24px]">Roadmap & 30-Day Plan</h2>
+              <h2 className="!text-[22px]">Roadmap & 30-Day Plan</h2>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-navy-700 border border-navy-700 mb-8">
               {ROADMAP.map((s) => (
@@ -566,7 +566,7 @@ export default async function DashboardPage() {
             <section id="results" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.results} · My Results</div>
-                <h2 className="!text-[24px]">Your saved quiz results</h2>
+                <h2 className="!text-[22px]">Your saved quiz results</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="panel p-7">
@@ -625,7 +625,7 @@ export default async function DashboardPage() {
             <section id="certificates" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.certificates} · My Certificates</div>
-                <h2 className="!text-[24px]">Completed stages and certificates</h2>
+                <h2 className="!text-[22px]">Completed stages and certificates</h2>
               </div>
               <CertificateSection
                 stages={ROADMAP.map((s) => ({ key: s.key, title: s.title, complete: pct(s.key) === 100 }))}
@@ -640,7 +640,7 @@ export default async function DashboardPage() {
           <section id="portfolio" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">{sectionNum.portfolio} · Portfolio</div>
-              <h2 className="!text-[24px]">Your public page</h2>
+              <h2 className="!text-[22px]">Your public page</h2>
             </div>
             {portfolioRow ? (
               <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -682,7 +682,7 @@ export default async function DashboardPage() {
             <section id="tracker" className="scroll-mt-24">
               <div className="section-head !mb-6">
                 <div className="eyebrow">{sectionNum.tracker} · Job Tracker</div>
-                <h2 className="!text-[24px]">Track your applications</h2>
+                <h2 className="!text-[22px]">Track your applications</h2>
               </div>
               {appsCount > 0 ? (
                 <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
@@ -721,7 +721,7 @@ export default async function DashboardPage() {
           <section id="settings" className="scroll-mt-24">
             <div className="section-head !mb-6">
               <div className="eyebrow">{sectionNum.settings} · Account Settings</div>
-              <h2 className="!text-[24px]">Profile, password, and preferences</h2>
+              <h2 className="!text-[22px]">Profile, password, and preferences</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
               <div className="panel p-7">

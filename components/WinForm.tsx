@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/Button";
 
 export default function WinForm() {
   const router = useRouter();
@@ -88,9 +89,9 @@ export default function WinForm() {
         <p className="form-note mt-2">{quote.length}/500</p>
       </div>
       {status === "error" && <p className="form-error">Something went wrong — please try again.</p>}
-      <button className="btn-primary" disabled={status === "saving"}>
+      <Button loading={status === "saving"}>
         {status === "saving" ? "Sending..." : "Send"}
-      </button>
+      </Button>
     </form>
   );
 }

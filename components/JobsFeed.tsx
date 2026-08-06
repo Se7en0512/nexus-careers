@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NICHE_LEARNING } from "@/data/niche-learning";
+import Button from "@/components/Button";
 
 interface Job {
   id: number;
@@ -105,9 +106,9 @@ export default function JobsFeed({ jobs, savedNiches }: { jobs: Job[]; savedNich
                 </button>
               ))}
             </div>
-            <button onClick={savePrefs} disabled={saving} className="btn-secondary !py-[9px] !px-[16px] !text-[12.5px]">
+            <Button variant="secondary" loading={saving} onClick={savePrefs} className="!py-[9px] !px-[16px] !text-[12.5px]">
               {saving ? "Saving..." : savedMsg ? "Saved ✓" : "Save alert preferences"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

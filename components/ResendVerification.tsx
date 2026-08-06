@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/Button";
 
 export default function ResendVerification() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -25,45 +26,20 @@ export default function ResendVerification() {
   }
 
   return (
-    <div
-      style={{
-        background: "#FFF3CD",
-        border: "1px solid #D4A94E",
-        borderRadius: 8,
-        padding: "12px 20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: 8,
-      }}
-    >
-      <span style={{ color: "#555" }}>
-        <strong>Email not verified.</strong>{" "}
+    <div className="flex items-center justify-between flex-wrap gap-2 bg-amber-500/10 border border-amber-500/30 rounded-[3px] px-5 py-3">
+      <span className="text-[13px] text-ink-300">
+        <strong className="text-ink-50">Email not verified.</strong>{" "}
         {status === "sent"
           ? msg
           : "Please check your inbox or resend the verification link."}
       </span>
       {status !== "sent" && (
-        <button
-          onClick={handleResend}
-          disabled={status === "sending"}
-          style={{
-            background: "#D9A94E",
-            color: "#1a1a2e",
-            border: "none",
-            borderRadius: 4,
-            padding: "6px 16px",
-            fontWeight: 600,
-            cursor: status === "sending" ? "not-allowed" : "pointer",
-            opacity: status === "sending" ? 0.6 : 1,
-          }}
-        >
+        <Button variant="secondary" loading={status === "sending"} onClick={handleResend} className="!py-[6px] !px-4 !text-[12px]">
           {status === "sending" ? "Sending..." : "Resend"}
-        </button>
+        </Button>
       )}
       {status === "error" && (
-        <span style={{ color: "#c00", fontSize: 13 }}>{msg}</span>
+        <span className="text-[13px] text-red-400 w-full">{msg}</span>
       )}
     </div>
   );

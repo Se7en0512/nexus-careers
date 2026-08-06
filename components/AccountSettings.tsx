@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/Button";
 
 const GOAL_OPTIONS = [
   { value: "first_client", label: "Get my first client" },
@@ -144,9 +145,9 @@ export default function AccountSettings({
         <h3 className="font-mono text-xs uppercase tracking-[0.1em] text-gold-400 mb-4">Profile</h3>
         <div className="flex flex-col sm:flex-row gap-3 max-w-[520px]">
 <input className="field" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Name" />
-          <button onClick={saveProfile} disabled={busy} className="btn-secondary !py-[12px] !px-[18px] !text-[12.5px] whitespace-nowrap">
+          <Button variant="secondary" loading={busy} onClick={saveProfile} className="!py-[12px] !px-[18px] !text-[12.5px] whitespace-nowrap">
             Save
-          </button>
+          </Button>
         </div>
         <p className="font-mono text-[11.5px] text-ink-500 mt-2">Email (can't be changed): {email}</p>
       </div>
@@ -177,9 +178,9 @@ export default function AccountSettings({
           ))}
         </div>
         {goal !== mainGoal && (
-          <button onClick={saveGoal} disabled={busy} className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] mt-3">
+          <Button variant="secondary" loading={busy} onClick={saveGoal} className="!py-[10px] !px-[16px] !text-[12.5px] mt-3">
             Save Goal
-          </button>
+          </Button>
         )}
       </div>
 
@@ -204,9 +205,9 @@ export default function AccountSettings({
         <div className="flex flex-col gap-3 max-w-[520px]">
           <input type="password" className="field" placeholder="Current password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} />
           <input type="password" className="field" placeholder="New password (8+ characters, letters + numbers)" value={newPw} onChange={(e) => setNewPw(e.target.value)} />
-          <button onClick={changePassword} disabled={busy} className="btn-secondary !py-[12px] !px-[18px] !text-[12.5px] self-start">
+          <Button variant="secondary" loading={busy} onClick={changePassword} className="!py-[12px] !px-[18px] !text-[12.5px] self-start">
             Change Password
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -226,13 +227,14 @@ export default function AccountSettings({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        <button
+        <Button
+          variant="danger"
+          loading={busy}
           onClick={requestDelete}
-          disabled={busy}
-          className="btn-danger !py-[10px] !px-[16px] !text-[12.5px] mt-3 block"
+          className="!py-[10px] !px-[16px] !text-[12.5px] mt-3 block"
         >
           Request Account Deletion
-        </button>
+        </Button>
         {deleteMsg && <p className="text-[13px] text-gold-300 mt-3">{deleteMsg}</p>}
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/Button";
 
 interface WeeklyCheckinProps {
     initialApps: number;
@@ -12,6 +13,7 @@ export default function WeeklyCheckin({ initialApps, streak, checkedIn }: Weekly
     const [applicationsSent, setApplicationsSent] = useState(initialApps > 0 ? initialApps : "");
     const [note, setNote] = useState("");
     const [saved, setSaved] = useState(checkedIn);
+    const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -20,6 +22,7 @@ export default function WeeklyCheckin({ initialApps, streak, checkedIn }: Weekly
         const n = parseInt(String(applicationsSent), 10);
         if (isNaN(n) || n < 0) return setError("Enter a valid number of applications sent.");
 
+        setBusy(true);
         try {
             const res = await fetch("/api/checkins", {
                 method: "POST",
@@ -33,6 +36,8 @@ export default function WeeklyCheckin({ initialApps, streak, checkedIn }: Weekly
             setSaved(true);
         } catch (e: any) {
             setError(e.message || "Failed to save check-in.");
+        } finally {
+            setBusy(false);
         }
     };
 
@@ -89,9 +94,9 @@ export default function WeeklyCheckin({ initialApps, streak, checkedIn }: Weekly
 
             {error && <p className="text-xs text-red-400 font-mono mb-3">{error}</p>}
 
-            <button type="submit" className="btn-primary !py-2.5 !px-5 !text-xs font-mono">
+            <Button type="submit" loading={busy} className="!py-2.5 !px-5 !text-xs font-mono">
                 SAVE CHECK-IN
-            </button>
+            </Button>
         </form>
     );
 }

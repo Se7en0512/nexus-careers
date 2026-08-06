@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ScoreRing from "./ScoreRing";
 import ProfileStrengthCelebration from "./ProfileStrengthCelebration";
+import { SkeletonCard } from "@/components/Skeleton";
 
 interface ChecklistItem {
   id: string;
@@ -57,18 +58,7 @@ export default function ProfileStrengthCard() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="panel p-7 animate-pulse">
-        <div className="h-4 w-32 bg-navy-700 rounded mb-4" />
-        <div className="h-20 w-20 bg-navy-700 rounded-full mx-auto mb-4" />
-        <div className="h-3 w-48 bg-navy-700 rounded mx-auto mb-6" />
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-navy-700 rounded" />
-          ))}
-        </div>
-      </div>
-    );
+    return <SkeletonCard />;
   }
 
   if (!data) return null;

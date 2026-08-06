@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Button from "@/components/Button";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -66,9 +67,9 @@ export default function ForgotPasswordForm() {
         </div>
       )}
       {!link && !sent && (
-        <button className="btn-primary w-full" disabled={busy}>
+        <Button loading={busy} className="w-full">
           {busy ? "Sending..." : "Send Reset Link"}
-        </button>
+        </Button>
       )}
       <p className="form-note text-center">
         <Link href="/login" className="accent-link">← Back to sign in</Link>

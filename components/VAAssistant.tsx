@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Button from "@/components/Button";
 
 interface Message {
   role: "user" | "model";
@@ -143,9 +144,9 @@ export default function VAAssistant() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <button className="btn-primary !py-[10px]" disabled={busy}>
+        <Button loading={busy} className="!py-[10px]">
           Send
-        </button>
+        </Button>
       </form>
     </div>
   );

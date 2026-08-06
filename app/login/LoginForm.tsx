@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Button from "@/components/Button";
 
 declare global {
   interface Window {
@@ -108,16 +109,9 @@ export default function LoginForm() {
       </div>
       <div ref={captchaRef} className="flex justify-center"></div>
       {error && <p className="form-error">{error}</p>}
-      <button className="btn-primary w-full" disabled={busy}>
-        {busy ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-            Signing in...
-          </span>
-        ) : "Sign In"}
-      </button>
+      <Button loading={busy} className="w-full">
+        {busy ? "Signing in..." : "Sign In"}
+      </Button>
 
       {/* Trust signals */}
       <div className="border-t border-navy-700 pt-4 mt-1">

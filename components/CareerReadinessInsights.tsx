@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SkeletonCard } from "@/components/Skeleton";
 import type {
   ReadinessResult,
   ReadinessInsight,
@@ -172,13 +173,7 @@ export default function CareerReadinessInsights() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="border border-navy-700 bg-navy-900 rounded-[3px] p-6 animate-pulse">
-        <div className="h-4 bg-navy-700 rounded w-1/3 mb-4" />
-        <div className="h-20 bg-navy-700 rounded mb-4" />
-        <div className="h-4 bg-navy-700 rounded w-2/3" />
-      </div>
-    );
+    return <SkeletonCard />;
   }
 
   if (!data) return null;

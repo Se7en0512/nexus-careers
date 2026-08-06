@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Button from "@/components/Button";
 
 const NICHES = [
   { key: "general VA", label: "General VA" },
@@ -201,9 +202,9 @@ export default function MockInterview() {
           ))}
         </div>
         {error && <p className="form-error mb-5">{error}</p>}
-        <button className="btn-primary" onClick={start} disabled={busy}>
+        <Button loading={busy} onClick={start}>
           {busy ? "Starting…" : "Start the Interview"}
-        </button>
+        </Button>
         <p className="text-[13px] text-ink-500 mt-5 leading-relaxed">
           You'll get 5 realistic questions with a score and specific feedback after each answer,
           plus a final hiring recommendation. Practice out loud — say the words.
@@ -248,9 +249,9 @@ export default function MockInterview() {
             <button className="btn-secondary" onClick={toggleVoice} type="button">
               {listening ? "⏹ Stop recording" : "🎤 Speak your answer"}
             </button>
-            <button className="btn-primary" onClick={submitAnswer} disabled={busy || !answer.trim()}>
+            <Button loading={busy} onClick={submitAnswer} disabled={!answer.trim()}>
               {busy ? "Evaluating…" : "Submit answer"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -259,9 +260,9 @@ export default function MockInterview() {
         <div className="panel p-8 border-gold-400/40">
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-gold-400 mb-3">Interview complete</p>
           <p className="text-[15.5px] text-ink-200 leading-relaxed mb-5">{current}</p>
-          <button className="btn-primary" onClick={start} disabled={busy}>
+          <Button loading={busy} onClick={start}>
             Take another interview
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getPortfolioStrength, type PortfolioStrengthResult } from "@/lib/portfolio-strength";
+import Button from "@/components/Button";
 
 interface Project {
   title: string;
@@ -295,9 +296,9 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {error && <p className="form-error">{error}</p>}
 
         <div className="flex items-center gap-4 flex-wrap">
-          <button className="btn-primary" disabled={busy}>
+          <Button loading={busy}>
             {busy ? "Saving..." : savedSlug ? "Update Portfolio" : "Publish Portfolio"}
-          </button>
+          </Button>
           {savedSlug && (
             <a href={`/portfolio/${savedSlug}`} target="_blank" rel="noopener noreferrer" className="btn-secondary">
               View the Public Page ↗

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
 
 export interface JobApplication {
   id: number;
@@ -382,9 +383,12 @@ export default function JobTracker({ initialApplications = [], isGuest }: JobTra
 
       <div className="panel border border-navy-700 rounded-[3px]">
         {apps.length === 0 ? (
-          <div className="p-8 text-center text-ink-500 font-mono text-sm">
-            No tracked applications yet. Click "+ Add Application" to start.
-          </div>
+          <EmptyState
+            icon="📤"
+            title="No tracked applications yet"
+            description="Click &quot;+ Add Application&quot; to start tracking where you've applied."
+            variant="motivational"
+          />
         ) : (
           <>
             {/* Mobile card layout */}

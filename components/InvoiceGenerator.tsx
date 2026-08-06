@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PrintButton from "@/components/PrintButton";
+import Button from "@/components/Button";
 
 interface LineItem {
     description: string;
@@ -134,9 +135,9 @@ export default function InvoiceGenerator() {
 
                 {error && <p className="text-xs text-red-400 font-mono mb-4">{error}</p>}
 
-                <button onClick={handleGenerate} disabled={loading} className="btn-primary !py-3 !px-6 !text-sm">
+                <Button loading={loading} onClick={handleGenerate} className="!py-3 !px-6 !text-sm">
                     {loading ? "GENERATING..." : "GENERATE INVOICE"}
-                </button>
+                </Button>
             </div>
 
             {invoice && (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Button from "@/components/Button";
 
 interface FeedbackItem {
   name: string;
@@ -106,9 +107,9 @@ export default function FeedbackSection() {
           </p>
         )}
         {msg && <p className="form-note text-gold-300">{msg}</p>}
-        <button className="btn-primary self-start" disabled={busy}>
+        <Button loading={busy} className="self-start">
           {busy ? "Sending..." : "Send feedback"}
-        </button>
+        </Button>
       </form>
 
       <section className="flex flex-col gap-3">

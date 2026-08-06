@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import CopyScript from "@/components/CopyScript";
+import Button from "@/components/Button";
 
 interface Fields {
   name: string;
@@ -196,14 +197,12 @@ ${f.name}`;
         </div>
 
         <div className="border-t border-navy-700 pt-6 mt-2">
-          <button
-            type="button"
+          <Button
+            loading={aiLoading}
             onClick={generateWithAi}
-            disabled={aiLoading}
-            className="btn-primary"
           >
             {aiLoading ? "Generating..." : "Generate the full letter with AI"}
-          </button>
+          </Button>
           <p className="font-mono text-[11px] text-ink-500 mt-2">
             Uses your portfolio — make sure you've saved one at /portfolio-builder
             before using it.

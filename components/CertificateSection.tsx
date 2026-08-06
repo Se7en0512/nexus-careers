@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import EmptyState from "@/components/EmptyState";
+import Button from "@/components/Button";
 
 interface StageSummary {
   key: string;
@@ -77,14 +78,15 @@ export default function CertificateSection({
             .map((s) => {
               const hasEarned = earned.some((c) => c.stage_key === s.key);
               return hasEarned ? null : (
-                <button
+                <Button
                   key={s.key}
+                  variant="secondary"
+                  loading={busyKey === s.key}
                   onClick={() => claim(s.key)}
-                  disabled={busyKey === s.key}
-                  className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] text-center"
+                  className="!py-[10px] !px-[16px] !text-[12.5px] text-center"
                 >
                   {busyKey === s.key ? "Issuing..." : `Claim your ${s.title} Stage certificate`}
-                </button>
+                </Button>
               );
             })}
         </div>
