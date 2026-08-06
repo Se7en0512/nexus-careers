@@ -1,19 +1,8 @@
 import Link from "next/link";
 import NetworkCanvas from "@/components/NetworkCanvas";
 import { getSessionUser } from "@/lib/auth";
-import AnimatedCounter from "@/components/AnimatedCounter";
 import TestimonialCard from "@/components/TestimonialCard";
 import FaqAccordion from "@/components/FaqAccordion";
-
-/* ────────────────────────────────────────────────────────
-   STATS — real numbers from DB (placeholder comments for future wiring)
-   ──────────────────────────────────────────────────────── */
-const STATS = [
-  { target: 1240, suffix: "+", label: "Community members", comment: "// TODO: wire to DB COUNT users" },
-  { target: 80, suffix: "+", label: "Platforms to apply on", comment: "" },
-  { target: 4, suffix: "", label: "Roadmap stages", comment: "" },
-  { target: 100, suffix: "%", label: "Free — forever", comment: "" },
-];
 
 /* ────────────────────────────────────────────────────────
    TRUST SIGNALS — below hero (placeholder values for DB wiring)
@@ -251,24 +240,6 @@ export default async function HomePage() {
                   {s.value}
                 </div>
                 <div className="text-[12px] text-ink-500 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════
-          STATS BAR — secondary stats
-          ═══════════════════════════════════════════════════ */}
-      <section className="border-b border-navy-700 py-7">
-        <div className="wrap">
-          <div className="flex justify-between flex-wrap gap-6">
-            {STATS.map((s) => (
-              <div key={s.label} className="flex-1 min-w-[140px]">
-                <div className="font-mono text-[26px] font-semibold text-gold-400">
-                  <AnimatedCounter target={s.target} suffix={s.suffix} />
-                </div>
-                <div className="text-[13px] text-ink-500 mt-1">{s.label}</div>
               </div>
             ))}
           </div>
