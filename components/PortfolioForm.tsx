@@ -24,6 +24,9 @@ interface PortfolioData {
   links: { label: string; url: string }[];
   projects?: Project[];
   theme?: string;
+  layout?: string;
+  accent_color?: string;
+  resume_url?: string;
   custom_slug?: string;
   tagline?: string;
   location?: string;
@@ -50,11 +53,90 @@ interface PortfolioFormProps {
 }
 
 const THEMES = [
-  { key: "minimal", label: "Minimal", icon: "◻️", colors: "bg-white text-gray-900" },
-  { key: "modern", label: "Modern", icon: "◼️", colors: "bg-gray-900 text-white" },
-  { key: "creative", label: "Creative", icon: "🎨", colors: "bg-purple-900 text-purple-50" },
-  { key: "professional", label: "Professional", icon: "💼", colors: "bg-blue-900 text-blue-50" },
+  { key: "minimal", label: "Minimal", icon: "◻️", colors: "bg-white text-gray-900", accentHex: "#d97706" },
+  { key: "modern", label: "Modern", icon: "◼️", colors: "bg-gray-900 text-white", accentHex: "#fbbf24" },
+  { key: "creative", label: "Creative", icon: "🎨", colors: "bg-purple-900 text-purple-50", accentHex: "#d8b4fe" },
+  { key: "professional", label: "Professional", icon: "💼", colors: "bg-blue-900 text-blue-50", accentHex: "#93c5fd" },
 ];
+
+const LAYOUTS = [
+  {
+    key: "classic",
+    label: "Classic",
+    desc: "One-column, timeless look",
+  },
+  {
+    key: "services",
+    label: "Services-Forward",
+    desc: "Hero + services grid + CTA",
+  },
+  {
+    key: "resume",
+    label: "Resume-Style",
+    desc: "Sidebar + dense one-pager",
+  },
+  {
+    key: "photo-forward",
+    label: "Photo-Forward",
+    desc: "Cover banner + big photo",
+  },
+];
+
+function LayoutWireframe({ variant, accent }: { variant: string; accent: string }) {
+  const stroke = "currentColor";
+  const accentStroke = accent;
+  if (variant === "services") {
+    return (
+      <svg viewBox="0 0 120 84" className="w-full h-auto" fill="none" stroke={stroke} strokeWidth="1.4">
+        <circle cx="26" cy="24" r="8" />
+        <path d="M40 17h32M40 25h38M42 31h26" strokeLinecap="round" />
+        <rect x="40" y="34" width="26" height="8" rx="2" stroke={accentStroke} />
+        <rect x="12" y="50" width="20" height="11" rx="1.5" />
+        <rect x="36" y="50" width="20" height="11" rx="1.5" />
+        <rect x="12" y="65" width="20" height="11" rx="1.5" />
+        <rect x="36" y="65" width="20" height="11" rx="1.5" />
+        <rect x="60" y="50" width="20" height="11" rx="1.5" />
+        <rect x="60" y="65" width="20" height="11" rx="1.5" />
+        <rect x="84" y="42" width="20" height="34" rx="1.5" />
+        <rect x="14" y="80" width="92" height="6" rx="1.5" stroke={accentStroke} />
+      </svg>
+    );
+  }
+  if (variant === "resume") {
+    return (
+      <svg viewBox="0 0 120 84" className="w-full h-auto" fill="none" stroke={stroke} strokeWidth="1.4">
+        <rect x="10" y="12" width="30" height="64" rx="2" />
+        <rect x="16" y="18" width="18" height="18" rx="1.5" stroke={accentStroke} />
+        <path d="M16 42h18M16 48h14" strokeLinecap="round" />
+        <path d="M48 20h50M48 30h40M48 40h44M48 50h36" strokeLinecap="round" />
+        <path d="M48 60h50M54 66h38" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (variant === "photo-forward") {
+    return (
+      <svg viewBox="0 0 120 84" className="w-full h-auto" fill="none" stroke={stroke} strokeWidth="1.4">
+        <rect x="10" y="8" width="100" height="24" rx="2" stroke={accentStroke} />
+        <circle cx="60" cy="30" r="11" />
+        <path d="M38 52h44" strokeLinecap="round" />
+        <path d="M42 60h36" strokeLinecap="round" />
+        <rect x="12" y="66" width="18" height="8" rx="2" />
+        <rect x="34" y="66" width="18" height="8" rx="2" />
+        <rect x="56" y="66" width="18" height="8" rx="2" />
+        <rect x="78" y="66" width="18" height="8" rx="2" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 120 84" className="w-full h-auto" fill="none" stroke={stroke} strokeWidth="1.4">
+      <circle cx="60" cy="20" r="6" stroke={accentStroke} />
+      <path d="M42 34h36M34 44h52M40 52h40" strokeLinecap="round" />
+      <rect x="26" y="60" width="16" height="12" rx="1.5" />
+      <rect x="52" y="60" width="16" height="12" rx="1.5" />
+      <rect x="78" y="60" width="16" height="12" rx="1.5" />
+    </svg>
+  );
+}
 
 const IMPRESSION_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   "needs-improvement": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30" },
@@ -76,6 +158,11 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
     initial?.projects?.length ? initial.projects : []
   );
   const [theme, setTheme] = useState(initial?.theme || "minimal");
+  const [layout, setLayout] = useState(
+    ["classic", "services", "resume", "photo-forward"].includes(initial?.layout || "") ? initial?.layout || "" : "classic"
+  );
+  const [accentColor, setAccentColor] = useState(initial?.accent_color || "");
+  const [resumeUrl, setResumeUrl] = useState(initial?.resume_url || "");
   const [customSlug, setCustomSlug] = useState(initial?.custom_slug || "");
   const [location, setLocation] = useState(initial?.location || "");
   const [availability, setAvailability] = useState(initial?.availability || "");
@@ -89,6 +176,8 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
   const [resumeUploading, setResumeUploading] = useState(false);
   const [resumePending, setResumePending] = useState<ParsedResume | null>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);
+  const [resumeFileUploading, setResumeFileUploading] = useState(false);
+  const resumeFileInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [savedSlug, setSavedSlug] = useState<string | null>(currentSlug || null);
@@ -161,6 +250,30 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
     }
   };
 
+  const uploadResumeFile = async (file: File) => {
+    setResumeFileUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/portfolio/resume", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("error", data.error || "Upload failed — please try again.");
+        return;
+      }
+      setResumeUrl(data.url);
+      showToast("success", "Resume uploaded — clients can now download it.");
+    } catch {
+      showToast("error", "Upload failed — please try again.");
+    } finally {
+      setResumeFileUploading(false);
+      if (resumeFileInputRef.current) resumeFileInputRef.current.value = "";
+    }
+  };
+
   const hasManualFields = () => Boolean(
     name.trim() || tagline.trim() || bio.trim() || skillsInput.trim() ||
     experience.trim() || location.trim() || languagesInput.trim()
@@ -230,6 +343,9 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
           links: links.filter(l => l.url.trim()),
           projects: projects.filter(p => p.title.trim()),
           theme,
+          layout,
+          accent_color: accentColor,
+          resume_url: resumeUrl,
           custom_slug: customSlug,
           location,
           availability,
@@ -262,7 +378,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
               className={`flex-1 min-h-[44px] py-2.5 px-3 rounded-[2px] text-[12px] font-mono uppercase tracking-wider transition-colors ${
                 activeTab === tab ? "bg-gold-400 text-navy-950" : "text-ink-500 hover:text-ink-300"
               }`}>
-              {tab === "content" ? "Content" : tab === "projects" ? "Projects" : tab === "trust" ? "Trust" : "Theme"}
+              {tab === "content" ? "Content" : tab === "projects" ? "Projects" : tab === "trust" ? "Trust" : "Design"}
             </button>
           ))}
         </div>
@@ -446,21 +562,110 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {/* THEME TAB */}
         {activeTab === "theme" && (
           <>
-            <p className="text-[13.5px] text-ink-500">Choose a look for your public portfolio page. Content stays the same.</p>
-            <div className="grid grid-cols-2 gap-3">
-              {THEMES.map(t => (
-                <button key={t.key} type="button" onClick={() => setTheme(t.key)}
-                  className={`text-left p-4 rounded-[3px] border transition-colors ${
-                    theme === t.key ? "border-gold-400 bg-gold-400/10" : "border-navy-700 bg-navy-900 hover:border-navy-600"
-                  }`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[18px]">{t.icon}</span>
-                    <span className="text-[13px] font-medium">{t.label}</span>
-                  </div>
-                  <div className={`h-8 rounded ${t.colors}`} />
-                </button>
-              ))}
+            <p className="text-[13.5px] text-ink-500">Choose how your portfolio is arranged, its color look, and whether clients can download your resume. Content stays the same.</p>
+
+            {/* Layout picker */}
+            <div>
+              <label className="form-label">Layout</label>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {LAYOUTS.map(l => (
+                  <button key={l.key} type="button" onClick={() => setLayout(l.key)}
+                    className={`text-left p-3 rounded-[3px] border transition-colors ${
+                      layout === l.key ? "border-gold-400 bg-gold-400/10" : "border-navy-700 bg-navy-900 hover:border-navy-600"
+                    }`}>
+                    <div className="text-ink-300 mb-2">
+                      <LayoutWireframe variant={l.key} accent="#d9a94e" />
+                    </div>
+                    <span className={`text-[12px] font-medium block ${layout === l.key ? "text-gold-300" : "text-ink-50"}`}>{l.label}</span>
+                    <span className="text-[10.5px] text-ink-500 block mt-0.5 leading-snug">{l.desc}</span>
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Color palette */}
+            <div>
+              <label className="form-label">Color Palette</label>
+              <div className="grid grid-cols-2 gap-3">
+                {THEMES.map(t => (
+                  <button key={t.key} type="button" onClick={() => setTheme(t.key)}
+                    className={`text-left p-4 rounded-[3px] border transition-colors ${
+                      theme === t.key ? "border-gold-400 bg-gold-400/10" : "border-navy-700 bg-navy-900 hover:border-navy-600"
+                    }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[13px] font-medium">{t.label}</span>
+                      <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: t.accentHex }} />
+                    </div>
+                    <div className={`h-8 rounded ${t.colors}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom accent color */}
+            <div>
+              <label className="form-label">Accent Color (optional)</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={accentColor || (THEMES.find(t => t.key === theme)?.accentHex || "#d9a94e")}
+                  onChange={e => setAccentColor(e.target.value)}
+                  className="w-10 h-10 rounded-[3px] border border-navy-700 bg-navy-900 cursor-pointer"
+                  aria-label="Pick custom accent color"
+                />
+                <span className="w-6 h-6 rounded-full border border-white/20" style={{ backgroundColor: accentColor || (THEMES.find(t => t.key === theme)?.accentHex || "#d9a94e") }} />
+                <button
+                  type="button"
+                  onClick={() => setAccentColor("")}
+                  className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px]"
+                >
+                  Reset to theme default
+                </button>
+              </div>
+              <p className="font-mono text-[10px] text-ink-500 mt-1">
+                {accentColor
+                  ? `Custom accent: ${accentColor} — applied to all layouts`
+                  : `Using the ${THEMES.find(t => t.key === theme)?.label} palette's default accent`}
+              </p>
+            </div>
+
+            {/* Resume download */}
+            <div>
+              <label className="form-label">Resume for clients to download (optional)</label>
+              {resumeUrl ? (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="text-[12.5px] text-gold-300 underline underline-offset-2 truncate max-w-[280px]">
+                    {resumeUrl}
+                  </a>
+                  <button type="button" onClick={() => { setResumeUrl(""); if (resumeFileInputRef.current) resumeFileInputRef.current.value = ""; }} className="text-[11.5px] text-red-400 hover:text-red-300">
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input
+                    ref={resumeFileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadResumeFile(file);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px]"
+                    onClick={() => resumeFileInputRef.current?.click()}
+                    disabled={resumeFileUploading}
+                  >
+                    {resumeFileUploading ? "Uploading…" : "Upload PDF"}
+                  </button>
+                  <p className="font-mono text-[10px] text-ink-500">PDF · max 8MB — a "Download Resume" button appears on your page</p>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="form-label" htmlFor="pf-slug">Custom URL slug</label>
               <div className="flex items-center gap-0">
@@ -539,9 +744,22 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {/* Live Mini Preview */}
         <div className="border border-navy-700 bg-navy-900 rounded-[3px] p-5">
           <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-gold-400 mb-3 block">Preview</span>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] text-ink-400 font-mono uppercase tracking-wider">
+              {LAYOUTS.find(l => l.key === layout)?.label || "Classic"} layout
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: accentColor || (THEMES.find(t => t.key === theme)?.accentHex || "#d9a94e") }} />
+              <span className="text-[10px] text-ink-500">{accentColor || "theme accent"}</span>
+            </span>
+          </div>
           <div className="bg-navy-800 rounded-[3px] p-4 space-y-3">
             {name && <h3 className="font-serif text-[16px] font-medium text-ink-50">{name}</h3>}
-            {tagline && <p className="text-[11px] text-gold-400">{tagline}</p>}
+            {tagline && (
+              <p className="text-[11px]" style={{ color: accentColor || (THEMES.find(t => t.key === theme)?.accentHex || "#d9a94e") }}>
+                {tagline}
+              </p>
+            )}
             {bio && <p className="text-[11px] text-ink-500 line-clamp-2">{bio}</p>}
             {parsedSkills.length > 0 && (
               <div className="flex flex-wrap gap-1">
@@ -556,6 +774,9 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
                 <p className="text-[9px] text-ink-500 mb-1">{projects.length} featured project{projects.length > 1 ? "s" : ""}</p>
               </div>
             )}
+            <div className="text-ink-500/60 pt-1">
+              <LayoutWireframe variant={layout} accent={accentColor || (THEMES.find(t => t.key === theme)?.accentHex || "#d9a94e")} />
+            </div>
           </div>
         </div>
       </div>

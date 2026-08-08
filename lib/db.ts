@@ -567,6 +567,9 @@ async function migrate() {
   await addColumn("jobs", "client_type", "client_type TEXT NOT NULL DEFAULT ''");
   await addColumn("courses", "pro_only", "pro_only INTEGER NOT NULL DEFAULT 0");
   await addColumn("courses", "related_niches", "related_niches TEXT NOT NULL DEFAULT '[]'");
+  await addColumn("portfolios", "layout", "layout TEXT NOT NULL DEFAULT 'classic'");
+  await addColumn("portfolios", "accent_color", "accent_color TEXT NOT NULL DEFAULT ''");
+  await addColumn("portfolios", "resume_url", "resume_url TEXT NOT NULL DEFAULT ''");
   await client.executeMultiple(`
     CREATE TABLE IF NOT EXISTS course_progress (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

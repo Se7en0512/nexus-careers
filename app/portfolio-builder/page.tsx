@@ -35,6 +35,9 @@ export default async function PortfolioBuilderPage() {
         slug: string;
         projects: string;
         theme: string;
+        layout: string;
+        accent_color: string;
+        resume_url: string;
         custom_slug: string;
         tagline: string;
         location: string;
@@ -58,6 +61,9 @@ export default async function PortfolioBuilderPage() {
         links: parseJson(row.links, []),
         projects: parseJson(row.projects, []),
         theme: row.theme || "minimal",
+        layout: ["classic", "services", "resume", "photo-forward"].includes(row.layout) ? row.layout : "classic",
+        accent_color: row.accent_color || "",
+        resume_url: row.resume_url || "",
         custom_slug: row.custom_slug || "",
         tagline: row.tagline || "",
         location: row.location || "",

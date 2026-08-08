@@ -67,6 +67,15 @@ export async function POST(req: Request) {
   const validThemes = ["minimal", "modern", "creative", "professional"];
   const theme = validThemes.includes(data.theme) ? data.theme : "minimal";
 
+  // Layout
+  const validLayouts = ["classic", "services", "resume", "photo-forward"];
+  const layout = validLayouts.includes(data.layout) ? data.layout : "classic";
+
+  // Accent color (empty = use theme default; otherwise a 6-digit hex)
+  const accentColor =
+    typeof data.accent_color === "string" && /^#[0-9a-fA-F]{6}$/.test(data.accent_color) ? data.accent_color : "";
+  const resumeUrl = String(data.resume_url || "").trim().slice(0, 500);
+
   // Trust fields
   const location = String(data.location || "").trim().slice(0, 100);
   const availability = String(data.availability || "").trim().slice(0, 50);
@@ -92,9 +101,9 @@ export async function POST(req: Request) {
     const baseSlug = customSlugRaw || slugify(name);
     slug = await uniqueSlug("portfolios", baseSlug);
     await db.prepare(
-      `INSERT INTO portfolios (user_id, slug, name, bio, tagline, skills, experience, links, projects, theme, custom_slug, location, availability, languages, timezone_info, response_time, avatar_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(user.id, slug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl);
+      `INSERT INTO portfolios (user_id, slug, name, bio, tagline, skills, experience, links, projects, theme, layout, accent_color, resume_url, custom_slug, location, availability, languages, timezone_info, response_time, avatar_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(user.id, slug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, layout, accentColor, resumeUrl, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl);
   } else {
     // Update existing
     let finalSlug = slug!;
@@ -102,8 +111,8 @@ export async function POST(req: Request) {
       finalSlug = await uniqueSlug("portfolios", customSlugRaw, existing!.id);
     }
     await db.prepare(
-      `UPDATE portfolios SET slug = ?, name = ?, bio = ?, tagline = ?, skills = ?, experience = ?, links = ?, projects = ?, theme = ?, custom_slug = ?, location = ?, availability = ?, languages = ?, timezone_info = ?, response_time = ?, avatar_url = ?, updated_at = datetime('now') WHERE user_id = ?`
-    ).run(finalSlug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl, user.id);
+      `UPDATE portfolios SET slug = ?, name = ?, bio = ?, tagline = ?, skills = ?, experience = ?, links = ?, projects = ?, theme = ?, layout = ?, accent_color = ?, resume_url = ?, custom_slug = ?, location = ?, availability = ?, languages = ?, timezone_info = ?, response_time = ?, avatar_url = ?, updated_at = datetime('now') WHERE user_id = ?`
+    ).run(finalSlug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, layout, accentColor, resumeUrl, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl, user.id);
     slug = finalSlug;
   }
 
