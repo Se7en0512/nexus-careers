@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const data = await req.json().catch(() => null);
@@ -47,15 +48,15 @@ export async function POST(req: Request) {
 
   const resetLink = `${appUrl}/reset-password?token=${token}`;
 
-  // TODO: once an SMTP/mail service exists, send the link here and delete the block below.
-  //
-  // Security: don't return the reset link in the response in production —
-  // if an attacker only knows the email, they could take over the account.
-  // In production, the link only goes to the server logs (for the owner to retrieve via an ops tool).
+  // Send the reset link via email. In production we never return the link in
+  // the response — if an attacker only knows the email, they could take over
+  // the account. Never reveal whether sending failed either.
+  await sendPasswordResetEmail(email, resetLink);
+
   if (process.env.NODE_ENV === "production") {
-    console.error(`[password-reset] ${email}: ${resetLink}`);
     return NextResponse.json({ ok: true });
   }
 
+  // Dev convenience: return the link so local testing works without SMTP creds.
   return NextResponse.json({ ok: true, resetLink });
 }

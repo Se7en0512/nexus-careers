@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   if (!data) return NextResponse.json({ error: "Request body must be JSON" }, { status: 400 });
 
   const ip = getClientIp(req);
-  if (!(await rateLimit(`signup:${ip}`, 5, 15 * 60 * 1000))) {
+  if (!(await rateLimit(`signup:${ip}`, 3, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "Too many accounts created from this IP — please wait 15 minutes." },
       { status: 429 }
@@ -30,6 +30,9 @@ export async function POST(req: Request) {
   const password = String(data.password || "");
   const updatesOptIn = data.updates_opt_in === true ? 1 : 0;
 
+  if (name.length < 2 || !/[a-zA-Z]/.test(name)) {
+    return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
+  }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
@@ -54,8 +57,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "An account already exists for this email. Please sign in." }, { status: 409 });
   }
 
-  // TEMPORARILY DISABLED — auto-verify on signup
-  // Re-enable once a verified email domain is configured on Resend.
+  // Verification enabled — new users must verify via email to flip this to 1.
   const autoVerify = EMAIL_VERIFICATION_ENABLED ? 0 : 1;
 
   const result = await db
@@ -65,8 +67,7 @@ export async function POST(req: Request) {
   await createSession(userId);
   await logActivity(userId, "account_created", { email, name });
 
-  // TEMPORARILY DISABLED — skip verification email
-  // Re-enable once a verified email domain is configured on Resend.
+  // Verification emails are sent via Gmail SMTP when the flag is enabled.
   if (EMAIL_VERIFICATION_ENABLED) {
     const token = randomBytes(32).toString("hex");
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
