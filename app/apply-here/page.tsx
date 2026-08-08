@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import ApplyDirectory from "@/components/ApplyDirectory";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Apply Here" };
 
@@ -20,13 +20,26 @@ interface Site {
 
 export default async function ApplyHerePage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/apply-here");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Apply Here"
+        title="Where you can really apply — not where you're just led on."
+        description="A directory of platforms and companies that actually hire Filipino VAs."
+        highlights={[
+          "Curated platforms and agencies that hire Filipino VAs",
+          "Filter by niche and platform type",
+          "Read the Red Flags page first to stay safe",
+        ]}
+        nextPath="/apply-here"
+      />
+    );
 
   const rows = (await db
     .prepare("SELECT id, name, url, category, description, platform_type, niche_tags FROM apply_sites ORDER BY category, name")
     .all()) as unknown as Site[];
 
-  // node:sqlite rows have no plain prototype — must map to plain objects
+  // libsql rows have no plain prototype — must map to plain objects
   // before passing to a Client Component (Next.js serialization).
   const sites = rows.map((s) => ({
     id: s.id,
@@ -42,7 +55,7 @@ export default async function ApplyHerePage() {
     <>
       <section className="page-hero">
         <div className="wrap">
-          <div className="eyebrow">Apply Here · {sites.length}+ platform</div>
+          <div className="eyebrow">Apply Here · {sites.length}+ platforms</div>
           <h1>Where you can really apply — not where you're just led on.</h1>
           <p>
             A directory of platforms and companies that actually hire Filipino VAs.

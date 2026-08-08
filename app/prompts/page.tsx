@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { PROMPT_STAGES, PROMPT_STEPS, PROMPT_RULES } from "@/data/prompts";
 import CopyScript from "@/components/CopyScript";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "AI Tools — Prompt Library & GPT Bots" };
 
@@ -48,7 +48,20 @@ const GPT_BOTS = [
 
 export default async function PromptsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/prompts");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="AI Tools"
+        title="Your AI co-pilot for the entire hiring journey."
+        description="Custom GPT bots + prompt library + step-by-step guides. Paste the job post, fill in your details, and get professional results in seconds. The AI drafts; you make it yours."
+        highlights={[
+          "Specialist GPT bots for each career stage",
+          "Prompt library with step-by-step guides",
+          "The AI drafts — you deliver. All free.",
+        ]}
+        nextPath="/prompts"
+      />
+    );
 
   return (
     <>

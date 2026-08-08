@@ -77,9 +77,13 @@ export async function POST(req: Request) {
     if (!title || !url.startsWith("http")) {
       return NextResponse.json({ error: "A title and a valid URL are required" }, { status: 400 });
     }
+    let relatedNiches = "[]";
+    if (Array.isArray(data.relatedNiches) && data.relatedNiches.length > 0) {
+      relatedNiches = JSON.stringify(data.relatedNiches.filter((n: unknown) => VALID_NICHES.includes(String(n))));
+    }
     await db.prepare(
-      "INSERT INTO courses (title, provider, url, description, badge, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(title, provider, url, description, badge, category, difficulty);
+      "INSERT INTO courses (title, provider, url, description, badge, category, difficulty, related_niches) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).run(title, provider, url, description, badge, category, difficulty, relatedNiches);
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 

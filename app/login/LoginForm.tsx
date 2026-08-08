@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
+
+const NEXT_KEY = "thrive-next";
 
 declare global {
   interface Window {
@@ -13,6 +15,8 @@ declare global {
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +53,14 @@ export default function LoginForm() {
         setError(data.error || "Wrong email or password.");
         return;
       }
-      router.push("/dashboard");
+      // Honor the ?next= param captured from a locked page.
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+      if (safeNext) {
+        try { sessionStorage.removeItem(NEXT_KEY); } catch {}
+        router.push(safeNext);
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } finally {
       setBusy(false);

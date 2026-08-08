@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { TIMELINE_90, NORMAL_FEELINGS, ONBOARDING_CHECKLIST, EXPERIENCED_SECRETS, FIRST_WEEK, DAILY_SUMMARY_SCRIPT } from "@/data/timeline90";
 import CopyScript from "@/components/CopyScript";
+import LockedPreview from "@/components/LockedPreview";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 
 export const metadata: Metadata = { title: "The First 90 Days" };
 
@@ -28,7 +30,25 @@ function NumberedList({ items, gold }: { items: { num: string; title: string; de
 
 export default async function NinetyDaysPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/first-90-days");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Real Talk"
+        title="The truth about your first three months."
+        description="Most online advice stops at 'how to land your first client.' But the first 90 days after that — that's where the real test is. Here's what to expect, based on real experience."
+        highlights={[
+          "What each month really feels like — no sugarcoating",
+          "The onboarding checklist that sets week one up",
+          "Daily summary template you can copy today",
+        ]}
+        nextPath="/first-90-days"
+      />
+    );
+
+  const savedRows = (await db
+    .prepare("SELECT item_num FROM onboarding_checklist_progress WHERE user_id = ?")
+    .all(user.id)) as Array<{ item_num: string }>;
+  const savedItemNums = savedRows.map((r) => r.item_num);
 
   return (
     <>
@@ -71,7 +91,7 @@ export default async function NinetyDaysPage() {
               set up everything below, so your first day is smooth and confident.
             </p>
           </div>
-          <NumberedList items={ONBOARDING_CHECKLIST} gold />
+          <OnboardingChecklist items={ONBOARDING_CHECKLIST} initialDone={savedItemNums} />
         </div>
       </section>
 

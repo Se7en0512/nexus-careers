@@ -3,11 +3,14 @@ import { IBM_Plex_Mono, Newsreader, Public_Sans } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import MarqueeBar from "@/components/MarqueeBar";
 import DonateButton from "@/components/DonateButton";
+import DonateWelcomeModal from "@/components/DonateWelcomeModal";
+import GuestHintBar from "@/components/GuestHintBar";
 import Heartbeat from "@/components/Heartbeat";
 import ToastContainer from "@/components/Toast";
 import { db } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth";
+import { manilaDateString, parseSqliteUtc } from "@/lib/date";
 import type { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -71,10 +74,17 @@ async function getSiteConfig(): Promise<Record<string, string>> {
   }
 }
 
+function shouldShowDonatePopup(lastShown: string | null | undefined): boolean {
+  if (!lastShown) return true;
+  const lastShownManila = manilaDateString(parseSqliteUtc(lastShown));
+  return lastShownManila !== manilaDateString();
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const config = await getSiteConfig();
+  const [config, user] = await Promise.all([getSiteConfig(), getSessionUser()]);
+  const showDonatePopup = !!user && shouldShowDonatePopup(user.donate_popup_last_shown_at);
 
   return (
     <html lang="en" className={`${newsreader.variable} ${publicSans.variable} ${plexMono.variable}`}>
@@ -88,11 +98,18 @@ export default async function RootLayout({
         >
           Skip to main content
         </a>
-        <MarqueeBar text={config.marquee_text || ""} />
         <Nav />
         <main id="main-content" className="flex-1 pb-10" tabIndex={-1}>{children}</main>
         <Footer />
+        {!user && <GuestHintBar />}
         <DonateButton paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"} gcashNumber={config.gcash_number || ""} />
+        {user && (
+          <DonateWelcomeModal
+            shouldShow={showDonatePopup}
+            paypalLink={config.paypal_link || "https://paypal.me/PhillipWendyll"}
+            gcashNumber={config.gcash_number || ""}
+          />
+        )}
         <ToastContainer />
         <Heartbeat />
       </body>

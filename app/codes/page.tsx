@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { CODE_GROUPS } from "@/data/codes";
 import CopyScript from "@/components/CopyScript";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Codes for Efficiency" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function CodesPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/codes");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Codes for Efficiency"
+        title="Copy-paste codes that make you look fast."
+        description="The formulas, filters, and shortcuts VAs actually use every day. Copy the code, adapt the example, and let your spreadsheets and inbox do the heavy lifting."
+        highlights={[
+          "Sheets formulas, Gmail operators & shortcuts",
+          "Canned responses for everyday replies",
+          "Copy, adapt, and look fast from day one",
+        ]}
+        nextPath="/codes"
+      />
+    );
 
   return (
     <>

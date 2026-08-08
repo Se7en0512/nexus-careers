@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { CLOSING_SCRIPTS } from "@/data/closing-scripts";
 import CopyScript from "@/components/CopyScript";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Client Closing Scripts" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function ClosingScriptsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/closing-scripts");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Interactive Tool · Free"
+        title="Scripts for negotiation, not for guessing."
+        description="The biggest reason new VAs earn low isn't a lack of skills — it's that they don't know how to negotiate. Here are scripts you only adapt, not build from scratch."
+        highlights={[
+          "Word-for-word scripts for rates, scope, and follow-ups",
+          "Why-this-works notes to understand the negotiation",
+          "Copy the script, fill the brackets, and practice out loud",
+        ]}
+        nextPath="/closing-scripts"
+      />
+    );
 
   return (
     <>

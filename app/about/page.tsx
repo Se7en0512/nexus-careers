@@ -20,10 +20,13 @@ const VALUES = [
   },
 ];
 
-const STATS = [
-  { num: "1,240+", label: "Community members" },
-  { num: "45", label: "Active resources" },
-  { num: "2026", label: "Year of launch" },
+const NOW = [
+  "13+ free tools — resume builder, cover letter generator, invoice generator, rate card, pitch calculator, mock interview, niche finder, red flag checker, and more.",
+  "A full roadmap from zero experience to your first client, plus a day-by-day 30-day plan.",
+  "A shareable portfolio builder with photo upload and resume auto-fill.",
+  "An AI career assistant that answers questions about rates, negotiation, and interviews.",
+  "Scam protection: a dedicated Red Flags guide and an in-tool checker for suspicious offers.",
+  "Courses, tutorials, templates, closing scripts, and a niche explorer — all free, no credit card, no trial that expires.",
 ];
 
 export default function AboutPage() {
@@ -84,17 +87,50 @@ export default function AboutPage() {
       <section className="py-[76px]">
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">Current Status</div>
-            <h2>Clear numbers, no fluff.</h2>
+            <div className="eyebrow">What's Here Right Now</div>
+            <h2>No made-up numbers — here's what actually exists.</h2>
           </div>
-          <div className="flex gap-10 flex-wrap mt-9">
-            {STATS.map((s) => (
-              <div key={s.label}>
-                <div className="font-mono text-[26px] font-semibold text-gold-400">{s.num}</div>
-                <div className="text-[13px] text-ink-500 mt-1">{s.label}</div>
+          <div className="flex flex-col gap-4 mt-9 max-w-[680px]">
+            {NOW.map((item) => (
+              <div key={item} className="flex gap-3">
+                <span className="text-gold-400 font-mono text-[13px] mt-0.5 flex-shrink-0">✓</span>
+                <p className="text-[15px] text-ink-300 leading-relaxed">{item}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="py-[76px] border-t border-navy-700">
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">Get in Touch</div>
+            <h2>Questions, feedback, or ideas?</h2>
+          </div>
+          <p className="text-[15px] text-ink-300 leading-relaxed max-w-[680px] mt-5">
+            We read everything that comes in — email or Facebook, both work.
+          </p>
+          <div className="flex flex-col gap-3 mt-6">
+            <p className="text-[15px] text-ink-300">
+              <a href="mailto:thrive.va.2026@gmail.com" className="accent-link">
+                thrive.va.2026@gmail.com
+              </a>
+            </p>
+            <p className="text-[15px] text-ink-300">
+              <a
+                href="https://www.facebook.com/profile.php?id=61593070227652"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="accent-link"
+              >
+                Follow us on Facebook
+              </a>
+            </p>
+          </div>
+          <p className="text-[13.5px] text-ink-500 leading-relaxed mt-5 max-w-[680px]">
+            And if you've got your own project running — a website, a system,
+            something real — we're open to hearing about it. Same email.
+          </p>
         </div>
       </section>
     </>

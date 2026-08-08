@@ -4,29 +4,7 @@ import { db } from "@/lib/db";
 import { recordDailyActivity, refreshHireReadyBadge } from "@/lib/gamification";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { logActivity } from "@/lib/activity";
-
-function slugify(input: string): string {
-  const base = input
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-  return base || "va";
-}
-
-async function uniqueSlug(base: string, excludeId?: number): Promise<string> {
-  let slug = base;
-  let n = 2;
-  for (;;) {
-    const existing = (await db.prepare("SELECT id FROM portfolios WHERE slug = ?").get(slug)) as { id: number } | undefined;
-    if (!existing || (excludeId && existing.id === excludeId)) break;
-    slug = `${base}-${n}`;
-    n++;
-  }
-  return slug;
-}
+import { slugify, uniqueSlug } from "@/lib/slug";
 
 export async function GET() {
   let user;
@@ -95,6 +73,7 @@ export async function POST(req: Request) {
   const languages = (Array.isArray(data.languages) ? data.languages : []).slice(0, 5).map((l: unknown) => String(l).trim().slice(0, 30)).filter(Boolean);
   const timezoneInfo = String(data.timezone_info || "").trim().slice(0, 50);
   const responseTime = String(data.response_time || "").trim().slice(0, 50);
+  const avatarUrl = String(data.avatar_url || "").trim().slice(0, 500);
 
   // Custom slug
   const customSlugRaw = String(data.custom_slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
@@ -111,20 +90,20 @@ export async function POST(req: Request) {
   if (!slug) {
     // New portfolio
     const baseSlug = customSlugRaw || slugify(name);
-    slug = await uniqueSlug(baseSlug);
+    slug = await uniqueSlug("portfolios", baseSlug);
     await db.prepare(
-      `INSERT INTO portfolios (user_id, slug, name, bio, tagline, skills, experience, links, projects, theme, custom_slug, location, availability, languages, timezone_info, response_time)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(user.id, slug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime);
+      `INSERT INTO portfolios (user_id, slug, name, bio, tagline, skills, experience, links, projects, theme, custom_slug, location, availability, languages, timezone_info, response_time, avatar_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(user.id, slug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl);
   } else {
     // Update existing
     let finalSlug = slug!;
     if (customSlugRaw && customSlugRaw !== existing!.slug) {
-      finalSlug = await uniqueSlug(customSlugRaw, existing!.id);
+      finalSlug = await uniqueSlug("portfolios", customSlugRaw, existing!.id);
     }
     await db.prepare(
-      `UPDATE portfolios SET slug = ?, name = ?, bio = ?, tagline = ?, skills = ?, experience = ?, links = ?, projects = ?, theme = ?, custom_slug = ?, location = ?, availability = ?, languages = ?, timezone_info = ?, response_time = ?, updated_at = datetime('now') WHERE user_id = ?`
-    ).run(finalSlug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, user.id);
+      `UPDATE portfolios SET slug = ?, name = ?, bio = ?, tagline = ?, skills = ?, experience = ?, links = ?, projects = ?, theme = ?, custom_slug = ?, location = ?, availability = ?, languages = ?, timezone_info = ?, response_time = ?, avatar_url = ?, updated_at = datetime('now') WHERE user_id = ?`
+    ).run(finalSlug, name, bio, tagline, JSON.stringify(skills), experience, JSON.stringify(links), JSON.stringify(projects), theme, customSlugRaw, location, availability, JSON.stringify(languages), timezoneInfo, responseTime, avatarUrl, user.id);
     slug = finalSlug;
   }
 

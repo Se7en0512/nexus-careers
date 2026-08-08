@@ -1,13 +1,28 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+
+const NEXT_KEY = "thrive-next";
 
 function VerifyContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const success = params.get("success") === "1";
   const error = params.get("error");
+
+  // If the user signed up from a locked page, send them back there
+  // once their email is verified.
+  useEffect(() => {
+    if (!success) return;
+    let next: string | null = null;
+    try { next = sessionStorage.getItem(NEXT_KEY); } catch {}
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      try { sessionStorage.removeItem(NEXT_KEY); } catch {}
+      router.replace(next);
+    }
+  }, [success, router]);
 
   if (success) {
     return (

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ROADMAP } from "@/data/roadmap";
 import Checklist from "@/components/Checklist";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Get Started" };
 
@@ -12,7 +12,20 @@ export const dynamic = "force-dynamic";
 
 export default async function GetStartedPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/get-started");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Your Path"
+        title="The roadmap, from your first step to your first client."
+        description="Four stages, each with a checklist you can follow and check off. Your progress is saved on your dashboard."
+        highlights={[
+          "Four stages with checklists you can check off",
+          "Progress saved automatically to your dashboard",
+          "Follow the roadmap in order — equipment to applications",
+        ]}
+        nextPath="/get-started"
+      />
+    );
   const progress = user
     ? ((await db
         .prepare("SELECT checks FROM progress WHERE user_id = ?")

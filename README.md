@@ -5,7 +5,7 @@ Platform for Filipino VAs — structured roadmap, practical tools, and scam prot
 ## Stack
 
 - **Next.js 15** (App Router) + React 19 + Tailwind CSS v4
-- **SQLite** via built-in `node:sqlite` (Node 24+) — no external database required
+- **SQLite** via Turso (@libsql/client) — cloud-hosted, no local database required
 - **Auth:** custom — scrypt password hashing + httpOnly session cookies
 - Fonts: Newsreader, Public Sans, IBM Plex Mono (Google Fonts)
 

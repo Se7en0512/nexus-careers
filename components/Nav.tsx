@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
+import AnnouncementBell from "./AnnouncementBell";
 
 export default async function Nav() {
   const user = await getSessionUser();
@@ -32,7 +33,7 @@ export default async function Nav() {
         </Link>
 
         <nav className="hidden lg:flex">
-          <NavLinks className="flex items-center gap-7" />
+          <NavLinks className="flex items-center gap-7" loggedIn={!!user} />
         </nav>
 
 <div className="hidden lg:flex items-center gap-5">
@@ -49,6 +50,7 @@ export default async function Nav() {
                   )}
                 </Link>
               )}
+              {user && !admin && <AnnouncementBell />}
               {user ? (
                 <Link href="/dashboard" className="nav-link">
                   Dashboard

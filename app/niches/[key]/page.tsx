@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NICHE_DETAILS } from "@/lib/quizzes";
+import LockedPreview from "@/components/LockedPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,20 @@ export async function generateMetadata({ params }: { params: Promise<{ key: stri
 
 export default async function NicheDetailPage({ params }: { params: Promise<{ key: string }> }) {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/niches");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Niche Learning Hub"
+        title="Everything you need to learn a niche and get hired in it."
+        description="Rate ranges, job titles, skills to learn, tools to master, and free curated resources — all in one place."
+        highlights={[
+          "Real rate ranges and job titles for the niche",
+          "Skills and tools checklist per specialization",
+          "Free curated resources — courses, guides, and more",
+        ]}
+        nextPath="/niches"
+      />
+    );
 
   const { key } = await params;
   const row = (await db.prepare("SELECT * FROM niches WHERE key = ?").get(key)) as NicheRow | undefined;

@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import SignupForm from "./SignupForm";
+import { findToolHint } from "@/lib/tool-hints";
 
 export const metadata: Metadata = { title: "Create Account" };
 
-export default async function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const hint = findToolHint(next);
+
   return (
     <div className="py-20 px-8">
       <div className="auth-card">
@@ -19,10 +27,12 @@ export default async function SignupPage() {
           <div className="eyebrow">// Create Account</div>
         </div>
         <h1 className="font-serif font-medium text-[28px] mt-3 mb-2">
-          Start your journey.
+          {hint ? `Unlock the ${hint.label}.` : "Start your journey."}
         </h1>
         <p className="text-[14px] text-ink-500 mb-8">
-          Full roadmap, quizzes, and progress tracking — no payment, no trial that expires.
+          {hint
+            ? `${hint.blurb} Free account, no payment, no trial that expires.`
+            : "Full roadmap, quizzes, and progress tracking — no payment, no trial that expires."}
         </p>
         <SignupForm />
       </div>

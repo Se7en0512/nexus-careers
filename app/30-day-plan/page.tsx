@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PLAN_30 } from "@/data/plan30";
 import DayChecklist from "@/components/DayChecklist";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "30-Day Plan" };
 
@@ -12,7 +12,20 @@ export const dynamic = "force-dynamic";
 
 export default async function Plan30Page() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/30-day-plan");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Free Tool · Day-by-Day Guide"
+        title="The 30-day plan — day by day, not phase by phase."
+        description="The four phases are the map. This 30-day plan is the step-by-step — what you'll do on Day 3, on Day 7, on Day 21. Check off each day and stay true to the plan."
+        highlights={[
+          "What to do every single day for 30 days",
+          "Check off each day as you finish it",
+          "Four weeks: setup, skills, portfolio, applications",
+        ]}
+        nextPath="/30-day-plan"
+      />
+    );
 
   const rows = await db
     .prepare("SELECT day, done FROM daily_plan_progress WHERE user_id = ? AND done = 1")
@@ -65,7 +78,7 @@ export default async function Plan30Page() {
                 <Link href="/apply-here" className="text-[13.5px] text-gold-400 hover:text-gold-300">
                   Apply Here →
                 </Link>
-                <Link href="/templates" className="text-[13.5px] text-gold-400 hover:text-gold-300">
+                <Link href="/free-templates" className="text-[13.5px] text-gold-400 hover:text-gold-300">
                   Templates →
                 </Link>
               </div>

@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import BudgetCalculator from "@/components/BudgetCalculator";
+import CalculatorHub from "@/components/CalculatorHub";
 
-export const metadata: Metadata = { title: "Freelance Budget Planner" };
+export const metadata: Metadata = { title: "Freelance Calculators Hub" };
 
 export default function BudgetPlannerPage() {
   return (
     <>
       <section className="page-hero">
         <div className="wrap">
-          <div className="eyebrow">Free Tool</div>
-          <h1>Freelance Budget Planner</h1>
+          <div className="eyebrow">Free Tools · One Place</div>
+          <h1>Every calculator a freelancer needs, in one place.</h1>
           <p>
-            Find out your real income. This tool uses the 50/30/20 budget framework
-            tailored for Filipino freelancers and VAs, with statutory deductions
-            and overhead calculations included.
+            Plan your income with the 50/30/20 budget, price a project with the pitch
+            calculator, check your SSS / PhilHealth / Pag-IBIG contributions, and keep
+            client time zones straight — no more digging through the footer.
           </p>
         </div>
       </section>
 
       <div className="wrap py-16">
-        <BudgetCalculator />
+        <CalculatorHub />
       </div>
     </>
   );

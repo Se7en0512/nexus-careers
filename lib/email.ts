@@ -92,3 +92,89 @@ export async function sendPasswordResetEmail(email: string, resetLink: string): 
     return false;
   }
 }
+
+export interface FollowUpItem {
+  company: string;
+  role: string;
+  daysSince: number;
+}
+
+export async function sendFollowUpReminderEmail(email: string, items: FollowUpItem[]): Promise<boolean> {
+  const transport = getTransport();
+  if (!transport) return false;
+
+  const rowsHtml = items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #333; font-size: 14px;">
+            <strong>${item.role || "Application"}</strong> — ${item.company || "Unknown company"}
+          </td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #999; font-size: 13px; text-align: right; white-space: nowrap;">
+            ${item.daysSince} day${item.daysSince === 1 ? "" : "s"} since applied
+          </td>
+        </tr>`
+    )
+    .join("");
+
+  try {
+    await transport.sendMail({
+      from: getFromAddress(),
+      to: email,
+      subject: `Time to follow up on ${items.length} job application${items.length === 1 ? "" : "s"}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+          <h2 style="color: #1a1a2e; margin-bottom: 16px;">Your weekly follow-up reminder</h2>
+          <p style="color: #555; line-height: 1.6;">
+            A few of your applications are due for a follow-up. A short, polite message
+            can bump you back to the top of a busy inbox.
+          </p>
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+            ${rowsHtml}
+          </table>
+          <p style="color: #555; line-height: 1.6;">
+            Not sure what to say? Use the client message templates on Thrive —
+            <a href="https://thrive-ph.vercel.app/free-templates" style="color: #D9A94E;">grab one here</a>.
+          </p>
+          <p style="color: #999; font-size: 13px;">
+            You get this reminder weekly. You can update your preferences anytime.
+          </p>
+        </div>
+      `,
+    });
+    return true;
+  } catch (e) {
+    console.error("[email] Failed to send follow-up reminder email", e);
+    return false;
+  }
+}
+
+export async function sendAnnouncementEmail(email: string, title: string, message: string): Promise<boolean> {
+  const transport = getTransport();
+  if (!transport) return false;
+
+  try {
+    await transport.sendMail({
+      from: getFromAddress(),
+      to: email,
+      subject: `New update from Thrive: ${title}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+          <h2 style="color: #1a1a2e; margin-bottom: 16px;">${title}</h2>
+          <p style="color: #555; line-height: 1.6; white-space: pre-line;">${message}</p>
+          <a href="https://thrive-ph.vercel.app/dashboard" style="display: inline-block; background: #D9A94E; color: #1a1a2e; padding: 12px 32px; border-radius: 4px; text-decoration: none; font-weight: bold; margin: 16px 0;">
+            Go to Dashboard
+          </a>
+          <p style="color: #999; font-size: 13px;">
+            You're getting this because you opted in to Thrive updates. You can unsubscribe
+            anytime from your dashboard settings.
+          </p>
+        </div>
+      `,
+    });
+    return true;
+  } catch (e) {
+    console.error("[email] Failed to send announcement email", e);
+    return false;
+  }
+}

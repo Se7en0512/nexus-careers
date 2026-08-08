@@ -60,12 +60,21 @@ interface NotificationItem {
   created_at: string;
 }
 
+interface AnnouncementItem {
+  id: number;
+  title: string;
+  message: string;
+  emailed: number;
+  created_at: string;
+}
+
 export default function AdminPanel({
   sites,
   jobs,
   courses,
   feedback,
   notifications,
+  announcements,
   config,
 }: {
   sites: Site[];
@@ -73,18 +82,20 @@ export default function AdminPanel({
   courses: Course[];
   feedback: FeedbackItem[];
   notifications: NotificationItem[];
+  announcements: AnnouncementItem[];
   config: Record<string, string>;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback" | "notifications" | "config">("site");
+  const [tab, setTab] = useState<"site" | "job" | "course" | "feedback" | "notifications" | "announcements" | "config">("site");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
 
   const [site, setSite] = useState({ name: "", url: "", category: "Global Job Board", description: "", platformType: "job_board", nicheTags: "all" });
   const [job, setJob] = useState({ title: "", company: "", url: "", niche: "admin", description: "", rateRange: "", clientType: "" });
-  const [course, setCourse] = useState({ title: "", provider: "", url: "", description: "", badge: "Free", category: "Marketing", difficulty: "Beginner" });
-  const [siteConfig, setSiteConfig] = useState({ marquee_text: config.marquee_text || "", paypal_link: config.paypal_link || "", gcash_number: config.gcash_number || "" });
+  const [course, setCourse] = useState({ title: "", provider: "", url: "", description: "", badge: "Free", category: "Marketing", difficulty: "Beginner", relatedNiches: [] as string[] });
+  const [announcement, setAnnouncement] = useState({ title: "", message: "", sendEmail: false });
+  const [siteConfig, setSiteConfig] = useState({ paypal_link: config.paypal_link || "", gcash_number: config.gcash_number || "" });
 
   const handleSiteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,12 +152,12 @@ export default function AdminPanel({
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "course", ...course }),
+        body: JSON.stringify({ type: "course", ...course, relatedNiches: course.relatedNiches }),
       });
       const data = await res.json();
       if (!res.ok) return setError(data.error || "Error");
       setMsg("Course added.");
-      setCourse({ ...course, title: "", provider: "", url: "", description: "" });
+      setCourse({ ...course, title: "", provider: "", url: "", description: "", relatedNiches: [] });
       router.refresh();
     } finally {
       setBusy(false);
@@ -204,12 +215,37 @@ export default function AdminPanel({
     }
   };
 
+  const handleAnnouncementSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: announcement.title, message: announcement.message, send_email: announcement.sendEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.error || "Error");
+      setMsg(
+        announcement.sendEmail
+          ? `Posted. Emailed to ${data.emailedCount ?? 0} users.`
+          : "Posted."
+      );
+      setAnnouncement({ title: "", message: "", sendEmail: false });
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex gap-2">
+      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1">
         <button
           onClick={() => setTab("site")}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "site" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -217,7 +253,7 @@ export default function AdminPanel({
         </button>
         <button
           onClick={() => setTab("job")}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "job" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -225,7 +261,7 @@ export default function AdminPanel({
         </button>
         <button
           onClick={() => setTab("course")}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "course" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -233,7 +269,7 @@ export default function AdminPanel({
         </button>
         <button
           onClick={() => setTab("feedback")}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "feedback" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -251,7 +287,7 @@ export default function AdminPanel({
               }).then(() => router.refresh());
             }
           }}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "notifications" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -262,8 +298,16 @@ export default function AdminPanel({
           )}
         </button>
         <button
+          onClick={() => setTab("announcements")}
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+            tab === "announcements" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
+          }`}
+        >
+          Announcements
+        </button>
+        <button
           onClick={() => setTab("config")}
-          className={`font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
+          className={`whitespace-nowrap flex-shrink-0 font-mono text-[12px] px-4 py-2 rounded-[3px] border transition-colors ${
             tab === "config" ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400"
           }`}
         >
@@ -341,6 +385,31 @@ export default function AdminPanel({
               ))}
             </select>
             <textarea className="field md:col-span-2 min-h-[80px]" placeholder="Description" value={course.description} onChange={(e) => setCourse({ ...course, description: e.target.value })} />
+            <div className="md:col-span-2">
+              <p className="form-label mb-2">Related niches (for recommendations)</p>
+              <div className="flex flex-wrap gap-2">
+                {NICHE_LEARNING.map((n) => {
+                  const on = course.relatedNiches.includes(n.key);
+                  return (
+                    <button
+                      key={n.key}
+                      type="button"
+                      onClick={() =>
+                        setCourse((c) => ({
+                          ...c,
+                          relatedNiches: on ? c.relatedNiches.filter((k) => k !== n.key) : [...c.relatedNiches, n.key],
+                        }))
+                      }
+                      className={`font-mono text-[12px] px-3 py-1.5 rounded-[3px] border transition-colors ${
+                        on ? "border-gold-400 bg-[rgba(217,169,78,0.12)] text-gold-300" : "border-navy-700 text-ink-400 hover:border-navy-500"
+                      }`}
+                    >
+                      {n.title}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
           <button className="btn-primary self-start" disabled={busy}>{busy ? "Saving..." : "Add course"}</button>
         </form>
@@ -351,22 +420,8 @@ export default function AdminPanel({
           <h3 className="font-serif font-medium text-[19px]">Site Configuration</h3>
           <div className="flex flex-col gap-4">
             <div>
-              <label className="form-label">Marquee Text (scrolling announcement bar)</label>
-              <div className="flex gap-2">
-                <input
-                  className="field flex-1"
-                  value={siteConfig.marquee_text}
-                  onChange={(e) => setSiteConfig({ ...siteConfig, marquee_text: e.target.value })}
-                  placeholder="Welcome message..."
-                />
-                <button onClick={() => saveConfig("marquee_text", siteConfig.marquee_text)} disabled={busy} className="btn-primary !px-4">
-                  Save
-                </button>
-              </div>
-            </div>
-            <div>
               <label className="form-label">PayPal.me Link</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   className="field flex-1"
                   value={siteConfig.paypal_link}
@@ -380,7 +435,7 @@ export default function AdminPanel({
             </div>
             <div>
               <label className="form-label">GCash Number (shown as QR only, not as text)</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   className="field flex-1"
                   type="tel"
@@ -398,9 +453,30 @@ export default function AdminPanel({
         </div>
       )}
 
+      {tab === "announcements" && (
+        <form onSubmit={handleAnnouncementSubmit} className="panel p-7 flex flex-col gap-4">
+          <h3 className="font-serif font-medium text-[19px]">Post an update</h3>
+          <p className="text-[12.5px] text-ink-500">
+            Reaches every logged-in user&apos;s notification bell. Optionally also emailed to users who opted in.
+          </p>
+          <input className="field" placeholder="Title (max 150 chars)" maxLength={150} value={announcement.title} onChange={(e) => setAnnouncement({ ...announcement, title: e.target.value })} required />
+          <textarea className="field min-h-[120px]" placeholder="Message (max 2000 chars)" maxLength={2000} value={announcement.message} onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })} required />
+          <label className="flex items-center gap-2.5 text-[13.5px] text-ink-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={announcement.sendEmail}
+              onChange={(e) => setAnnouncement({ ...announcement, sendEmail: e.target.checked })}
+              className="accent-[#D9A94E] w-4 h-4"
+            />
+            Also email opted-in users
+          </label>
+          <button className="btn-primary self-start" disabled={busy}>{busy ? "Posting..." : "Post announcement"}</button>
+        </form>
+      )}
+
       <section className="flex flex-col gap-2">
         <h3 className="font-mono text-[11.5px] uppercase tracking-[0.1em] text-gold-400 mb-1">
-          {tab === "site" ? `Platforms (${sites.length})` : tab === "job" ? `Job posts (${jobs.length})` : tab === "course" ? `Courses (${courses.length})` : tab === "notifications" ? `Notifications (${notifications.length})` : `Feedback (${feedback.length})`}
+          {tab === "site" ? `Platforms (${sites.length})` : tab === "job" ? `Job posts (${jobs.length})` : tab === "course" ? `Courses (${courses.length})` : tab === "notifications" ? `Notifications (${notifications.length})` : tab === "announcements" ? `Announcements (${announcements.length})` : `Feedback (${feedback.length})`}
         </h3>
         {tab === "notifications" ? (
           notifications.length === 0 ? (
@@ -457,6 +533,31 @@ export default function AdminPanel({
               </div>
             </div>
           ))
+        ) : tab === "announcements" ? (
+          announcements.length === 0 ? (
+            <div className="panel p-8 text-center">
+              <p className="text-gold-400 text-[28px] mb-3">📢</p>
+              <p className="text-[14px] text-ink-300 mb-1">No announcements yet</p>
+              <p className="text-[12.5px] text-ink-500">Post an update above and it will show up in members&apos; notification bells.</p>
+            </div>
+          ) : (
+            announcements.map((a) => (
+              <div key={a.id} className="panel p-4 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-[13px] font-medium">{a.title}</p>
+                  <div className="flex items-center gap-3">
+                    {a.emailed === 1 ? (
+                      <span className="font-mono text-[10.5px] uppercase tracking-wider text-emerald-400 flex-shrink-0">Emailed</span>
+                    ) : (
+                      <span className="font-mono text-[10.5px] uppercase tracking-wider text-ink-500 flex-shrink-0">In-app only</span>
+                    )}
+                    <p className="text-[11px] text-ink-500 flex-shrink-0">{new Date(a.created_at + "Z").toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
+                  </div>
+                </div>
+                <p className="text-[13px] text-ink-300">{a.message}</p>
+              </div>
+            ))
+          )
         ) : (
           (tab === "site" ? sites : tab === "job" ? jobs : courses).map((item) => (
             <div key={item.id} className="panel p-4 flex items-center justify-between gap-4">

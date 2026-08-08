@@ -50,7 +50,7 @@ export const ROADMAP: StageChecklist[] = [
     resources: [
       { label: "Niche Finder", href: "/tools/niche-finder" },
       { label: "Apply Here", href: "/apply-here" },
-      { label: "Templates", href: "/templates" },
+      { label: "Templates", href: "/free-templates" },
       { label: "Prompt Library", href: "/prompts" },
       { label: "Tools Tutorials", href: "/tutorials" },
     ],
@@ -72,7 +72,7 @@ export const ROADMAP: StageChecklist[] = [
     ],
     resources: [
       { label: "First 90 Days", href: "/first-90-days" },
-      { label: "Templates", href: "/templates" },
+      { label: "Templates", href: "/free-templates" },
       { label: "Pitch Calculator", href: "/tools/pitch-calculator" },
       { label: "Codes for Efficiency", href: "/codes" },
       { label: "Prompt Library", href: "/prompts" },

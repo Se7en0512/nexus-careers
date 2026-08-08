@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { TIP_GROUPS } from "@/data/tips";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "VA Tips" };
 
@@ -9,7 +9,20 @@ export const dynamic = "force-dynamic";
 
 export default async function TipsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/tips");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Tips"
+        title="The honest advice no one tells you."
+        description="No hype, no 'quit your job in 30 days.' These are the practical things that really decide who gets hired — in the order you'll need them."
+        highlights={[
+          "Practical advice for every stage of the journey",
+          "In the order you'll actually need it",
+          "No hype, no get-rich promises",
+        ]}
+        nextPath="/tips"
+      />
+    );
 
   return (
     <>

@@ -69,6 +69,15 @@ interface NotificationRow {
 }
 export type AdminNotification = NotificationRow;
 
+interface AnnouncementRow {
+  id: number;
+  title: string;
+  message: string;
+  emailed: number;
+  created_at: string;
+}
+export type AdminAnnouncement = AnnouncementRow;
+
 export default async function AdminPage() {
   const user = await getSessionUser();
   if (!user) redirect("/signup?next=/admin");
@@ -89,6 +98,11 @@ export default async function AdminPage() {
     .prepare("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 50")
     .all()) as unknown as NotificationRow[];
   const notifications: AdminNotification[] = notifRows.map((n) => ({ ...n }));
+
+  const announcementRows = (await db
+    .prepare("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 10")
+    .all()) as unknown as AnnouncementRow[];
+  const announcements: AdminAnnouncement[] = announcementRows.map((a) => ({ ...a }));
 
   const configRows = (await db.prepare("SELECT key, value FROM site_config").all()) as Array<{ key: string; value: string }>;
   const config: Record<string, string> = {};
@@ -131,7 +145,7 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
-        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} config={config} />
+        <AdminPanel sites={sites} jobs={jobs} courses={courses} feedback={feedback} notifications={notifications} announcements={announcements} config={config} />
       </div>
     </>
   );

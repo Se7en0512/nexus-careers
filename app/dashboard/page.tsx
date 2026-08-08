@@ -5,7 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ROADMAP, stageFromKey } from "@/data/roadmap";
 import { PLAN_30 } from "@/data/plan30";
-import { getStreak, hasBadge, refreshHireReadyBadge, roadmapCompletion, getCheckinStreak, hasCheckedInThisWeek } from "@/lib/gamification";
+import { computeHireReady, getCheckinStreak, getStreak, hasCheckedInThisWeek, refreshHireReadyBadge, type HireReadyCache } from "@/lib/gamification";
 import { getGreeting, getCoachMessage, getInsights, getMilestoneForecast, getSmartProgress, getStepsToHireReady, type UserProfile } from "@/lib/personalization";
 import { getNextBestAction, getQuickActions } from "@/lib/recommendations";
 import EmptyState from "@/components/EmptyState";
@@ -27,6 +27,7 @@ import SmartWeeklyPlan from "@/components/SmartWeeklyPlan";
 import WeeklyAIReview from "@/components/WeeklyAIReview";
 import CareerJourneyMap from "@/components/CareerJourneyMap";
 import CareerReadinessInsights from "@/components/CareerReadinessInsights";
+import DashboardTabs, { type DashboardTabGroup } from "@/components/DashboardTabs";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -48,6 +49,14 @@ const SECTIONS = [
   { id: "settings", num: "13", label: "Account Settings" },
 ];
 
+const TAB_GROUPS: DashboardTabGroup[] = [
+  { id: "overview", label: "Overview", sections: ["overview", "motivation"] },
+  { id: "progress", label: "Progress", sections: ["roadmap", "readiness", "journey", "weekly-plan", "results", "certificates"] },
+  { id: "tools", label: "Tools", sections: ["tools", "portfolio", "tracker"] },
+  { id: "activity", label: "Activity", sections: ["activity"] },
+  { id: "settings", label: "Settings", sections: ["settings"] },
+];
+
 export default async function DashboardPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
@@ -63,6 +72,8 @@ export default async function DashboardPage() {
     appsCountRow,
     streak,
     onboarding,
+    checkinStreak,
+    weeklyCheckedIn,
   ] = await Promise.all([
     db.prepare("SELECT stage, checks, updated_at FROM progress WHERE user_id = ?").get(user.id),
     db.prepare("SELECT quiz, result, payload, created_at FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC").all(user.id),
@@ -74,6 +85,8 @@ export default async function DashboardPage() {
     db.prepare("SELECT COUNT(*) AS n FROM job_applications WHERE user_id = ?").get(user.id),
     getStreak(user.id),
     db.prepare("SELECT experience_level, main_goal, weekly_hours, interests FROM user_onboarding WHERE user_id = ?").get(user.id),
+    getCheckinStreak(user.id),
+    hasCheckedInThisWeek(user.id),
   ]);
 
   let checks: Record<string, number[]> = {};
@@ -94,8 +107,6 @@ export default async function DashboardPage() {
   const portfolioRow = portfolio as { slug: string; updated_at: string } | undefined;
   const certRows = certificates as unknown as Array<{ id: number; stage_key: string; stage_title: string; date_issued: string }>;
   const appsCount = (appsCountRow as { n: number } | undefined)?.n ?? 0;
-  const checkinStreak = await getCheckinStreak(user.id);
-  const weeklyCheckedIn = await hasCheckedInThisWeek(user.id);
 
   const pct = (key: string) => {
     const items = stageFromKey(key)?.items.length || 0;
@@ -109,9 +120,14 @@ export default async function DashboardPage() {
   const totalItems = ROADMAP.reduce((acc, s) => acc + s.items.length, 0);
   const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
 
-  const roadmap = await roadmapCompletion(user.id);
-  await refreshHireReadyBadge(user.id);
-  const hireReady = await hasBadge(user.id, "hire_ready");
+  const hireReadyCache: HireReadyCache = {
+    checks,
+    vaScore: vaScoreRow?.va_score ?? 0,
+    portfolioExists: !!portfolioRow,
+    certCount: certRows.length,
+  };
+  const hireReady = computeHireReady(hireReadyCache);
+  void refreshHireReadyBadge(user.id, hireReadyCache);
 
   // Build user profile for personalization engine
   const interests = (() => {
@@ -186,6 +202,12 @@ export default async function DashboardPage() {
   // Lookup for dynamic section numbers in eyebrow labels
   const sectionNum = Object.fromEntries(numberedSections.map((s) => [s.id, s.num]));
 
+  // Tab groups, filtered to only what this user level can see
+  const tabGroups = TAB_GROUPS.map((g) => ({
+    ...g,
+    sections: g.sections.filter((id) => visibleSections.some((s) => s.id === id)),
+  })).filter((g) => g.sections.length > 0);
+
   return (
     <>
       {/* HERO — Greeting + Today's Focus + Stats */}
@@ -201,23 +223,14 @@ export default async function DashboardPage() {
       />
 
       <div className="wrap py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 items-start">
-        {/* SECTION NAV — filtered and re-numbered */}
-        <nav aria-label="Dashboard sections" className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 -mx-8 px-8 lg:mx-0 lg:px-0">
-          {numberedSections.map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              aria-label={`${s.num} ${s.label}`}
-              className="flex items-center gap-3 whitespace-nowrap lg:whitespace-normal font-mono text-[12px] uppercase tracking-[0.08em] text-ink-500 hover:text-gold-300 transition-colors border border-navy-800 lg:border-0 rounded-[3px] px-3.5 lg:px-0 py-2 lg:py-1.5 min-h-[44px]"
-            >
-              <span className="text-gold-400/70" aria-hidden="true">{s.num}</span>
-              {s.label}
-            </a>
-          ))}
-        </nav>
+        {/* TABS — grouped by user level */}
+        <DashboardTabs groups={tabGroups} />
 
-        {/* MAIN CONTENT */}
-        <div className="flex flex-col gap-14 min-w-0">
+        {/* MAIN CONTENT — TABBED */}
+        <div className="min-w-0">
+          {/* TAB GROUP: OVERVIEW */}
+          <div id="tab-panel-overview" data-tab-group="overview" role="tabpanel" aria-label="Overview">
+            <div className="flex flex-col gap-14 min-w-0">
 
           {/* ═══════════════════════════════════════════════════════
               01 OVERVIEW — always visible
@@ -341,6 +354,23 @@ export default async function DashboardPage() {
           </section>
 
           {/* ═══════════════════════════════════════════════════════
+              DAILY MOTIVATION — Overview tab
+          ═══════════════════════════════════════════════════════ */}
+          <section id="motivation" className="scroll-mt-24">
+            <div className="section-head !mb-6">
+              <div className="eyebrow">{sectionNum.motivation} · Daily Motivation</div>
+              <h2 className="!text-[22px]">Your daily boost</h2>
+            </div>
+            <DailyMotivation />
+          </section>
+            </div>
+          </div>
+
+          {/* TAB GROUP: TOOLS */}
+          <div id="tab-panel-tools" data-tab-group="tools" className="hidden" role="tabpanel" aria-label="Tools">
+            <div className="flex flex-col gap-14 min-w-0">
+
+          {/* ═══════════════════════════════════════════════════════
               02 TOOLS — intermediate + advanced only
           ═══════════════════════════════════════════════════════ */}
           {userLevel !== "new" && (
@@ -417,6 +447,93 @@ export default async function DashboardPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
+              PORTFOLIO — Tools tab
+          ═══════════════════════════════════════════════════════ */}
+          <section id="portfolio" className="scroll-mt-24">
+            <div className="section-head !mb-6">
+              <div className="eyebrow">{sectionNum.portfolio} · Portfolio</div>
+              <h2 className="!text-[22px]">Your public page</h2>
+            </div>
+            {portfolioRow ? (
+              <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
+                    ✓
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-semibold mb-1">Your portfolio is published.</p>
+                    <p className="text-[13px] text-ink-500">
+                      Live at /portfolio/{portfolioRow.slug} — share the link with every application.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
+                    EDIT PORTFOLIO →
+                  </Link>
+                  <Link href={`/portfolio/${portfolioRow.slug}`} target="_blank" className="btn-secondary !py-[10px] !px-[16px] !text-[12px] text-center">
+                    VIEW PREVIEW ↗
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                icon="💼"
+                title="Create your professional portfolio"
+                description="A shareable page clients can view in under 5 minutes. Skills, projects, and trust signals — all in one link."
+                action={{ label: "CREATE PORTFOLIO →", href: "/portfolio-builder" }}
+                variant="motivational"
+              />
+            )}
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════
+              JOB TRACKER — Tools tab
+          ═══════════════════════════════════════════════════════ */}
+          {userLevel === "advanced" && (
+            <section id="tracker" className="scroll-mt-24">
+              <div className="section-head !mb-6">
+                <div className="eyebrow">{sectionNum.tracker} · Job Tracker</div>
+                <h2 className="!text-[22px]">Track your applications</h2>
+              </div>
+              {appsCount > 0 ? (
+                <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
+                      📊
+                    </div>
+                    <div>
+                      <p className="text-[15px] font-semibold mb-1">{appsCount} applications tracked</p>
+                      <p className="text-[13px] text-ink-500">
+                        Keep track of where you applied, interview schedules, and follow-ups.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2.5 sm:flex-row">
+                    <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
+                      OPEN JOB TRACKER →
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState
+                  icon="📤"
+                  title="Start tracking your applications"
+                  description="Know exactly where you applied, who responded, and what to follow up on."
+                  action={{ label: "OPEN JOB TRACKER →", href: "/tools/tracker" }}
+                  variant="motivational"
+                />
+              )}
+            </section>
+          )}
+            </div>
+          </div>
+
+          {/* TAB GROUP: PROGRESS */}
+          <div id="tab-panel-progress" data-tab-group="progress" className="hidden" role="tabpanel" aria-label="Progress">
+            <div className="flex flex-col gap-14 min-w-0">
+
+          {/* ═══════════════════════════════════════════════════════
               03 READINESS INSIGHTS — intermediate + advanced only
           ═══════════════════════════════════════════════════════ */}
           {userLevel !== "new" && (
@@ -480,32 +597,6 @@ export default async function DashboardPage() {
                   currentStreak={streak.current_streak}
                   vaScore={vaScoreRow?.va_score ?? 0}
                 />
-              </div>
-            </section>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              05 DAILY MOTIVATION — always visible
-          ═══════════════════════════════════════════════════════ */}
-          <section id="motivation" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">{sectionNum.motivation} · Daily Motivation</div>
-              <h2 className="!text-[22px]">Your daily boost</h2>
-            </div>
-            <DailyMotivation />
-          </section>
-
-          {/* ═══════════════════════════════════════════════════════
-              06 ACTIVITY — advanced only
-          ═══════════════════════════════════════════════════════ */}
-          {userLevel === "advanced" && (
-            <section id="activity" className="scroll-mt-24">
-              <div className="section-head !mb-6">
-                <div className="eyebrow">{sectionNum.activity} · Activity</div>
-                <h2 className="!text-[22px]">Your recent activity</h2>
-              </div>
-              <div className="panel p-7">
-                <ActivityTimeline userId={user.id} />
               </div>
             </section>
           )}
@@ -640,87 +731,33 @@ export default async function DashboardPage() {
               />
             </section>
           )}
-
-          {/* ═══════════════════════════════════════════════════════
-              10 PORTFOLIO — always visible (important for all levels)
-          ═══════════════════════════════════════════════════════ */}
-          <section id="portfolio" className="scroll-mt-24">
-            <div className="section-head !mb-6">
-              <div className="eyebrow">{sectionNum.portfolio} · Portfolio</div>
-              <h2 className="!text-[22px]">Your public page</h2>
             </div>
-            {portfolioRow ? (
-              <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
-                    ✓
-                  </div>
-                  <div>
-                    <p className="text-[15px] font-semibold mb-1">Your portfolio is published.</p>
-                    <p className="text-[13px] text-ink-500">
-                      Live at /portfolio/{portfolioRow.slug} — share the link with every application.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2.5 sm:flex-row">
-                  <Link href="/portfolio-builder" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                    EDIT PORTFOLIO →
-                  </Link>
-                  <Link href={`/portfolio/${portfolioRow.slug}`} target="_blank" className="btn-secondary !py-[10px] !px-[16px] !text-[12px] text-center">
-                    VIEW PREVIEW ↗
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <EmptyState
-                icon="💼"
-                title="Create your professional portfolio"
-                description="A shareable page clients can view in under 5 minutes. Skills, projects, and trust signals — all in one link."
-                action={{ label: "CREATE PORTFOLIO →", href: "/portfolio-builder" }}
-                variant="motivational"
-              />
-            )}
-          </section>
+          </div>
+
+          {/* TAB GROUP: ACTIVITY */}
+          <div id="tab-panel-activity" data-tab-group="activity" className="hidden" role="tabpanel" aria-label="Activity">
+            <div className="flex flex-col gap-14 min-w-0">
 
           {/* ═══════════════════════════════════════════════════════
-              11 JOB TRACKER — advanced only
+              ACTIVITY — advanced only
           ═══════════════════════════════════════════════════════ */}
           {userLevel === "advanced" && (
-            <section id="tracker" className="scroll-mt-24">
+            <section id="activity" className="scroll-mt-24">
               <div className="section-head !mb-6">
-                <div className="eyebrow">{sectionNum.tracker} · Job Tracker</div>
-                <h2 className="!text-[22px]">Track your applications</h2>
+                <div className="eyebrow">{sectionNum.activity} · Activity</div>
+                <h2 className="!text-[22px]">Your recent activity</h2>
               </div>
-              {appsCount > 0 ? (
-                <div className="panel p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-[3px] bg-gold-400/10 border border-gold-400/20 flex items-center justify-center text-[24px]" aria-hidden="true">
-                      📊
-                    </div>
-                    <div>
-                      <p className="text-[15px] font-semibold mb-1">{appsCount} applications tracked</p>
-                      <p className="text-[13px] text-ink-500">
-                        Keep track of where you applied, interview schedules, and follow-ups.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2.5 sm:flex-row">
-                    <Link href="/tools/tracker" className="btn-primary !py-[10px] !px-[16px] !text-[12px] text-center">
-                      OPEN JOB TRACKER →
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState
-                  icon="📤"
-                  title="Start tracking your applications"
-                  description="Know exactly where you applied, who responded, and what to follow up on."
-                  action={{ label: "OPEN JOB TRACKER →", href: "/tools/tracker" }}
-                  variant="motivational"
-                />
-              )}
+              <div className="panel p-7">
+                <ActivityTimeline userId={user.id} />
+              </div>
             </section>
           )}
+            </div>
+          </div>
+
+          {/* TAB GROUP: SETTINGS */}
+          <div id="tab-panel-settings" data-tab-group="settings" className="hidden" role="tabpanel" aria-label="Settings">
+            <div className="flex flex-col gap-14 min-w-0">
 
           {/* ═══════════════════════════════════════════════════════
               13 ACCOUNT SETTINGS — always visible
@@ -756,6 +793,8 @@ export default async function DashboardPage() {
               </div>
             </div>
           </section>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import QuizNiche from "@/components/QuizNiche";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Niche Finder" };
 
@@ -9,7 +9,20 @@ export const dynamic = "force-dynamic";
 
 export default async function NicheFinderPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/tools/niche-finder");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Interactive Tool · 2 Minutes"
+        title="Niche Finder"
+        description="Eight questions to find out which specialization fits your personality, skills, and interests. The result is a recommendation — not a verdict."
+        highlights={[
+          "Eight questions, two minutes",
+          "A recommendation matched to your skills",
+          "Save your result to your dashboard",
+        ]}
+        nextPath="/tools/niche-finder"
+      />
+    );
 
   return (
     <>

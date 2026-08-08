@@ -21,6 +21,7 @@ interface PortfolioRow {
   languages: string;
   timezone_info: string;
   response_time: string;
+  avatar_url: string;
   portfolio_views_count: number;
   updated_at: string;
 }
@@ -99,6 +100,16 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
               </span>
             )}
           </div>
+
+          {row.avatar_url && (
+            <div className="mt-4">
+              <img
+                src={row.avatar_url}
+                alt={`${row.name}'s photo`}
+                className="w-[120px] h-[120px] rounded-full object-cover border-4 border-white/20 shadow-lg"
+              />
+            </div>
+          )}
 
           <h1 className={`font-serif font-medium text-[clamp(30px,4vw,44px)] mt-4 mb-2 ${theme.text}`}>{row.name}</h1>
           {row.tagline && <p className={`text-[15px] ${theme.accent} mb-3`}>{row.tagline}</p>}

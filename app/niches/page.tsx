@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { NICHES, NICHE_DETAILS } from "@/lib/quizzes";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "VA Niches" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function NichesPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/niches");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="VA Niches"
+        title="Specialization isn't a prison — it's what raises your rate."
+        description="The generic 'virtual assistant' has a lot of competition. A niche gives you a clearer path, an easier pitch, and a higher rate. Here are the six most common specializations for Filipino VAs — including the real income range."
+        highlights={[
+          "Six niches with real income ranges",
+          "Skills and tools breakdown per niche",
+          "A learning hub of free resources per niche",
+        ]}
+        nextPath="/niches"
+      />
+    );
 
   return (
     <>

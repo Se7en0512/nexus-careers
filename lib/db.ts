@@ -194,6 +194,7 @@ async function init() {
     skills TEXT NOT NULL DEFAULT '[]',
     experience TEXT NOT NULL DEFAULT '',
     links TEXT NOT NULL DEFAULT '[]',
+    avatar_url TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -393,6 +394,22 @@ async function init() {
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    emailed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS announcement_reads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    announcement_id INTEGER NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    read_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(announcement_id, user_id)
+  );
+
   CREATE TABLE IF NOT EXISTS referral_redemptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -483,7 +500,32 @@ async function init() {
     created_at INTEGER NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS portfolio_link_clicks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+    link_label TEXT NOT NULL DEFAULT '',
+    link_url TEXT NOT NULL DEFAULT '',
+    visitor_id TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_portfolio_clicks_port ON portfolio_link_clicks(portfolio_id, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS rate_cards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    slug TEXT NOT NULL UNIQUE,
+    headline TEXT NOT NULL DEFAULT '',
+    intro TEXT NOT NULL DEFAULT '',
+    currency TEXT NOT NULL DEFAULT 'USD',
+    packages TEXT NOT NULL DEFAULT '[]',
+    faq TEXT NOT NULL DEFAULT '[]',
+    contact_note TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_rate_cards_user ON rate_cards(user_id);
 `);
 
 // Note: tables created in later sessions that aren't in the CREATE block above:
@@ -516,12 +558,36 @@ async function migrate() {
   await addColumn("users", "email_verified", "email_verified INTEGER NOT NULL DEFAULT 0");
   await addColumn("users", "updates_opt_in", "updates_opt_in INTEGER NOT NULL DEFAULT 0");
   await addColumn("users", "role", "role TEXT NOT NULL DEFAULT 'user'");
+  await addColumn("users", "last_reminder_sent_at", "last_reminder_sent_at TEXT");
   await addColumn("users", "referred_by", "referred_by INTEGER");
+  await addColumn("users", "donate_popup_last_shown_at", "donate_popup_last_shown_at TEXT");
   await addColumn("job_applications", "source_url", "source_url TEXT NOT NULL DEFAULT ''");
   await addColumn("job_applications", "follow_up_date", "follow_up_date TEXT");
   await addColumn("jobs", "rate_range", "rate_range TEXT NOT NULL DEFAULT ''");
   await addColumn("jobs", "client_type", "client_type TEXT NOT NULL DEFAULT ''");
   await addColumn("courses", "pro_only", "pro_only INTEGER NOT NULL DEFAULT 0");
+  await addColumn("courses", "related_niches", "related_niches TEXT NOT NULL DEFAULT '[]'");
+  await client.executeMultiple(`
+    CREATE TABLE IF NOT EXISTS course_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'started',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(user_id, course_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_course_progress_user ON course_progress(user_id);
+  `);
+  await client.executeMultiple(`
+    CREATE TABLE IF NOT EXISTS onboarding_checklist_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      item_num TEXT NOT NULL,
+      done INTEGER NOT NULL DEFAULT 1,
+      UNIQUE(user_id, item_num)
+    );
+    CREATE INDEX IF NOT EXISTS idx_onboarding_checklist_user ON onboarding_checklist_progress(user_id);
+  `);
   if (!(await columnExists("apply_sites", "platform_type"))) {
     await addColumn("apply_sites", "platform_type", "platform_type TEXT NOT NULL DEFAULT 'job_board'");
     await addColumn("apply_sites", "niche_tags", "niche_tags TEXT NOT NULL DEFAULT '[]'");
@@ -560,6 +626,7 @@ async function migrate() {
   await addColumn("portfolios", "timezone_info", "timezone_info TEXT NOT NULL DEFAULT ''");
   await addColumn("portfolios", "response_time", "response_time TEXT NOT NULL DEFAULT ''");
   await addColumn("portfolios", "portfolio_views_count", "portfolio_views_count INTEGER NOT NULL DEFAULT 0");
+  await addColumn("portfolios", "avatar_url", "avatar_url TEXT NOT NULL DEFAULT ''");
 }
 
 /* ============ SEEDS ============ */

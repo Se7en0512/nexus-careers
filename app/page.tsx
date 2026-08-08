@@ -1,73 +1,62 @@
 import Link from "next/link";
 import NetworkCanvas from "@/components/NetworkCanvas";
 import { getSessionUser } from "@/lib/auth";
-import TestimonialCard from "@/components/TestimonialCard";
+import { db } from "@/lib/db";
 import FaqAccordion from "@/components/FaqAccordion";
 
 /* ────────────────────────────────────────────────────────
-   TRUST SIGNALS — below hero (placeholder values for DB wiring)
+   REAL PROBLEMS, REAL SOLUTIONS — tools that actually exist
    ──────────────────────────────────────────────────────── */
-const TRUST_SIGNALS = [
-  { icon: "👤", value: "1,240+", label: "Active Users", comment: "// TODO: COUNT users FROM users table" },
-  { icon: "📄", value: "320+", label: "Resumes Generated", comment: "// TODO: COUNT FROM portfolios" },
-  { icon: "🎤", value: "580+", label: "Mock Interviews Done", comment: "// TODO: COUNT FROM mock_interviews" },
-  { icon: "🗺️", value: "85%", label: "Roadmap Completion", comment: "// TODO: AVG completion FROM progress" },
-  { icon: "⚡", value: "99.9%", label: "Platform Uptime", comment: "// Static — verified via Vercel" },
-  { icon: "⭐", value: "4.8/5", label: "User Satisfaction", comment: "// TODO: AVG rating FROM feedback" },
+const SOLUTIONS = [
+  {
+    title: "Don't know where to start?",
+    body: "The VA Readiness Check scores you in 8 questions and tells you exactly which stage to begin from.",
+    href: "/tools/readiness",
+    cta: "Take the Readiness Check",
+  },
+  {
+    title: "Resume looks generic?",
+    body: "The Resume Builder turns your experience into a clean, client-ready document in minutes.",
+    href: "/tools/resume-builder",
+    cta: "Open the Resume Builder",
+  },
+  {
+    title: "Afraid of getting scammed?",
+    body: "The Red Flags guide and Red Flag Checker screen offers for scam patterns before you even reply.",
+    href: "/tools/red-flag-checker",
+    cta: "Check the Red Flags",
+  },
+  {
+    title: "No portfolio to show clients?",
+    body: "The Portfolio Builder creates a shareable page — with photo upload and resume auto-fill.",
+    href: "/portfolio-builder",
+    cta: "Build your portfolio",
+  },
+  {
+    title: "Nervous about interviews?",
+    body: "Practice with the Mock Interview and Interview Coach — your answers get graded out loud.",
+    href: "/tools/mock-interview",
+    cta: "Practice a mock interview",
+  },
+  {
+    title: "Stuck with no one to ask?",
+    body: "The AI Career Assistant answers rate, negotiation, and tool questions instantly — for free.",
+    href: "/assistant",
+    cta: "Ask the Assistant",
+  },
 ];
 
 /* ────────────────────────────────────────────────────────
-   TESTIMONIALS — premium cards with profiles
+   WHAT YOU GET — benefit strip below hero (no fake numbers,
+   only real features that exist on the site)
    ──────────────────────────────────────────────────────── */
-const TESTIMONIALS = [
-  {
-    name: "Jenna R.",
-    role: "Social Media VA",
-    company: "Agency",
-    quote: "I had zero experience and no idea where to start. The Readiness Check showed me exactly what stage I was in, and the roadmap gave me a clear path forward. Within a month, I had my first paying client.",
-    initials: "JR",
-    rating: 5,
-  },
-  {
-    name: "Mark T.",
-    role: "E-commerce VA",
-    company: "Freelance",
-    quote: "The Equipment Guide helped me figure out which setup my budget could handle without needing to take out a loan for a laptop. Now I manage two Shopify stores full-time.",
-    initials: "MT",
-    rating: 5,
-  },
-  {
-    name: "Anna L.",
-    role: "Admin Support VA",
-    company: "Remote",
-    quote: "The Red Flags page is why I didn't end up taking an offer that charged a 'training fee' before I even got interviewed. Thrive doesn't just teach you skills — it teaches you how to protect yourself.",
-    initials: "AL",
-    rating: 5,
-  },
-  {
-    name: "Joyce M.",
-    role: "Content Writer VA",
-    company: "Freelance",
-    quote: "The 30-Day Plan was a game-changer. Instead of overwhelming myself with everything at once, I followed one task per day. By week three, I was already applying to jobs with a portfolio I was proud of.",
-    initials: "JM",
-    rating: 5,
-  },
-  {
-    name: "Catherine D.",
-    role: "Bookkeeping VA",
-    company: "Accounting Firm",
-    quote: "I was a career shifter from BPO. The niche finder pointed me to bookkeeping — something I never considered. Now I earn more than I did in my previous job, working from home.",
-    initials: "CD",
-    rating: 5,
-  },
-  {
-    name: "Patricia S.",
-    role: "Social Media VA",
-    company: "Startup",
-    quote: "The Resume Builder and Mock Interview tool gave me confidence I never had. I used to spend days formatting documents — now I generate professional ones in minutes. Landed my first client in 2 weeks.",
-    initials: "PS",
-    rating: 5,
-  },
+const BENEFITS = [
+  { icon: "🎯", label: "Know your starting point", desc: "The Readiness Check scores where you are in 8 questions." },
+  { icon: "🗺️", label: "Know your next step", desc: "A personalized roadmap and 30-day plan guide each day." },
+  { icon: "🧰", label: "Skip the paid courses", desc: "13+ free tools — resumes, invoices, rates, and practice." },
+  { icon: "💼", label: "Look client-ready", desc: "A shareable portfolio page with photo upload and resume auto-fill." },
+  { icon: "🚩", label: "Don't get scammed", desc: "A Red Flags guide and in-tool checker for suspicious offers." },
+  { icon: "🤖", label: "Never stuck alone", desc: "The AI Assistant answers rates, interviews, and tool questions." },
 ];
 
 /* ────────────────────────────────────────────────────────
@@ -79,7 +68,7 @@ const TIMELINE = [
   { step: "03", title: "Followed the Roadmap", desc: "Step-by-step checklist — from learning fundamentals to building skills." },
   { step: "04", title: "Built a Professional Resume", desc: "AI-powered resume builder created a client-ready document in minutes." },
   { step: "05", title: "Passed Mock Interviews", desc: "AI interview coach graded answers and improved confidence." },
-  { step: "06", title: "Applied to 80+ Platforms", desc: "Curated directory of job boards, agencies, and direct clients." },
+  { step: "06", title: "Applied to {platformCount} Platforms", desc: "Curated directory of job boards, agencies, and direct clients." },
   { step: "07", title: "Got Hired", desc: "First client. First invoice. First taste of freedom." },
 ];
 
@@ -115,6 +104,16 @@ const FAQ_ITEMS = [
 export default async function HomePage() {
   const user = await getSessionUser();
 
+  // Real apply-sites count for the timeline — rounded down to the nearest 5
+  // so the displayed figure stays honest without needing edits per change.
+  let platformCount = 0;
+  try {
+    const row = (await db.prepare("SELECT COUNT(*) AS n FROM apply_sites").get()) as { n: number };
+    platformCount = Math.floor(row.n / 5) * 5;
+  } catch {
+    platformCount = 0;
+  }
+
   return (
     <>
       {/* ═══════════════════════════════════════════════════
@@ -124,7 +123,11 @@ export default async function HomePage() {
         <div className="wrap relative z-[2]">
           <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
             <div className="anim-fade-up">
-              <div className="eyebrow">// Trusted by 1,200+ Filipino VAs</div>
+              {/* Options for the owner to pick from (first one is active):
+                  1. "// Free forever. Built by someone who's been there."
+                  2. "// Everything here is free. No paywall, no upsell."
+                  3. "// No hype. No paywalls. Just a real path to your first client." */}
+              <div className="eyebrow">// Free forever. Built by someone who's been there.</div>
               <h1 className="font-serif font-medium text-[clamp(34px,4.6vw,58px)] leading-[1.1] tracking-[-0.01em] my-[18px]">
                 Launch Your Virtual Assistant Career
                 <br />
@@ -169,18 +172,18 @@ export default async function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════
-          TRUST SIGNALS — live counters below hero
+          WHAT YOU GET — benefit strip below hero
           ═══════════════════════════════════════════════════ */}
       <section className="border-b border-navy-700 py-10">
         <div className="wrap">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {TRUST_SIGNALS.map((s, i) => (
-              <div key={s.label} className={`text-center anim-fade-up delay-${i + 1}`}>
-                <div className="text-2xl mb-2">{s.icon}</div>
-                <div className="font-mono text-[22px] font-semibold text-gold-400">
-                  {s.value}
+            {BENEFITS.map((b, i) => (
+              <div key={b.label} className={`text-center anim-fade-up delay-${i + 1}`}>
+                <div className="text-2xl mb-2">{b.icon}</div>
+                <div className="font-mono text-[13px] font-semibold text-gold-400 leading-snug">
+                  {b.label}
                 </div>
-                <div className="text-[12px] text-ink-500 mt-1">{s.label}</div>
+                <div className="text-[12px] text-ink-500 mt-1 leading-relaxed">{b.desc}</div>
               </div>
             ))}
           </div>
@@ -204,7 +207,9 @@ export default async function HomePage() {
                   {t.step}
                 </div>
                 <div className="pt-1">
-                  <h3 className="font-semibold text-[16px] mb-1">{t.title}</h3>
+                  <h3 className="font-semibold text-[16px] mb-1">
+                    {platformCount > 0 ? t.title.replace("{platformCount}", `${platformCount}+`) : t.title.replace("{platformCount}", "Real")}
+                  </h3>
                   <p className="text-[14px] text-ink-500 leading-relaxed">{t.desc}</p>
                 </div>
               </div>
@@ -214,27 +219,27 @@ export default async function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════
-          TESTIMONIALS — premium cards with star ratings
+          WHAT YOU GET — real problems, real solutions
           ═══════════════════════════════════════════════════ */}
       <section className="py-[88px] border-b border-navy-700">
         <div className="wrap">
           <div className="section-head anim-fade-up">
-            <div className="eyebrow">What Our Members Say</div>
-            <h2>Real stories from real people building their VA careers.</h2>
-            <p>Every member started somewhere. Here&apos;s what happened when they followed the roadmap.</p>
+            <div className="eyebrow">What You Get</div>
+            <h2>Everything you need, actually free.</h2>
+            <p>Six real problems every new VA hits — and the exact tool on Thrive that solves each one.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard
-                key={t.name}
-                name={t.name}
-                role={t.role}
-                company={t.company}
-                quote={t.quote}
-                rating={t.rating}
-                initials={t.initials}
-                delay={`delay-${Math.min(i + 1, 6)}`}
-              />
+            {SOLUTIONS.map((s, i) => (
+              <div key={s.title} className={`panel p-7 flex flex-col hover-lift anim-fade-up delay-${Math.min(i + 1, 6)}`}>
+                <h3 className="text-[16.5px] font-semibold mb-2">{s.title}</h3>
+                <p className="text-[13.5px] text-ink-500 leading-relaxed mb-5">{s.body}</p>
+                <Link
+                  href={s.href}
+                  className="mt-auto font-mono text-xs text-gold-400 hover:text-gold-300"
+                >
+                  {s.cta} →
+                </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -287,10 +292,9 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {[
-              { stat: "₱15K–₱60K+", label: "Monthly earning potential", detail: "Starts at ₱15K for beginners. Experienced VAs and specialists earn ₱40K–₱60K+." },
-              { stat: "4M+", label: "Filipino VAs registered", detail: "Filipinos are the #1 source of remote talent worldwide — English skills, reliability, and strong work ethic." },
+              { stat: "₱15K–₱60K+", label: "Monthly earning potential", detail: "Starts at ₱15K for beginners. Experienced VAs and specialists earn ₱40K–₱60K+ — varies by niche and experience." },
               { stat: "100%", label: "Free to start", detail: "No degree, no certificate, no equipment purchases needed. A laptop and internet are enough to begin." },
             ].map((s, i) => (
               <div key={s.label} className={`panel p-7 hover-lift anim-fade-up delay-${i + 1}`}>
@@ -377,7 +381,7 @@ export default async function HomePage() {
           <p className="text-ink-300 mb-8 text-base max-w-[480px] mx-auto anim-fade-up delay-1">
             {user
               ? "Your roadmap, tracker, and every tool are waiting in your dashboard."
-              : "Join 1,200+ Filipinos building their VA careers. No experience needed. No credit card required. Completely free."}
+              : "Join free — no experience needed, no credit card required, nothing to cancel."}
           </p>
           {user ? (
             <Link href="/dashboard" className="btn-primary btn-ripple glow-ring anim-fade-up delay-2">

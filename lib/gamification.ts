@@ -94,18 +94,45 @@ export async function getStreak(
 
 /* ================= HIRE-READY BADGE ================= */
 
-export async function roadmapCompletion(userId: number): Promise<{ complete: boolean; pct: number }> {
-  const progress = (await db.prepare("SELECT checks FROM progress WHERE user_id = ?").get(userId)) as
-    | { checks: string }
-    | undefined;
-  let checks: Record<string, number[]> = {};
-  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
+export type RoadmapChecks = Record<string, number[]>;
+
+export interface HireReadyCache {
+  checks: RoadmapChecks;
+  vaScore: number;
+  portfolioExists: boolean;
+  certCount: number;
+}
+
+export function computeRoadmapCompletion(checks: RoadmapChecks): { complete: boolean; pct: number } {
   const totalItems = ROADMAP.reduce((a, s) => a + s.items.length, 0);
   const totalDone = ROADMAP.reduce((a, s) => a + (checks[s.key]?.length || 0), 0);
   return { complete: totalItems > 0 && totalDone >= totalItems, pct: totalItems ? Math.round((totalDone / totalItems) * 100) : 0 };
 }
 
-export async function isHireReady(userId: number): Promise<boolean> {
+async function fetchRoadmapChecks(userId: number): Promise<RoadmapChecks> {
+  const progress = (await db.prepare("SELECT checks FROM progress WHERE user_id = ?").get(userId)) as
+    | { checks: string }
+    | undefined;
+  let checks: RoadmapChecks = {};
+  try { checks = progress ? JSON.parse(progress.checks) : {}; } catch { checks = {}; }
+  return checks;
+}
+
+export async function roadmapCompletion(userId: number, checks?: RoadmapChecks): Promise<{ complete: boolean; pct: number }> {
+  return checks
+    ? computeRoadmapCompletion(checks)
+    : computeRoadmapCompletion(await fetchRoadmapChecks(userId));
+}
+
+export function computeHireReady(cached: Partial<HireReadyCache>): boolean {
+  if (!computeRoadmapCompletion(cached.checks ?? {}).complete) return false;
+  if ((cached.vaScore ?? 0) < 80) return false;
+  if ((cached.certCount ?? 0) < 1) return false;
+  return !!cached.portfolioExists;
+}
+
+export async function isHireReady(userId: number, cached?: Partial<HireReadyCache>): Promise<boolean> {
+  if (cached) return computeHireReady(cached);
   if (!(await roadmapCompletion(userId)).complete) return false;
   const vaRow = (await db.prepare("SELECT va_score FROM users WHERE id = ?").get(userId)) as { va_score: number } | undefined;
   if ((vaRow?.va_score ?? 0) < 80) return false;
@@ -114,8 +141,8 @@ export async function isHireReady(userId: number): Promise<boolean> {
   return !!(await db.prepare("SELECT 1 FROM portfolios WHERE user_id = ?").get(userId));
 }
 
-export async function refreshHireReadyBadge(userId: number): Promise<boolean> {
-  if (!(await isHireReady(userId))) return false;
+export async function refreshHireReadyBadge(userId: number, cached?: Partial<HireReadyCache>): Promise<boolean> {
+  if (!(await isHireReady(userId, cached))) return false;
   const existing = await db.prepare("SELECT 1 FROM user_badges WHERE user_id = ? AND badge_type = 'hire_ready'").get(userId);
   await db.prepare("INSERT OR IGNORE INTO user_badges (user_id, badge_type) VALUES (?, 'hire_ready')").run(userId);
   if (!existing) {

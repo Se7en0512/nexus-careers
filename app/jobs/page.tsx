@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import JobsFeed from "@/components/JobsFeed";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "WFH Job Alerts" };
 
@@ -23,7 +23,20 @@ interface Job {
 
 export default async function JobsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/jobs");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Free Tool · Daily Updates"
+        title="Remote job posts — filtered for your niche."
+        description="You don't need to visit six job boards every day. Set your niche preferences, and you'll see the roles that match your skills — with a direct link to the platform where you apply."
+        highlights={[
+          "Jobs pulled from multiple boards into one feed",
+          "Ranked according to the niche you choose",
+          "Direct link to the platform where you apply",
+        ]}
+        nextPath="/jobs"
+      />
+    );
 
   const rows = (await db
     .prepare("SELECT * FROM jobs ORDER BY created_at DESC")

@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
+
+const NEXT_KEY = "thrive-next";
 
 declare global {
   interface Window {
@@ -13,6 +15,8 @@ declare global {
 
 export default function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,9 +72,22 @@ export default function SignupForm() {
         setError(data.error || "Something went wrong — please try again.");
         return;
       }
-      // TEMPORARILY DISABLED — skip verify-email page, go straight to onboarding
-      // Re-enable once a verified email domain is configured on Resend.
-      router.push(data.verified === false ? "/verify-email" : "/onboarding");
+      // Honor the ?next= param captured from a locked page — e.g. come back
+      // to the Resume Builder after creating the account.
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+      if (data.verified === false) {
+        // Account still needs email verification — remember the destination
+        // so verify-email can finish the journey once verified.
+        if (safeNext) {
+          try { sessionStorage.setItem(NEXT_KEY, safeNext); } catch {}
+        }
+        router.push("/verify-email");
+      } else if (safeNext) {
+        try { sessionStorage.removeItem(NEXT_KEY); } catch {}
+        router.push(safeNext);
+      } else {
+        router.push("/onboarding");
+      }
       router.refresh();
     } finally {
       setBusy(false);

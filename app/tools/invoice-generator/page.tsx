@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import InvoiceGenerator from "@/components/InvoiceGenerator";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Invoice Generator" };
 
@@ -9,7 +9,20 @@ export const dynamic = "force-dynamic";
 
 export default async function InvoiceGeneratorPage() {
     const user = await getSessionUser();
-    if (!user) redirect("/login?next=/tools/invoice-generator");
+    if (!user)
+        return (
+            <LockedPreview
+                eyebrow="Tool"
+                title="Invoice Generator"
+                description="Create clean invoices for your clients. Dynamic line items, PHP/USD currency toggle, and instant print/save-as-PDF."
+                highlights={[
+                    "Dynamic line items for any scope of work",
+                    "PHP/USD currency toggle",
+                    "Print or save as PDF instantly",
+                ]}
+                nextPath="/tools/invoice-generator"
+            />
+        );
 
     return (
         <>

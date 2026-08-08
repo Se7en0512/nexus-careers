@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { TUTORIAL_CATEGORIES } from "@/data/tutorials";
 import { getSkillQuiz } from "@/data/skill-quizzes";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import SkillQuiz from "@/components/SkillQuiz";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Tools Tutorials" };
 
@@ -12,7 +12,20 @@ export const dynamic = "force-dynamic";
 
 export default async function TutorialsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/tutorials");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Tools Tutorials"
+        title="Learn the tools clients actually ask about."
+        description="Eight categories, 30+ tools, and free tutorials from official sources — no paid courses, no gatekeeping."
+        highlights={[
+          "Step-by-step guides from official, free sources",
+          "Skill quizzes to test what you've learned",
+          "Jump straight to the category you need",
+        ]}
+        nextPath="/tutorials"
+      />
+    );
 
   const quizResults = (await db
     .prepare("SELECT skill_key, score, total, passed FROM skill_quiz_results WHERE user_id = ?")

@@ -187,8 +187,8 @@ export default function JobsFeed({ jobs, savedNiches }: { jobs: Job[]; savedNich
       </div>
 
       <p className="mt-8 text-[12.5px] text-ink-500">
-        These job posts are sample data for the platform demo. They're refreshed
-        regularly — and the real listings will be pulled from the job boards linked in Apply Here.
+        Listings are refreshed daily from multiple remote job boards, filtered for VA-relevant roles.
+        Always verify the client and offer details before applying.
       </p>
     </>
   );

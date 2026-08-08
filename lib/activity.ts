@@ -12,7 +12,9 @@ export type ActivityType =
   | "profile_milestone"
   | "job_applied"
   | "checkin_recorded"
-  | "daily_plan_progress";
+  | "daily_plan_progress"
+  | "resume_parsed"
+  | "course_completed";
 
 const ACTIVITY_LABELS: Record<ActivityType, string> = {
   account_created: "Account created",
@@ -27,6 +29,8 @@ const ACTIVITY_LABELS: Record<ActivityType, string> = {
   job_applied: "Tracked a job application",
   checkin_recorded: "Recorded weekly check-in",
   daily_plan_progress: "Made progress on 30-Day Plan",
+  resume_parsed: "Parsed a resume",
+  course_completed: "Completed a course",
 };
 
 export async function logActivity(

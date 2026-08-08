@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { EQUIPMENT_TIERS } from "@/data/equipment";
 import EquipmentChecker from "@/components/EquipmentChecker";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Equipment Guide 2026" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function EquipmentPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/equipment");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Equipment Guide 2026"
+        title="You don't need perfect. You need prepared."
+        description="The complete WFH setup guide for Filipino VAs and freelancers. Check what you have, plan what to buy, and get PH-priced picks for every part of your setup."
+        highlights={[
+          "Five-minute equipment self-check with a score",
+          "PH-priced picks in three budget tiers",
+          "Buy with your first income, not debt",
+        ]}
+        nextPath="/equipment"
+      />
+    );
 
   return (
     <>
@@ -40,7 +53,7 @@ export default async function EquipmentPage() {
         {/* Budget Tiers */}
         <div className="flex flex-col gap-8">
           {EQUIPMENT_TIERS.map((tier) => (
-            <section key={tier.key} className="panel">
+            <section key={tier.key} id={tier.key} className="panel scroll-mt-24">
               <div className="p-8 border-b border-navy-700 flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <h2 className="font-serif font-medium text-[26px]">{tier.title}</h2>

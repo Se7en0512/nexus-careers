@@ -40,6 +40,7 @@ const INTEREST_OPTIONS = [
 ];
 
 const DRAFT_KEY = "thrive_onboarding_draft";
+const NEXT_KEY = "thrive-next";
 
 export default function WelcomeWizard() {
   const router = useRouter();
@@ -94,6 +95,18 @@ export default function WelcomeWizard() {
     );
   };
 
+  const goAfterComplete = () => {
+    let next: string | null = null;
+    try { next = sessionStorage.getItem(NEXT_KEY); } catch {}
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      try { sessionStorage.removeItem(NEXT_KEY); } catch {}
+      router.push(next);
+    } else {
+      router.push("/dashboard");
+    }
+    router.refresh();
+  };
+
   const complete = async () => {
     setSaving(true);
     try {
@@ -111,8 +124,7 @@ export default function WelcomeWizard() {
       // proceed anyway
     }
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
-    router.push("/dashboard");
-    router.refresh();
+    goAfterComplete();
   };
 
   const skip = async () => {
@@ -130,8 +142,7 @@ export default function WelcomeWizard() {
       });
     } catch {}
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
-    router.push("/dashboard");
-    router.refresh();
+    goAfterComplete();
   };
 
   const canNext = () => {

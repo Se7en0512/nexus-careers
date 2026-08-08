@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import PortfolioForm from "@/components/PortfolioForm";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "Portfolio Builder" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function PortfolioBuilderPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/portfolio-builder");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="Interactive Tool · Free"
+        title="Portfolio Builder"
+        description="A shareable page that shows who you are, what you can do, and why clients should hire you. Add projects, trust signals, and choose a theme."
+        highlights={[
+          "Add skills, projects, languages, and trust signals",
+          "Choose your own theme and custom link",
+          "Share the link with every application you send",
+        ]}
+        nextPath="/portfolio-builder"
+      />
+    );
 
   const row = (await db.prepare("SELECT * FROM portfolios WHERE user_id = ?").get(user.id)) as
     | {

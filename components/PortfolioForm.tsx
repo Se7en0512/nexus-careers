@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getPortfolioStrength, type PortfolioStrengthResult } from "@/lib/portfolio-strength";
 import Button from "@/components/Button";
@@ -31,6 +31,17 @@ interface PortfolioData {
   languages?: string[];
   timezone_info?: string;
   response_time?: string;
+  avatar_url?: string;
+}
+
+interface ParsedResume {
+  name: string;
+  tagline: string;
+  bio: string;
+  skills: string[];
+  experience: string;
+  location: string;
+  languages: string[];
 }
 
 interface PortfolioFormProps {
@@ -71,6 +82,13 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
   const [languagesInput, setLanguagesInput] = useState((initial?.languages || []).join(", "));
   const [timezoneInfo, setTimezoneInfo] = useState(initial?.timezone_info || "");
   const [responseTime, setResponseTime] = useState(initial?.response_time || "");
+  const [avatarUrl, setAvatarUrl] = useState(initial?.avatar_url || "");
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [resumePending, setResumePending] = useState<ParsedResume | null>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [savedSlug, setSavedSlug] = useState<string | null>(currentSlug || null);
@@ -114,6 +132,87 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
   const addProject = () => setProjects(ps => [...ps, { title: "", description: "", role: "", tools: "", image: "", liveUrl: "", repoUrl: "" }]);
   const removeProject = (idx: number) => setProjects(ps => ps.filter((_, i) => i !== idx));
 
+  const uploadAvatar = async (file: File) => {
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/portfolio/avatar", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAvatarPreview("");
+        showToast("error", data.error || "Upload failed — please try again.");
+        return;
+      }
+      setAvatarUrl(data.url);
+      setAvatarPreview("");
+      showToast("success", "Profile photo uploaded!");
+    } catch {
+      setAvatarPreview("");
+      showToast("error", "Upload failed — please try again.");
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
+  const hasManualFields = () => Boolean(
+    name.trim() || tagline.trim() || bio.trim() || skillsInput.trim() ||
+    experience.trim() || location.trim() || languagesInput.trim()
+  );
+
+  const applyResume = (d: ParsedResume) => {
+    if (d.name) setName(d.name);
+    if (d.tagline) setTagline(d.tagline);
+    if (d.bio) setBio(d.bio);
+    if (d.skills?.length) setSkillsInput(d.skills.join(", "));
+    if (d.experience) setExperience(d.experience);
+    if (d.location) setLocation(d.location);
+    if (d.languages?.length) setLanguagesInput(d.languages.join(", "));
+  };
+
+  const parseResume = async (file: File) => {
+    setResumeUploading(true);
+    setResumePending(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/portfolio/parse-resume", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("error", data.error || "Couldn't read your resume — please try again.");
+        return;
+      }
+      const parsed = data.data as ParsedResume;
+      if (hasManualFields()) {
+        setResumePending(parsed);
+      } else {
+        applyResume(parsed);
+        showToast("success", "Resume imported — review the fields before saving!");
+      }
+    } catch {
+      showToast("error", "Couldn't read your resume — please try again.");
+    } finally {
+      setResumeUploading(false);
+      if (resumeInputRef.current) resumeInputRef.current.value = "";
+    }
+  };
+
+  const confirmResumeApply = () => {
+    if (!resumePending) return;
+    applyResume(resumePending);
+    setResumePending(null);
+    showToast("success", "Resume imported — review the fields before saving!");
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -137,6 +236,7 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
           languages: parsedLanguages,
           timezone_info: timezoneInfo,
           response_time: responseTime,
+          avatar_url: avatarUrl,
         }),
       });
       const data = await res.json();
@@ -170,6 +270,76 @@ export default function PortfolioForm({ initial, currentSlug }: PortfolioFormPro
         {/* CONTENT TAB */}
         {activeTab === "content" && (
           <>
+            <div className="border border-dashed border-navy-600 rounded-[3px] p-4 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="text-[13px] text-ink-300">
+                  {resumeUploading ? "Reading your resume…" : "Upload your resume (PDF or DOCX) and we'll fill this in for you"}
+                </p>
+                <p className="font-mono text-[10px] text-ink-500 mt-0.5">Optional shortcut — you can still fill everything manually</p>
+              </div>
+              <input
+                ref={resumeInputRef}
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) parseResume(file);
+                }}
+              />
+              <button
+                type="button"
+                className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] shrink-0"
+                onClick={() => resumeInputRef.current?.click()}
+                disabled={resumeUploading}
+              >
+                {resumeUploading ? "Reading…" : "Choose file"}
+              </button>
+            </div>
+            {resumePending && (
+              <div className="border border-amber-500/40 bg-amber-500/10 rounded-[3px] p-4">
+                <p className="text-[13px] text-ink-300 mb-3">This will replace what you've already entered — continue?</p>
+                <div className="flex gap-2">
+                  <button type="button" className="btn-primary !py-[10px] !px-[16px] !text-[12.5px]" onClick={confirmResumeApply}>
+                    Yes, fill from resume
+                  </button>
+                  <button type="button" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px]" onClick={() => setResumePending(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="flex items-center gap-4">
+              <div className="relative w-[88px] h-[88px] shrink-0">
+                <div className="w-full h-full rounded-full overflow-hidden border-2 border-navy-600 bg-navy-800 flex items-center justify-center">
+                  {avatarUploading ? (
+                    <span className="text-[12px] text-ink-500 animate-pulse">Uploading…</span>
+                  ) : (avatarPreview || avatarUrl) ? (
+                    <img src={avatarPreview || avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-[30px] font-serif text-gold-400">
+                      {(name || "T").trim().charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadAvatar(file);
+                  }}
+                />
+                <button type="button" className="btn-secondary !py-[10px] !px-[16px] !text-[12.5px] self-start" onClick={() => avatarInputRef.current?.click()}>
+                  {avatarUrl ? "Change photo" : "Upload photo"}
+                </button>
+                <p className="font-mono text-[10px] text-ink-500">JPG, PNG or WebP · max 5MB</p>
+              </div>
+            </div>
             <div>
               <label className="form-label" htmlFor="pf-name">Name</label>
               <input id="pf-name" className="field" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Maria Santos" required />

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_GROUPS } from "./NavLinks";
+import { NAV_GROUPS, GATED_HREFS } from "./NavLinks";
 
 export default function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
@@ -48,16 +48,32 @@ export default function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
               {group.items.map((item) => {
                 const active =
                   item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                const locked = !loggedIn && GATED_HREFS.has(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`py-1.5 text-[13px] transition-colors ${
+                    className={`py-1.5 text-[13px] transition-colors flex items-center gap-1.5 ${
                       active ? "text-gold-400" : "text-ink-300 hover:text-ink-50"
                     }`}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {locked && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="w-[10px] h-[10px] text-gold-400/70 flex-shrink-0"
+                        aria-label="Requires a free account"
+                      >
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    )}
                   </Link>
                 );
               })}

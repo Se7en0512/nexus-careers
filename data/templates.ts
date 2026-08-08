@@ -431,5 +431,160 @@ Client: ________________________  Date: ________`
 - Set up CRM automation rules for new incoming leads.
 - Follow up on outstanding client proposals.
 - Clean up draft archives in Google Drive.`
+  },
+  {
+    key: "follow-up-after-silence",
+    title: "Follow-Up After the Client Goes Quiet",
+    desc: "Send when a client hasn't replied in 1–2 weeks. Gives them an easy way to pause or continue without chasing them awkwardly.",
+    filename: "follow-up-after-silence.md",
+    content: `Subject: Checking in — [Project/Client] update
+
+Hi [Name],
+
+I know inboxes get busy, so no pressure at all — I just wanted to check in
+on [project or task]. I haven't heard from you since [date/last update],
+and I want to make sure I'm not holding anything up on my end.
+
+If you'd like to pause for a bit, no problem — just say the word and I'll
+hold everything until you're ready.
+
+If we're continuing, could you let me know the next step? I'm ready to
+pick up whenever it works for you.
+
+Best,
+[Your Name]`,
+  },
+  {
+    key: "rate-increase-request",
+    title: "Rate Increase Request (3+ Months In)",
+    desc: "For asking a long-term client for a fair raise — framed around the results you've delivered and the market, not need.",
+    filename: "rate-increase-request.md",
+    content: `Subject: Rate update — [Project/Client]
+
+Hi [Name],
+
+I've really enjoyed working with you over the past [3/6/12] months. I want
+to keep delivering the same level of care and results — and to keep it
+sustainable, I'd like to adjust my rate from [old rate] to [new rate] per
+[hour/month], effective [date — give 2–4 weeks notice].
+
+A few things that changed since we started:
+- [Result 1, e.g. I now manage your full inbox plus calendar, and handle
+  [X] weekly tasks instead of [Y]]
+- [Result 2, e.g. Response time is now under 2 hours during work hours]
+- [Result 3]
+
+My new rate is still within the typical range for [your niche] VAs with
+[your experience level], and I'll keep the same quality you've come to
+expect.
+
+If there's flexibility in your budget, I'd love to continue. If not, I'm
+open to talking about trimming the scope to match.
+
+Thank you for understanding,
+[Your Name]`,
+  },
+  {
+    key: "decline-scope-creep",
+    title: "Declining Scope Creep (Politely)",
+    desc: "Saying no to extra unpaid work outside the agreement — while offering to quote it separately so the door stays open.",
+    filename: "decline-scope-creep.md",
+    content: `Subject: Regarding [extra task] — quick clarification
+
+Hi [Name],
+
+Happy to help with [extra task]. Since it's outside the scope we agreed on
+in [the agreement/our first call], I'd like to quote it as a separate
+piece of work so we're both clear on expectations.
+
+Quick quote: [extra task] would be [price] per [hour/project], and I can
+finish it by [date].
+
+Alternatively, I can fold it into our current arrangement starting [date]
+for [adjusted rate] — whichever works better for you.
+
+I'm not trying to be difficult — I just want to protect the quality of the
+work I do for you by keeping everything clear.
+
+Let me know which option you'd prefer,
+[Your Name]`,
+  },
+  {
+    key: "chasing-late-payment",
+    title: "Chasing a Late Payment (Firm but Professional)",
+    desc: "For an overdue invoice — polite on the first reminder, clearer on the terms as days pass.",
+    filename: "chasing-late-payment.md",
+    content: `Subject: Invoice [INV-###] — [Amount] overdue
+
+Hi [Name],
+
+I'm writing about invoice [INV-###] for [amount], which was due on
+[due date]. Just a friendly reminder — I know it's easy for invoices to
+slip through.
+
+If you've already sent it, please ignore this and thank you! If there's an
+issue with the payment or the invoice itself, let me know and we'll sort
+it out right away.
+
+If payment isn't possible by [date + a few days], I'll need to pause work
+on our current tasks until it's settled, per our agreement.
+
+Looking forward to resolving this quickly,
+[Your Name]
+[Payment details: PayPal / GCash / bank / Wise]`,
+  },
+  {
+    key: "ending-engagement-professionally",
+    title: "Ending a Client Engagement on Good Terms",
+    desc: "Resigning gracefully — with notice, a handover plan, and no bridges burned, so they'll still give a good reference.",
+    filename: "ending-engagement-professionally.md",
+    content: `Subject: A note about our working arrangement
+
+Hi [Name],
+
+I want to let you know I'll be ending our engagement, with [notice
+period, e.g. 2 weeks] — my last working day will be [date].
+
+This wasn't an easy decision — I've genuinely enjoyed working with you on
+[project or tasks]. I'm [moving into a new opportunity / focusing on
+[reason]] and wanted to give you plenty of time to transition smoothly.
+
+To make the handover as easy as possible, I'll prepare:
+- A short handover document covering [tasks, tools, passwords access,
+  and where files live]
+- [X] hours this week to walk you or the new VA through everything
+
+I'd also be glad to refer a colleague if you'd like a recommendation for
+a replacement.
+
+Thank you for everything — it's been a pleasure working with you, and I'd
+be happy to stay in touch.
+
+Warm regards,
+[Your Name]`,
+  },
+  {
+    key: "responding-to-ghosting-before-interview",
+    title: "Following Up a Ghosted Application/Interview",
+    desc: "For when an employer or client goes silent after your application or interview — one last clear ask, then move on.",
+    filename: "responding-to-ghosting-before-interview.md",
+    content: `Subject: Following up — [Role] application
+
+Hi [Name or Hiring Team],
+
+I hope you're doing well. I'm following up on my application for the
+[Role] position — I applied on [date] and [had an interview on date / was
+looking forward to the next step].
+
+I understand schedules get busy, and I completely respect that priorities
+shift. If the role has been filled or put on hold, just let me know and
+I'll take it from there — no hard feelings at all.
+
+If things are still moving, I'd love to hear about next steps. I remain
+fully available and interested.
+
+Thank you for your time either way,
+[Your Name]
+[Portfolio / LinkedIn links]`,
   }
 ];

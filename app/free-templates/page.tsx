@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { TEMPLATES } from "@/data/templates";
 import DownloadTemplate from "@/components/DownloadTemplate";
+import LockedPreview from "@/components/LockedPreview";
 
 export const metadata: Metadata = { title: "FREE Templates" };
 
@@ -10,7 +10,20 @@ export const dynamic = "force-dynamic";
 
 export default async function FreeTemplatesPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/signup?next=/free-templates");
+  if (!user)
+    return (
+      <LockedPreview
+        eyebrow="FREE Templates"
+        title="Copy-paste templates for every step of the journey."
+        description="Resume, cover letter, follow-up messages, service agreements, invoicing guides — all free. No subscription needed."
+        highlights={[
+          "Resume, cover letter & follow-up templates",
+          "Service agreements and invoicing guides",
+          "Copy, fill in the brackets, and send",
+        ]}
+        nextPath="/free-templates"
+      />
+    );
 
   return (
     <>

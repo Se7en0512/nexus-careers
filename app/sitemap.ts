@@ -26,7 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/prompts",
     "/codes",
     "/free-templates",
-    "/templates",
     "/apply-here",
     "/closing-scripts",
     "/applications",
